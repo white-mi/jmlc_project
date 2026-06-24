@@ -1,0 +1,48 @@
+{
+  "meta": {
+    "name": "panel_energy",
+    "version": "0.1",
+    "description": "Панель эмитент×период (электроэнергетика) для supervised-обучения и walk-forward валидации OSL — 4-я отрасль. ТОЛЬКО публичные данные МСФО/IR + биржевые/регуляторные цены (РСВ Совет рынка, КОМ Минэнерго). Никаких клиентских/портфельных данных банка.",
+    "isolation": "public-only: IFRS/IR reports + Совет рынка (РСВ) + Минэнерго (КОМ) + СО ЕЭС (генерация).",
+    "primary_industry": "energy",
+    "issuers": ["РусГидро", "Мосэнерго", "ОГК-2", "ТГК-1", "Эл5-Энерго", "Юнипро"],
+    "excluded_issuers": {
+      "Интер РАО": "~50% выручки — сбыт/экспорт-импорт (не Q×P генерации) → структурная не ложится; убран («плохой клиент»).",
+      "Росатом-Энергоатом": "Квазисуверен, нет публичной equity-МСФО."
+    },
+    "granularity": "FY (annual) primary",
+    "join_rule": "panel_prices джойнится к panel_revenue по точному совпадению `period`.",
+    "leakage_rule": "Окно усреднения цены ⊆ отчётного периода эмитента. Проверяется test_panel.py.",
+    "structural_angle": "ДВУХКОМПОНЕНТНАЯ регулируемая выручка: рыночная энергия (генерация × спот-цена РСВ) + регулируемая мощность (КОМ/ДПМ — стабильный «пол»). Отличается от товарного Q×P (металлургия/химия) и от отложенного НДПИ (нефтегаз). Структурная ПОДКЛЮЧЕНА (Фаза C, reuse osl_energy.predict_generation)."
+  },
+  "files": {
+    "panel_revenue.csv": "Дозалив energy-строк (industry='energy'). Генерация TWh + мощность GW.",
+    "panel_prices.csv": "Дозалив energy-серий (electricity_rsv, capacity_kom; usd_rub общий)."
+  },
+  "revenue_columns": {
+    "issuer": "str — РусГидро | Мосэнерго | ОГК-2 | ТГК-1 | Эл5-Энерго | Юнипро",
+    "industry": "str — energy",
+    "revenue_rub_bn": "float — выручка МСФО, млрд ₽ (все репортят в RUB)",
+    "vol_generation_twh": "float|'' — выработка электроэнергии, ТВт·ч (TWh)",
+    "vol_capacity_gw": "float|'' — установленная мощность, ГВт (GW)",
+    "common_columns": "как в panel_schema.json (period/period_end/.../source_url/source_quote/confidence)"
+  },
+  "prices_columns": "как в panel_schema.json",
+  "series_used": {
+    "electricity_rsv": "Средняя цена РСВ (рынок на сутки вперёд), ₽/МВт·ч, 1-я ценовая зона (Европа+Урал). Источник — Совет рынка/АТС. Драйвер рыночной части выручки.",
+    "capacity_kom": "Цена мощности КОМ, ₽/МВт·мес → ₽/ГВт·год. Регулируется (Минэнерго/Совет рынка). Драйвер регулируемой части («пол»).",
+    "usd_rub": "FX (общий; для домашней энергетики менее релевантен, входит как макро-контекст)."
+  },
+  "series_registry": {
+    "comment": "required — NaN-free цены для learned + structural. РСВ — рыночный драйвер, КОМ — регулируемый.",
+    "required_series": ["electricity_rsv", "capacity_kom", "usd_rub"],
+    "documented_gaps": {
+      "other_revenue_heat_sales": "Теплосегмент/сбыт по годам непрозрачен → в структурной модели это per-company константа (other_revenue_abs), не per-period; k поглощает. Для чистых ТЭС-генераторов «other» мал.",
+      "rsv_annual_avg": "Годовая средняя РСВ берётся из публикаций Совета рынка/АТС (помесячные индексы → среднее), confidence=med; КОМ-цена регулируемая, публикуется ежегодно."
+    },
+    "phase_c_notes": {
+      "capacity_kom_unit": "В панели capacity_kom хранится в ₽/МВт·мес (натуральная публикуемая величина, ~150000). osl_energy.predict_generation ждёт capacity_payment_per_gw_year (₽/ГВт·год) → _raw_energy конвертирует ×12×1000. НЕ identity-маппинг (иначе capacity-выручка на 4 порядка ниже).",
+      "energy_drivers_table": "osl_energy.PROFILES — legacy demo-набор (Интер РАО/Т Плюс/Росатом), пересекается с панелью только по РусГидро/Юнипро. Структурная (Фаза C) использует ПАНЕЛЬНУЮ таблицу ENERGY_DRIVERS в osl_models (issuer→profile-параметры: capacity_mult, other_revenue_abs), как CHEM_DRIVERS — НЕ reuse osl_energy.PROFILES напрямую. Формулу reuse из predict_generation."
+    }
+  }
+}

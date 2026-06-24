@@ -64,3 +64,13 @@
 2023FY,2023-12-31,crude_brent,82.6,usd_per_bbl,simple_annual_mean,2023-01-01,2023-12-31,https://thedocs.worldbank.org/en/doc/18675f1d1639c7a34d463f59263ba0a2-0050012025/related/CMO-Historical-Data-Annual.xlsx,"World Bank Pink Sheet (Crude oil, Brent)",high
 2024FY,2024-12-31,crude_brent,80.6,usd_per_bbl,simple_annual_mean,2024-01-01,2024-12-31,https://thedocs.worldbank.org/en/doc/18675f1d1639c7a34d463f59263ba0a2-0050012025/related/CMO-Historical-Data-Annual.xlsx,"World Bank Pink Sheet (Crude oil, Brent)",high
 2025FY,2025-12-31,crude_brent,70.0,usd_per_bbl,simple_annual_mean,2025-01-01,2025-12-31,https://thedocs.worldbank.org/en/doc/18675f1d1639c7a34d463f59263ba0a2-0050012025/related/CMO-Historical-Data-Annual.xlsx,"World Bank Pink Sheet (Crude oil, Brent)",med
+2021FY,2021-12-31,electricity_rsv,1290,rub_per_mwh,simple_annual_mean,2021-01-01,2021-12-31,https://www.atsenergo.ru/results/rsv/indexes/indexes1/index.htm,АТС/Совет рынка (РСВ 1 ЦЗ),med
+2022FY,2022-12-31,electricity_rsv,1380,rub_per_mwh,simple_annual_mean,2022-01-01,2022-12-31,https://www.atsenergo.ru/results/rsv/indexes/indexes1/index.htm,АТС/Совет рынка (РСВ 1 ЦЗ),med
+2023FY,2023-12-31,electricity_rsv,1589,rub_per_mwh,simple_annual_mean,2023-01-01,2023-12-31,https://www.atsenergo.ru/results/rsv/indexes/indexes1/index.htm,АТС/Совет рынка (РСВ 1 ЦЗ),med
+2024FY,2024-12-31,electricity_rsv,1747,rub_per_mwh,simple_annual_mean,2024-01-01,2024-12-31,https://www.atsenergo.ru/results/rsv/indexes/indexes1/index.htm,АТС/Совет рынка (РСВ 1 ЦЗ),high
+2025FY,2025-12-31,electricity_rsv,1950,rub_per_mwh,simple_annual_mean,2025-01-01,2025-12-31,https://www.atsenergo.ru/results/rsv/indexes/indexes1/index.htm,АТС/Совет рынка (РСВ 1 ЦЗ),med
+2021FY,2021-12-31,capacity_kom,134500,rub_per_mw_month,simple_annual_mean,2021-01-01,2021-12-31,https://peretok.ru/news/generation/20956/,Совет рынка (КОМ 1 ЦЗ),med
+2022FY,2022-12-31,capacity_kom,167800,rub_per_mw_month,simple_annual_mean,2022-01-01,2022-12-31,https://peretok.ru/news/generation/20956/,Совет рынка (КОМ 1 ЦЗ),med
+2023FY,2023-12-31,capacity_kom,266700,rub_per_mw_month,simple_annual_mean,2023-01-01,2023-12-31,https://peretok.ru/news/generation/20956/,Совет рынка (КОМ 1 ЦЗ),high
+2024FY,2024-12-31,capacity_kom,278000,rub_per_mw_month,simple_annual_mean,2024-01-01,2024-12-31,https://peretok.ru/news/generation/20956/,Совет рынка (КОМ 1 ЦЗ),high
+2025FY,2025-12-31,capacity_kom,295000,rub_per_mw_month,simple_annual_mean,2025-01-01,2025-12-31,https://peretok.ru/news/generation/20956/,Совет рынка (КОМ 1 ЦЗ),med

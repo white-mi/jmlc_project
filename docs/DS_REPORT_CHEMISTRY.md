@@ -138,5 +138,5 @@ python osl_panel.py --industry chemistry                       # 18 строк, 
 python osl_walkforward.py --industry chemistry                  # §3 (base=structural)
 python conformal_split.py --industry chemistry --model elasticnet   # §4
 python -m pytest tests/test_chemistry.py -q                     # 9 тестов
-python -m pytest tests/ -q                                       # 223 зелёных, 0 skipped
+python -m pytest tests/ -q                                       # 233 зелёных, 0 skipped
 ```

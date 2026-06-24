@@ -10,7 +10,7 @@ portfolio data.
 
 [![tests](https://github.com/white-mi/jmlc_project/actions/workflows/test.yml/badge.svg)](https://github.com/white-mi/jmlc_project/actions/workflows/test.yml)
 ![python](https://img.shields.io/badge/python-3.11%2B-blue)
-![tests-count](https://img.shields.io/badge/tests-223%20passed%2C%200%20skipped-brightgreen)
+![tests-count](https://img.shields.io/badge/tests-233%20passed%2C%200%20skipped-brightgreen)
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 ---
@@ -60,7 +60,7 @@ git clone https://github.com/white-mi/jmlc_project.git
 cd jmlc_project/_tools
 
 pip install -r ../requirements.lock pytest   # pinned numeric stack (TF-IDF, offline)
-python -m pytest tests/ -q                    # 223 passed, 0 skipped
+python -m pytest tests/ -q                    # 233 passed, 0 skipped
 
 # End-to-end smoke run — numbers at every layer, no LLM call:
 python run_pipeline.py --smoke-shock 4.2 --smoke-industry oilgas
@@ -113,6 +113,16 @@ MAPE beats naive persistence (16.1 %) and ties the best learned model, all Diebo
 at N≈10–16. So across three industries the winner differs by data regime: persistence (metallurgy),
 learned (oil & gas), structural (chemistry). Write-up: [`docs/DS_REPORT_CHEMISTRY.md`](docs/DS_REPORT_CHEMISTRY.md).
 
+A **fourth industry — electricity (N=30, the largest/cleanest panel)** adds the project's sharpest
+honesty lesson. Its structural model is genuinely new — **two-component regulated revenue** (generation×day-ahead-price **+** capacity×КОМ). An early version hand-set per-company heat-revenue
+intercepts and scored a flattering 8.1% MAPE; a reviewer flagged those intercepts as 32–38%-of-revenue
+fitting, so we **removed them** — the honest pure-physics structural is **11.9%**, and on walk-forward
+learned (7.9%) and even naive persistence (8.7%) beat it (smooth rising revenue + un-modeled heat). But
+split-conformal flips it: the structural covers **12/12 = 100%** while persistence/learned cover **17%** —
+because the structural reads *contemporaneous* prices/generation (the OSL premise) while autoregression
+trained on ≤2022 goes stale. That is the operational-signal value in one number. Write-up:
+[`docs/DS_REPORT_ENERGY.md`](docs/DS_REPORT_ENERGY.md).
+
 ## Repository layout
 
 ```
@@ -139,7 +149,7 @@ Design facts, not bugs:
   out-of-sample validation lives only in the DS layer (`conformal_split.py`).
 - **L3 is not calibrated on bank data** (`confidence='low'`, expert priors).
 - The ×1.30 spillover amplifier is a Fialkowski heuristic, **not yet calibrated on Russian shocks**.
-- The DS layer is deep on three industries (metallurgy N = 24, oil & gas N = 18, chemistry N = 18); the other four rely on in-sample actuals.
+- The DS layer is deep on four industries (metallurgy N = 24, oil & gas N = 18, chemistry N = 18, electricity N = 30); the other three rely on in-sample actuals.
 
 ## Built with AI
 

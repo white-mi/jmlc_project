@@ -56,6 +56,8 @@ VOL_COLUMNS = (
     'vol_oil_t', 'vol_gas_mmcm', 'vol_refined_t', 'vol_lng_t', 'vol_condensate_t',
     # химия
     'vol_fertilizer_kt', 'vol_polymer_kt',
+    # энергетика
+    'vol_generation_twh', 'vol_capacity_gw',
 )
 
 

@@ -33,6 +33,7 @@ sys.path.insert(0, str(__import__('pathlib').Path(__file__).parent))
 import osl_panel
 import osl_metallurgy as M
 import osl_chemistry as Ch
+import osl_energy as En
 
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8')
@@ -49,12 +50,14 @@ INDUSTRY_PRICE_FEATURES = {
     'metallurgy': ['gold', 'copper', 'nickel', 'platinum', 'steel_proxy_iron_ore', 'usd_rub'],
     'oilgas': ['urals', 'gas_eu', 'lng_jkm', 'usd_rub'],
     'chemistry': ['dap', 'urea', 'phosphate_rock', 'crude_brent', 'usd_rub'],
+    'energy': ['electricity_rsv', 'capacity_kom', 'usd_rub'],
 }
 INDUSTRY_VOL_FEATURES = {
     'metallurgy': ['vol_copper_t', 'vol_nickel_t', 'vol_pd_oz', 'vol_pt_oz',
                    'vol_gold_oz', 'vol_steel_t'],
     'oilgas': ['vol_oil_t', 'vol_gas_mmcm', 'vol_refined_t', 'vol_lng_t', 'vol_condensate_t'],
     'chemistry': ['vol_fertilizer_kt', 'vol_polymer_kt'],
+    'energy': ['vol_generation_twh', 'vol_capacity_gw'],
 }
 # обратная совместимость (металлургия по умолчанию)
 PRICE_FEATURES = INDUSTRY_PRICE_FEATURES['metallurgy']
@@ -76,6 +79,15 @@ CHEM_DRIVERS = {
     'КуйбышевАзот': ('vol_fertilizer_kt', 'urea',        430.0, 'avg_nitrogen_company',  0.05),
     'КОС':          ('vol_polymer_kt',    'crude_brent',  70.0, 'polymers_avg',          0.05),  # объём только 2024-25 → k на n=2, хрупко
 }
+
+# Структурная модель ЭНЕРГЕТИКИ (Фаза C). ЧИСТАЯ двухкомпонентная: генерация×РСВ + мощность×КОМ.
+# Reuse osl_energy.predict_generation (НЕ osl_energy.PROFILES — там legacy demo-набор).
+# СОЗНАТЕЛЬНО other_revenue=0: теплосегмент/сбыт (РусГидро ДВ ~34%, Мосэнерго моск.тепло, ТГК-1 СПб)
+# НЕ моделируем хардкод-интерсептами (это была бы подгонка per-company на 32-38% выручки → MAPE
+# искусственно падал с 11.9% до 8.1%). Heat поглощается мультипликативным k — НЕИДЕАЛЬНО для
+# теплоёмких эмитентов (документированное ограничение, как байпродукты Норникеля). Честный
+# структурный фит — на чистой физике Q×P энергорынка. КОМ ₽/МВт·мес → ×12×1000 = ₽/ГВт·год.
+ENERGY_ISSUERS = frozenset({'РусГидро', 'Мосэнерго', 'ТГК-1', 'ОГК-2', 'Эл5-Энерго', 'Юнипро'})
 
 
 def _industry_of(rows) -> str:
@@ -118,9 +130,12 @@ class StructuralOSL:
           • Байпродукты Норникеля (золото/кобальт/родий ≈7%) — нет объёмов в панели,
             в прогноз не входят (систематический недоучёт, поглощается скаляром k).
         Возвращает None (не падает), если нет ключевого объёма (напр. сталь 2025 — gap).
-        Для химии диспетчеризуется в _raw_chemistry; нефтегаз (не в M.PROFILES) → None (Фаза C ждёт НДПИ)."""
+        Для химии/энергетики диспетчеризуется в _raw_chemistry/_raw_energy; нефтегаз (не в M.PROFILES)
+        → None (Фаза C ждёт НДПИ)."""
         if row.industry == 'chemistry':
             return self._raw_chemistry(row)
+        if row.industry == 'energy':
+            return self._raw_energy(row)
         if row.issuer not in M.PROFILES:
             return None
         prof = M.PROFILES[row.issuer]
@@ -177,6 +192,25 @@ class StructuralOSL:
         price_t = base * price / ref                            # per-period вариация через драйвер
         rev_usd = vol * 1000.0 * price_t * (1 + other)          # vol kt→т × $/т (формула osl_chemistry)
         return rev_usd * fx / 1e9                               # → млрд ₽ (таргет химии — RUB)
+
+    def _raw_energy(self, row) -> Optional[float]:
+        """Структурный сырой прогноз энергетики (млрд ₽), reuse osl_energy.predict_generation.
+        ЧИСТАЯ двухкомпонентная: generation_twh×РСВ + capacity_gw×(КОМ×12×1000), other=0 (тепло
+        НЕ моделируем интерсептом — k поглощает, неидеально для теплоёмких). КОМ ₽/МВт·мес →
+        ×12×1000 = ₽/ГВт·год (что ждёт predict_generation). None при отсутствии объёма/цены."""
+        if row.issuer not in ENERGY_ISSUERS:
+            return None
+        gen_twh = row.volumes.get('vol_generation_twh')
+        cap_gw = row.volumes.get('vol_capacity_gw')
+        rsv = row.prices.get('electricity_rsv')                 # ₽/МВт·ч
+        kom = row.prices.get('capacity_kom')                    # ₽/МВт·мес
+        if not (gen_twh and cap_gw and rsv and kom):
+            return None
+        gen = En.GenerationData(row.issuer, gen_twh, cap_gw, row.period)
+        tar = En.TariffData(avg_tariff_rub_per_mwh=rsv,
+                            capacity_payment_per_gw_year=kom * 12 * 1000)  # ₽/МВт·мес → ₽/ГВт·год
+        prof = En.CompanyProfile(row.issuer, 'generation', other_revenue_abs_rub_bn=0.0)
+        return En.predict_generation(row.issuer, gen, tar, prof).predicted_rub_bn
 
     def fit(self, rows):
         ratios_all = []

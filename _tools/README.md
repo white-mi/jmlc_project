@@ -12,17 +12,18 @@ Python-пакет для расчёта индикаторов и моделей
 
 **Состояние v0.9.2 (июнь 2026):**
 - `pyproject` version = **0.9.0**, `pipeline_version='0.9'`.
-- **223 pytest зелёных, 0 skipped** (+6 продуктовым `backtest_analyses`; +10 DS-нефтегаз; +9 DS-химия).
+- **233 pytest зелёных, 0 skipped** (+6 продуктовым `backtest_analyses`; +10 DS-нефтегаз; +9 DS-химия).
 - Архитектурная оценка независимым ревьюером — **9.2/10**.
 - OSL в продакшене для **7 отраслей**; conformal-интервалы работают.
 - `fetch_macro_state.py` тянет **4 живых макрофида**.
 
 **DS-слой (доработка для Junior ML Contest, июнь 2026):** реальная панель FY2021–2025 +
 сравнение 3 моделей + честная **out-of-sample** walk-forward + **split-conformal**. Глубоко
-проработаны **три отрасли**: металлургия ([отчёт](../docs/DS_REPORT.md), N=24), нефтегаз
-([отчёт](../docs/DS_REPORT_OILGAS.md), N=18; выручка через `/doublecheck`+`/fact-check`) и
-химия ([отчёт](../docs/DS_REPORT_CHEMISTRY.md), N=18; **структурная модель подключена**).
-DS-харнесс **industry-параметрический** (разовая инвестиция на все 7 отраслей). Модули:
+проработаны **четыре отрасли**: металлургия ([отчёт](../docs/DS_REPORT.md), N=24), нефтегаз
+([отчёт](../docs/DS_REPORT_OILGAS.md), N=18), химия ([отчёт](../docs/DS_REPORT_CHEMISTRY.md),
+N=18; структурная подключена) и энергетика ([отчёт](../docs/DS_REPORT_ENERGY.md), N=30;
+двухкомпонентная структурная + урок про честность). DS-харнесс **industry-параметрический**
+(разовая инвестиция на все 7 отраслей). Модули:
 
 | Файл | Назначение |
 |---|---|
@@ -103,7 +104,7 @@ DS-харнесс **industry-параметрический** (разовая и
 |---|---|
 | `.github/workflows/test.yml` | CI: pytest + ruff + black (TF-IDF режим без сети) |
 | `pyproject.toml` | Зависимости + конфигурация ruff/black/pytest |
-| `tests/` | 223 теста (0 skipped) |
+| `tests/` | 233 теста (0 skipped) |
 
 ---
 
@@ -153,7 +154,7 @@ python batch_run.py                     # пакетный прогон неск
 
 ```bash
 cd _tools
-python -m pytest tests/ -v              # 223 зелёных, 0 skipped
+python -m pytest tests/ -v              # 233 зелёных, 0 skipped
 ```
 
 ---
@@ -212,7 +213,7 @@ python -m pytest tests/ -v              # 223 зелёных, 0 skipped
 | **B2** | Multi-source spillover (`propagate_multi_source` + `propagate_credit_channel`) |
 | **D1** | CI на GitHub Actions (`.github/workflows/test.yml`): pytest + ruff + black |
 | **D2** | ruff/black в `pyproject.toml` |
-| **D (частично)** | Расширение тестов — 223 зелёных (0 skipped) |
+| **D (частично)** | Расширение тестов — 233 зелёных (0 skipped) |
 | **Рефакторинг** | `osl_common.py` — общие `RevenuePredict`/`FXRate`/`mae_pct` для 7 модулей; `batch_run.py` — пакетный прогон |
 
 ### ⏳ Осознанно не закрыто (нет данных)
@@ -245,7 +246,7 @@ _tools/
 ├── agents/                    ← orchestrator.py + rag/
 ├── data/                      ← macro_state, shock_to_industries, brent_scenarios, ...
 ├── calibration/               ← <module>_calibrated.json (7 шт.)
-└── tests/                     ← 223 теста (0 skipped)
+└── tests/                     ← 233 теста (0 skipped)
 ```
 
 ---

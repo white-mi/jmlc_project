@@ -18,10 +18,11 @@ import osl_panel
 import osl_metallurgy
 
 SCHEMA = json.loads((osl_panel.PANEL_DIR / 'panel_schema.json').read_text(encoding='utf-8'))
-# Панель — мультиотраслевой CSV (металлургия + нефтегаз + химия). Доп-схемы добавляют
+# Панель — мультиотраслевой CSV (металлургия + нефтегаз + химия + энергетика). Доп-схемы добавляют
 # объёмные колонки и ценовые серии; тесты структуры/серий валидируют ОБЪЕДИНЕНИЕ.
 SCHEMA_OG = json.loads((osl_panel.PANEL_DIR / 'panel_schema_oilgas.json').read_text(encoding='utf-8'))
 SCHEMA_CH = json.loads((osl_panel.PANEL_DIR / 'panel_schema_chemistry.json').read_text(encoding='utf-8'))
+SCHEMA_EN = json.loads((osl_panel.PANEL_DIR / 'panel_schema_energy.json').read_text(encoding='utf-8'))
 # не-металлургические объёмы = всё из VOL_COLUMNS, чего нет в металлургической схеме
 # (source of truth — код; охватывает oilgas + chemistry + будущие отрасли)
 NON_MET_VOLS = [c for c in osl_panel.VOL_COLUMNS if c not in SCHEMA['revenue_columns']]
@@ -33,7 +34,7 @@ def _extra_series(schema):
 
 
 # серии доп-отраслей (для whitelist в test_all_used_series_are_known)
-EXTRA_SERIES = _extra_series(SCHEMA_OG) | _extra_series(SCHEMA_CH)
+EXTRA_SERIES = _extra_series(SCHEMA_OG) | _extra_series(SCHEMA_CH) | _extra_series(SCHEMA_EN)
 
 
 def _csv_header(path: Path):
@@ -246,7 +247,7 @@ def test_all_used_series_are_known():
         pytest.skip('panel_prices.csv пуст')
     known = set(SCHEMA['series_to_profile_metal']) | {'usd_rub'}
     known |= set(SCHEMA.get('series_registry', {}).get('proxy_series', {}))
-    known |= EXTRA_SERIES  # oilgas (urals/gas_eu/lng_jkm) + chemistry (dap/urea/phosphate_rock/crude_brent)
+    known |= EXTRA_SERIES  # oilgas + chemistry + energy (electricity_rsv/capacity_kom) серии
     used = {p.series for p in prices}
     unknown = used - known
     assert not unknown, f'неизвестные series (нет в схеме): {unknown}'
