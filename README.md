@@ -10,7 +10,7 @@ portfolio data.
 
 [![tests](https://github.com/white-mi/jmlc_project/actions/workflows/test.yml/badge.svg)](https://github.com/white-mi/jmlc_project/actions/workflows/test.yml)
 ![python](https://img.shields.io/badge/python-3.11%2B-blue)
-![tests-count](https://img.shields.io/badge/tests-202%20passed%2C%200%20skipped-brightgreen)
+![tests-count](https://img.shields.io/badge/tests-203%20passed%2C%200%20skipped-brightgreen)
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 ---
@@ -59,8 +59,8 @@ Seven industries: oil & gas, metallurgy, chemicals, retail, power, regional gove
 git clone https://github.com/white-mi/jmlc_project.git
 cd jmlc_project/_tools
 
-pip install -r ../requirements.txt pytest   # lightweight core (TF-IDF, offline)
-python -m pytest tests/ -q                    # 202 passed, 0 skipped
+pip install -r ../requirements.lock pytest   # pinned numeric stack (TF-IDF, offline)
+python -m pytest tests/ -q                    # 203 passed, 0 skipped
 
 # End-to-end smoke run — numbers at every layer, no LLM call:
 python run_pipeline.py --smoke-shock 4.2 --smoke-industry oilgas
@@ -97,11 +97,13 @@ _tools/                 Python package — every layer, plus tests/, data/, cali
   run_pipeline.py         end-to-end L0→L3 in one pass
   osl_*.py                OSL per industry + DS layer (panel / models / walk-forward / conformal)
   backtest_analyses.py    reproducible summary of the saved analysis corpus
-docs/                   DS_REPORT, PRODUCT_REPORT, architecture & analyst guides; Fialkowski (2025) paper
-_Анализы/               saved news analyses (the radar's track record)
+docs/                   DS_REPORT, PRODUCT_REPORT, PROJECT_DESCRIPTION, guides, EDA figures, Fialkowski (2025) paper
 _Справочники/           shock taxonomy, client-segment reference
-Dockerfile · Makefile · .github/workflows/test.yml
+requirements.lock · Dockerfile · Makefile · .github/workflows/test.yml
 ```
+
+> The saved news-analysis corpus is internal and not shipped; tests run against a small synthetic
+> fixture (`_tools/tests/fixtures/`), so the suite is deterministic on a clean clone.
 
 > Documentation under `docs/` is partly in Russian (the project's working language). This
 > README and `docs/DS_REPORT.md` are the English entry points.

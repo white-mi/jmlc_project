@@ -132,3 +132,16 @@ def test_run_writes_report(tmp_path, monkeypatch):
     # все модели получили какие-то метрики
     for name in Mo.MODELS:
         assert summary[name]['mape'] is not None
+
+
+def test_walkforward_bit_reproducible():
+    """Детерминизм: два прогона walk-forward на одной панели → ИДЕНТИЧНЫЕ метрики.
+    «Запусти дважды — то же число» — базовое требование воспроизводимости ML-результата
+    (seed=42 / random_state=0 фиксированы; данные неизменны)."""
+    rows = _rows(); _need(rows)
+    s1, _ = W.evaluate(W.walk_forward(rows, Mo.MODELS)[0])
+    s2, _ = W.evaluate(W.walk_forward(rows, Mo.MODELS)[0])
+    assert set(s1) == set(s2)
+    for name in s1:
+        for k in ('mape_common', 'mae', 'mape', 'rmse', 'skill_vs_struct', 'dm_p_vs_struct'):
+            assert s1[name][k] == s2[name][k], f'{name}.{k}: {s1[name][k]} != {s2[name][k]}'
