@@ -42,12 +42,35 @@ if hasattr(sys.stdout, 'reconfigure'):
 # периода = 510 × iron_ore_период / 100.18 — даёт per-period вариацию через прокси.
 IRON_ORE_REF_2025 = 100.18
 
-PRICE_FEATURES = ['gold', 'copper', 'nickel', 'platinum', 'steel_proxy_iron_ore', 'usd_rub']
-VOL_FEATURES = ['vol_copper_t', 'vol_nickel_t', 'vol_pd_oz', 'vol_pt_oz',
-                'vol_gold_oz', 'vol_steel_t']
-# объёмная колонка → металл-ключ структурной модели
+# Признаки learned-моделей ПО ОТРАСЛИ (ключи цен совпадают с приджойненными в row.prices;
+# объёмные колонки — из osl_panel.VOL_COLUMNS). Отрасль выводится из rows[0].industry.
+INDUSTRY_PRICE_FEATURES = {
+    'metallurgy': ['gold', 'copper', 'nickel', 'platinum', 'steel_proxy_iron_ore', 'usd_rub'],
+    'oilgas': ['urals', 'gas_export', 'lng_jkm', 'usd_rub'],
+}
+INDUSTRY_VOL_FEATURES = {
+    'metallurgy': ['vol_copper_t', 'vol_nickel_t', 'vol_pd_oz', 'vol_pt_oz',
+                   'vol_gold_oz', 'vol_steel_t'],
+    'oilgas': ['vol_oil_t', 'vol_gas_mmcm', 'vol_refined_t', 'vol_lng_t', 'vol_condensate_t'],
+}
+# обратная совместимость (металлургия по умолчанию)
+PRICE_FEATURES = INDUSTRY_PRICE_FEATURES['metallurgy']
+VOL_FEATURES = INDUSTRY_VOL_FEATURES['metallurgy']
+# объёмная колонка → металл-ключ структурной модели (металлургия)
 VOL_TO_METAL = {'vol_copper_t': 'copper', 'vol_nickel_t': 'nickel', 'vol_pd_oz': 'palladium',
                 'vol_pt_oz': 'platinum', 'vol_gold_oz': 'gold'}
+
+
+def _industry_of(rows) -> str:
+    return rows[0].industry if rows else 'metallurgy'
+
+
+def _price_features(rows):
+    return INDUSTRY_PRICE_FEATURES.get(_industry_of(rows), PRICE_FEATURES)
+
+
+def _vol_features(rows):
+    return INDUSTRY_VOL_FEATURES.get(_industry_of(rows), VOL_FEATURES)
 
 
 def _targets(rows) -> np.ndarray:
@@ -174,17 +197,19 @@ class _Design:
         return self
 
     def _log_prices(self, rows) -> np.ndarray:
+        feats = _price_features(rows)
         X = []
         for r in rows:
             X.append([np.log(r.prices[m]) if r.prices.get(m) else np.nan
-                      for m in PRICE_FEATURES])
+                      for m in feats])
         return np.array(X, dtype=float)
 
     def transform(self, rows) -> np.ndarray:
         blocks = [self.scaler_.transform(self._log_prices(rows))]
         if self.use_volumes:
+            vfeats = _vol_features(rows)
             vol = np.array([[r.volumes.get(c) if r.volumes.get(c) is not None else np.nan
-                             for c in VOL_FEATURES] for r in rows], dtype=float)
+                             for c in vfeats] for r in rows], dtype=float)
             with np.errstate(invalid='ignore'):
                 vol = np.where(vol > 0, np.log(vol), np.nan)  # NaN остаётся (GBM нативно)
             blocks.append(vol)

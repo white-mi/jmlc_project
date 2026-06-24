@@ -47,8 +47,14 @@ SERIES_TO_METAL = {
     'steel_fob_bsea': 'steel_fob_chm',
 }
 
-VOL_COLUMNS = ('vol_copper_t', 'vol_nickel_t', 'vol_pd_oz',
-               'vol_pt_oz', 'vol_gold_oz', 'vol_steel_t')
+# Объёмные колонки — ОБЪЕДИНЕНИЕ по всем отраслям (имена различимы; строки отрасли,
+# где колонка не применима, оставляют её пустой → None). Расширяется при добавлении отрасли.
+VOL_COLUMNS = (
+    # металлургия
+    'vol_copper_t', 'vol_nickel_t', 'vol_pd_oz', 'vol_pt_oz', 'vol_gold_oz', 'vol_steel_t',
+    # нефтегаз
+    'vol_oil_t', 'vol_gas_mmcm', 'vol_refined_t', 'vol_lng_t', 'vol_condensate_t',
+)
 
 
 # ============================================================
