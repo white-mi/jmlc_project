@@ -79,6 +79,16 @@ def test_epu_not_degraded_on_full_corpus():
     assert 0.0 <= res.epu_value <= 100.0
 
 
+def test_orchestrator_dry_run_no_api():
+    """L0 в dry-run даёт валидный Agent-1 JSON БЕЗ API-ключа/CLI — судья прогоняет L0 офлайн."""
+    import json as _json
+
+    import orchestrator as O
+    d = _json.loads(O.call_llm('любой промпт', mode='dry-run'))
+    assert d.get('dry_run') is True
+    assert 'main_category' in d and 'severity_score' in d
+
+
 # ---------- S3.4: spillover из severity / credit channel ----------
 
 def test_severity_to_magnitude_range():
