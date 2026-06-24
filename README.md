@@ -79,16 +79,20 @@ The data-science layer is validated **out-of-sample**, not by assertion. On a pu
 metallurgy panel (5 issuers × FY2021–2025, IFRS revenue + exchange prices), expanding-window
 walk-forward gives:
 
-| Model | MAPE | vs. structural prior |
+| Model | MAPE (common set) | DM p vs. structural |
 |---|---|---|
-| Structural OSL (domain formula) | 13.7 % | baseline |
-| Gradient boosting | 12.1 % | Diebold–Mariano p = 0.66 (not significant) |
-| Regularised linear | ~41 % | overfits price extrapolation |
+| Structural OSL (domain prior) | 13.7 % | baseline |
+| Gradient boosting | 12.1 % | 0.66 |
+| Naive persistence (last year) | 11.0 % | 0.41 |
+| Naive issuer-mean | 11.1 % | 0.43 |
+| Regularised linear | ~41 % | 0.02 (overfits) |
 
-The honest result: **at N = 24, no learned model significantly beats the domain prior** — and
-that is *shown* by walk-forward plus a Diebold–Mariano test, not claimed. Split-conformal
-intervals reach their target coverage on a temporal hold-out. Full write-up:
-[`docs/DS_REPORT.md`](docs/DS_REPORT.md).
+The honest result: **at N = 24, no model — not even a naive persistence baseline — is
+statistically distinguishable** (all Diebold–Mariano p > 0.4); only the regularised-linear models
+clearly overfit. We *show* this rather than overclaim. The OSL's value is the operational
+**lead-time** (estimating revenue from within-year prices before the annual report), not annual
+point-accuracy on a 24-row panel. Split-conformal coverage is reported as a small-N artifact, not a
+calibrated 90 %. Full write-up: [`docs/DS_REPORT.md`](docs/DS_REPORT.md).
 
 ## Repository layout
 

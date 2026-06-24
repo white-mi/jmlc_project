@@ -249,8 +249,45 @@ class GBMPanel:
         return np.exp(self.model.predict(self.design.transform(rows)) + self.fe.level(rows))
 
 
+class PersistenceBaseline:
+    """Наивный floor: выручка года t = ПОСЛЕДНЯЯ наблюдённая выручка эмитента в train
+    (в родной валюте). Эмитент не в train → медиана train. Всегда конечный прогноз."""
+    name = 'persistence'
+
+    def fit(self, rows):
+        self.last_ = {}
+        for r in sorted(rows, key=lambda x: x.period_end):
+            if r.has_target:
+                self.last_[r.issuer] = r.target_bn
+        tg = [r.target_bn for r in rows if r.has_target]
+        self.global_ = float(np.median(tg)) if tg else float('nan')
+        return self
+
+    def predict(self, rows) -> np.ndarray:
+        return np.array([self.last_.get(r.issuer, self.global_) for r in rows], dtype=float)
+
+
+class IssuerMeanBaseline:
+    """Наивный floor: выручка = среднее выручек эмитента по train (в родной валюте)."""
+    name = 'issuer_mean'
+
+    def fit(self, rows):
+        by = {}
+        for r in rows:
+            if r.has_target:
+                by.setdefault(r.issuer, []).append(r.target_bn)
+        self.mean_ = {k: float(np.mean(v)) for k, v in by.items()}
+        tg = [r.target_bn for r in rows if r.has_target]
+        self.global_ = float(np.median(tg)) if tg else float('nan')
+        return self
+
+    def predict(self, rows) -> np.ndarray:
+        return np.array([self.mean_.get(r.issuer, self.global_) for r in rows], dtype=float)
+
+
 MODELS = {'structural_osl': StructuralOSL, 'elasticnet': lambda: LinearPanel('elasticnet'),
-          'ridge': lambda: LinearPanel('ridge'), 'hist_gbm': GBMPanel}
+          'ridge': lambda: LinearPanel('ridge'), 'hist_gbm': GBMPanel,
+          'persistence': PersistenceBaseline, 'issuer_mean': IssuerMeanBaseline}
 
 
 def mape(y_true: np.ndarray, y_pred: np.ndarray) -> float:

@@ -79,7 +79,7 @@ tags: [макро-радар, продукт, product-report, junior-ml-contest]
 | ID | Гипотеза | Статус |
 |---|---|:--:|
 | H1 | OSL: MAPE ≤10 % за 2–3 мес. до МСФО (сырьевые) | ✅ validated (OOS) |
-| H2 | При N=24 prior не хуже ML (DM p=0.66) | ✅ validated (OOS) |
+| H2 | При N=24 ничто не отличимо — даже наивный baseline (все DM p>0.4) | ✅ validated (OOS) |
 | H3 | Conformal OOS-покрытие ≥90 % | ✅ validated (OOS) |
 | H4 | Spillover ловит каскад, занижаемый на 28–70 % | 🟡 partial (РФ-калибровки нет) |
 | H5 | Сегментная бифуркация даёт сигнал сверх среднего | 🟡 partial (L3 не калиброван) |
