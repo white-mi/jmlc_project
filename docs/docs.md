@@ -6,16 +6,16 @@ tags: [макро-радар, docs, индекс]
 
 # 📚 Документация «Макро-радар» — индекс
 
-> [[../Макро-радар — Хаб|← Хаб]]
+> **← Хаб**
 
 Оглавление папки `docs/`. Документация по аудиториям + досье для Junior ML Contest.
 
 | Документ | Для кого |
 |---|---|
-| 📘 [[1_Macro_Knowledge_for_IT]] | IT-специалист без финансового бекграунда — макроэкономика и финансы на языке кода |
-| 📗 [[2_Tech_Knowledge_for_IT]] | IT-специалист, готовый разрабатывать — стек, паттерны, алгоритмы, тестирование |
-| 📕 [[3_User_Guide_Analyst]] | Кредитный аналитик / риск-менеджер — что Радар умеет и как формулировать запросы |
-| 📙 [[4_Tech_Architecture]] | Tech lead / архитектор / новый разработчик — модули, API, схемы данных, deployment |
+| 📘 [1_Macro_Knowledge_for_IT](1_Macro_Knowledge_for_IT.md) | IT-специалист без финансового бекграунда — макроэкономика и финансы на языке кода |
+| 📗 [2_Tech_Knowledge_for_IT](2_Tech_Knowledge_for_IT.md) | IT-специалист, готовый разрабатывать — стек, паттерны, алгоритмы, тестирование |
+| 📕 [3_User_Guide_Analyst](3_User_Guide_Analyst.md) | Кредитный аналитик / риск-менеджер — что Радар умеет и как формулировать запросы |
+| 📙 [4_Tech_Architecture](4_Tech_Architecture.md) | Tech lead / архитектор / новый разработчик — модули, API, схемы данных, deployment |
 
 ---
 
@@ -25,12 +25,12 @@ tags: [макро-радар, docs, индекс]
 
 | Документ | Критерий JMLC |
 |---|---|
-| 🔬 [[DS_REPORT]] | **Data Science** — панель, EDA, модели, walk-forward, conformal (out-of-sample) |
-| 🎯 [[PRODUCT_REPORT]] | **Продуктовое мышление** — флагман: проблема, ЦА, конкуренты, MVP, импакт, обратная связь |
-| ↳ [[product/PERSONAS_JTBD]] | проблема + ЦА + персоны + JTBD |
-| ↳ [[product/COMPETITORS]] | анализ конкурентов (продуктовые/рыночные) |
-| ↳ [[product/HYPOTHESES]] | реестр продуктовых гипотез (validated/partial/aspirational) |
-| ↳ [[product/BACKTEST_FEEDBACK]] | обратная связь: ретро-валидация + forward-план |
+| 🔬 [DS_REPORT](DS_REPORT.md) | **Data Science** — панель, EDA, модели, walk-forward, conformal (out-of-sample) |
+| 🎯 [PRODUCT_REPORT](PRODUCT_REPORT.md) | **Продуктовое мышление** — флагман: проблема, ЦА, конкуренты, MVP, импакт, обратная связь |
+| ↳ [PERSONAS_JTBD](product/PERSONAS_JTBD.md) | проблема + ЦА + персоны + JTBD |
+| ↳ [COMPETITORS](product/COMPETITORS.md) | анализ конкурентов (продуктовые/рыночные) |
+| ↳ [HYPOTHESES](product/HYPOTHESES.md) | реестр продуктовых гипотез (validated/partial/aspirational) |
+| ↳ [BACKTEST_FEEDBACK](product/BACKTEST_FEEDBACK.md) | обратная связь: ретро-валидация + forward-план |
 
 ---
 

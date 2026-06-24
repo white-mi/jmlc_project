@@ -6,7 +6,7 @@ tags: [макро-радар, docs, architecture, для-IT]
 
 # 📙 Техническая архитектура проекта
 
-> [[../Макро-радар — Хаб|← Хаб]] · [[1_Macro_Knowledge_for_IT|← Макро-знания]] · [[2_Tech_Knowledge_for_IT|← Тех-знания]] · [[3_User_Guide_Analyst|← User Guide]]
+> **← Хаб** · [← Макро-знания](1_Macro_Knowledge_for_IT.md) · [← Тех-знания](2_Tech_Knowledge_for_IT.md) · [← User Guide](3_User_Guide_Analyst.md)
 
 Полная техническая документация проекта «Макро-радар». Архитектура, модули, API, схемы данных, deployment, тестирование.
 

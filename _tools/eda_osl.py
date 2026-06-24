@@ -1,8 +1,8 @@
 """
 EDA панели металлургии (DS-слой Макро-радара) — headless-генератор фигур.
 
-`python eda_osl.py` строит ~8 графиков в output/eda/*.png и пишет
-output/eda/implications.md — по одной «импликации для модели» на каждый график
+`python eda_osl.py` строит ~8 графиков в docs/figures/eda/*.png и пишет
+docs/figures/eda/implications.md — по одной «импликации для модели» на каждый график
 (именно нарратив, а не картинка, закрывает критерий «качество EDA»).
 
 Зависимости — только в extra [eda]: pip install -e ".[eda]".
@@ -36,7 +36,7 @@ sys.path.insert(0, str(TOOLS))
 import osl_panel          # noqa: E402
 import osl_metallurgy     # noqa: E402
 
-OUT = TOOLS / 'output' / 'eda'
+OUT = TOOLS.parent / 'docs' / 'figures' / 'eda'  # трекается в репо (видна на GitHub/в DS_REPORT)
 PRICE_METALS = ['gold', 'copper', 'nickel', 'platinum', 'steel_proxy_iron_ore', 'usd_rub']
 
 

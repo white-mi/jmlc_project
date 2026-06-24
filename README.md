@@ -10,6 +10,8 @@ portfolio data.
 
 [![tests](https://github.com/white-mi/jmlc_project/actions/workflows/test.yml/badge.svg)](https://github.com/white-mi/jmlc_project/actions/workflows/test.yml)
 ![python](https://img.shields.io/badge/python-3.11%2B-blue)
+![tests-count](https://img.shields.io/badge/tests-202%20passed%2C%200%20skipped-brightgreen)
+[![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 ---
 
@@ -31,6 +33,15 @@ Every number is attributable to a transmission channel and a public source, so a
 defend the conclusion instead of trusting a black box.
 
 ## The pipeline (five layers)
+
+```mermaid
+flowchart TD
+    N["News event"] --> L0["L0 · News filter<br/>5-agent LLM + RAG → 27 shock sub-categories"]
+    L0 --> L1["L1 · Macro state<br/>RF composite activity · EPU · key-rate regime"]
+    L1 --> L15["L1.5 · OSL<br/>issuer revenue = volumes × prices × FX<br/>+ conformal intervals (2–3 mo ahead of IFRS)"]
+    L15 --> L2["L2 · Industry spillover<br/>7×7 Fialkowski matrix · credit channel"]
+    L2 --> L3["L3 · Client segments<br/>ΔPD / Δdemand / Δchurn · 18 segments"]
+```
 
 | Layer | Role | Output |
 |---|---|---|

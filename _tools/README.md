@@ -6,7 +6,7 @@ tags: [макро-радар, инструменты]
 
 # `_tools/` — Инструменты Макро-радара
 
-> [[../Макро-радар — Хаб|← Хаб]]
+> **← Хаб**
 
 Python-пакет для расчёта индикаторов и моделей всех 4 слоёв архитектуры. Запуск из командной строки или импорт как модулей.
 
@@ -20,7 +20,7 @@ Python-пакет для расчёта индикаторов и моделей
 **DS-слой металлургии (доработка для Junior ML Contest, июнь 2026):** реальная панель
 данных FY2021–2025 + сравнение 3 моделей + честная **out-of-sample** walk-forward
 валидация + **split-conformal**. Разблокирован `test_holdout_coverage_metallurgy`
-(0 skipped). Подробно — [[../docs/DS_REPORT|DS-отчёт]]. Модули:
+(0 skipped). Подробно — [DS-отчёт](../docs/DS_REPORT.md). Модули:
 
 | Файл | Назначение |
 |---|---|
@@ -159,7 +159,7 @@ python -m pytest tests/ -v              # 202 зелёных, 0 skipped
 ## Статус OSL (v0.9.2)
 
 - **7 отраслей в продакшене:** металлургия, нефтегаз, химия, энергетика, фарма, розница, ОИВ.
-- **Conformal-интервалы работают.** Perturbation-интервалы (`conformal_prediction.py`) помечены как **IN-SAMPLE**. Честная **out-of-sample** валидация РЕАЛИЗОВАНА в DS-доработке: `conformal_split.py` (split-conformal на независимой панели FY2021–2025), тест `test_holdout_coverage_metallurgy` разблокирован. См. [[../docs/DS_REPORT|DS-отчёт]].
+- **Conformal-интервалы работают.** Perturbation-интервалы (`conformal_prediction.py`) помечены как **IN-SAMPLE**. Честная **out-of-sample** валидация РЕАЛИЗОВАНА в DS-доработке: `conformal_split.py` (split-conformal на независимой панели FY2021–2025), тест `test_holdout_coverage_metallurgy` разблокирован. См. [DS-отчёт](../docs/DS_REPORT.md).
 - **Нефтегаз больше НЕ «провален».** Pipeline v0.9 работает; `fetch_macro_state.py` тянет живые макрофиды, заглушки заменены рабочей логикой.
 
 ---
@@ -179,7 +179,7 @@ python -m pytest tests/ -v              # 202 зелёных, 0 skipped
 
 ## Зависимости
 
-Из `pyproject.toml` (`requires-python = ">=3.10"`):
+Из `pyproject.toml` (`requires-python = ">=3.11"`):
 
 **Runtime:**
 - `numpy`, `scipy`, `scikit-learn` — численные расчёты и модели
@@ -198,7 +198,7 @@ python -m pytest tests/ -v              # 202 зелёных, 0 skipped
 
 ## Roadmap инструментов
 
-Статус относительно [[ROADMAP_v0.8|ROADMAP v0.8]] (см. `CHANGELOG` v0.9.0):
+Статус относительно [ROADMAP v0.8](ROADMAP_v0.8.md) (см. `CHANGELOG` v0.9.0):
 
 ### ✅ Выполнено в v0.9
 

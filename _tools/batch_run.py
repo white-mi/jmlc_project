@@ -151,7 +151,7 @@ def main():
     out.append('---')
     out.append('tags: [макро-радар, pipeline, batch, перегон]')
     out.append(f'дата_перегона: "{date}"')
-    out.append('pipeline_version: "0.8-mvp"')
+    out.append('pipeline_version: "0.9"')
     out.append(f'новостей: {n_total}')
     out.append('---\n')
     out.append(f'# Перегон пайплайна на {n_total} новостях — {date}\n')

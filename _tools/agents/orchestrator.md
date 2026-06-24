@@ -5,7 +5,7 @@ agents: 5
 
 # Orchestrator — координация Multi-Agent Pipeline
 
-> [[README|← README]] · [[../../Промпт — Анализ новости|← Одиночный промпт v1.1]]
+> [← README](../../README.md) · **← Одиночный промпт v1.1**
 
 ## Назначение
 

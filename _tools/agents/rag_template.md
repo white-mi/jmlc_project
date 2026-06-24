@@ -6,7 +6,7 @@ date: 2026-04-25
 
 # RAG Template — News Embeddings + Historical Lookup
 
-> [[README|← README]] · [[orchestrator|← Orchestrator]]
+> [← README](../../README.md) · [← Orchestrator](orchestrator.md)
 
 Архитектура RAG-системы для **Agent 3 (Backtest-Analog)** в multi-agent pipeline. Цель — найти **исторические аналоги** текущей новости через cosine similarity на news embeddings.
 
