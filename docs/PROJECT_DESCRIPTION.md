@@ -171,7 +171,7 @@ figure are marked **illustrative / not calibrated on Russian data**.
 The whole pipeline is a Python package in `_tools/` with a thin, deterministic core
 (numpy / scipy / scikit-learn / pyyaml) and heavy ML dependencies kept behind optional extras.
 
-- **214 tests, 0 skipped** (`pytest tests/ -q`), including leakage guards (train < test;
+- **223 tests, 0 skipped** (`pytest tests/ -q`), including leakage guards (train < test;
   scaler / fixed-effects / calibration fit on train only), metric/DM/conformal-coverage tests,
   and a contract test that `run_pipeline.py --json` keeps stdout pure JSON (import-time prints
   go to stderr).
@@ -191,7 +191,7 @@ A first end-to-end result is one command away:
 ```bash
 cd _tools
 pip install -r ../requirements.txt pytest
-python -m pytest tests/ -q                                   # 214 passed, 0 skipped
+python -m pytest tests/ -q                                   # 223 passed, 0 skipped
 python run_pipeline.py --smoke-shock 4.2 --smoke-industry oilgas   # numbers at every layer, no LLM
 ```
 

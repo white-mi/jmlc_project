@@ -1,0 +1,47 @@
+{
+  "meta": {
+    "name": "panel_chemistry",
+    "version": "0.1",
+    "description": "Панель эмитент×период (химия) для supervised-обучения и walk-forward валидации OSL — 3-я отрасль после металлургии и нефтегаза. ТОЛЬКО публичные данные МСФО/IR + биржевые цены (World Bank Pink Sheet удобрения/нефть). Никаких клиентских/портфельных данных банка.",
+    "isolation": "public-only: IFRS/IR reports + World Bank fertilizer & crude prices + CBR/IRS FX.",
+    "primary_industry": "chemistry",
+    "issuers": ["ФосАгро", "Акрон", "КуйбышевАзот", "КОС"],
+    "excluded_issuers": {
+      "Уралхим": "МСФО не публикует (приватная группа) → нет таргета, исключён.",
+      "СИБУР": "Исторически закрытая отчётность (оценки) → исключён из честной панели.",
+      "Нижнекамскнефтехим": "После вхождения в СИБУР не раскрыл МСФО за 2022 и 2025 → <3 чистых лет, ниже минимума walk-forward. Удалён («плохой клиент»)."
+    },
+    "granularity": "FY (annual) primary",
+    "join_rule": "panel_prices джойнится к panel_revenue по точному совпадению `period`.",
+    "leakage_rule": "Окно усреднения цены ⊆ отчётного периода эмитента. Проверяется test_panel.py.",
+    "easier_than_oilgas": "Химия методологически проще нефтегаза: нет налогового клина (НДПИ/демпфер), а ключевые цены (DAP/urea/phosphate rock/нефть) — в World Bank Pink Sheet, годовые, high-conf. Поэтому структурная модель ПОДКЛЮЧЕНА (Фаза C), а не отложена."
+  },
+  "files": {
+    "panel_revenue.csv": "Дозалив chemistry-строк (industry='chemistry'). Объёмы удобрений/полимеров.",
+    "panel_prices.csv": "Дозалив chemistry-серий (dap, urea, phosphate_rock, crude_brent; usd_rub общий)."
+  },
+  "revenue_columns": {
+    "issuer": "str — ФосАгро | Акрон | КуйбышевАзот | КОС",
+    "industry": "str — chemistry",
+    "revenue_rub_bn": "float — выручка МСФО, млрд ₽ (все репортят в RUB)",
+    "vol_fertilizer_kt": "float|'' — выпуск товарной продукции (удобрения), тыс. т (kt)",
+    "vol_polymer_kt": "float|'' — выпуск полимеров/каучуков, тыс. т (kt) — нефтехимия",
+    "common_columns": "как в panel_schema.json (period/period_end/.../source_url/source_quote/confidence)"
+  },
+  "prices_columns": "как в panel_schema.json",
+  "series_used": {
+    "dap": "World Bank «DAP» (диаммонийфосфат) $/т — драйвер фосфатных эмитентов (ФосАгро).",
+    "urea": "World Bank «Urea» $/т — драйвер азотных (Акрон, КуйбышевАзот).",
+    "phosphate_rock": "World Bank «Phosphate rock» $/т — сырьевой фосфатный сигнал.",
+    "crude_brent": "World Bank «Crude oil, Brent» $/баррель — ПРОКСИ нафта-фидстока для нефтехимии (НКНХ, КОС).",
+    "usd_rub": "FX (общий, уже в panel_prices.csv)."
+  },
+  "series_registry": {
+    "comment": "required — NaN-free цены для learned-моделей; structural использует issuer-драйвер (dap/urea/crude_brent).",
+    "required_series": ["dap", "urea", "phosphate_rock", "crude_brent", "usd_rub"],
+    "documented_gaps": {
+      "polymer_fob_price": "Прямой FOB-индекс полимеров (ПВД/ПНД/каучук) недоступен публично-годовым рядом → нефтехимия использует crude_brent как прокси-фидсток (нафта ~линейна к нефти). Структурный k поглощает уровень.",
+      "domestic_export_split": "Разбивка внутр./экспорт по годам непрозрачна → структурная агрегирует через avg-price-per-ton × объём (наблюдение osl_chemistry v0.3) + калибровочный k."
+    }
+  }
+}

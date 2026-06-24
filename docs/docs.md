@@ -27,6 +27,7 @@ tags: [макро-радар, docs, индекс]
 |---|---|
 | 🔬 [DS_REPORT](DS_REPORT.md) | **Data Science (металлургия)** — панель, EDA, модели, walk-forward, conformal (out-of-sample) |
 | 🛢️ [DS_REPORT_OILGAS](DS_REPORT_OILGAS.md) | **Data Science (нефтегаз)** — 2-я отрасль: панель FY2021–2025 (выручка через `/doublecheck`+`/fact-check`), walk-forward, conformal |
+| 🧪 [DS_REPORT_CHEMISTRY](DS_REPORT_CHEMISTRY.md) | **Data Science (химия)** — 3-я отрасль: **структурная модель подключена**; panel FY2021–2025, walk-forward, conformal |
 | 🎯 [PRODUCT_REPORT](PRODUCT_REPORT.md) | **Продуктовое мышление** — флагман: проблема, ЦА, конкуренты, MVP, импакт, обратная связь |
 | ↳ [PERSONAS_JTBD](product/PERSONAS_JTBD.md) | проблема + ЦА + персоны + JTBD |
 | ↳ [COMPETITORS](product/COMPETITORS.md) | анализ конкурентов (продуктовые/рыночные) |

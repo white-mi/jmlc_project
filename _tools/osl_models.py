@@ -32,6 +32,7 @@ from sklearn.preprocessing import StandardScaler
 sys.path.insert(0, str(__import__('pathlib').Path(__file__).parent))
 import osl_panel
 import osl_metallurgy as M
+import osl_chemistry as Ch
 
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8')
@@ -47,11 +48,13 @@ IRON_ORE_REF_2025 = 100.18
 INDUSTRY_PRICE_FEATURES = {
     'metallurgy': ['gold', 'copper', 'nickel', 'platinum', 'steel_proxy_iron_ore', 'usd_rub'],
     'oilgas': ['urals', 'gas_eu', 'lng_jkm', 'usd_rub'],
+    'chemistry': ['dap', 'urea', 'phosphate_rock', 'crude_brent', 'usd_rub'],
 }
 INDUSTRY_VOL_FEATURES = {
     'metallurgy': ['vol_copper_t', 'vol_nickel_t', 'vol_pd_oz', 'vol_pt_oz',
                    'vol_gold_oz', 'vol_steel_t'],
     'oilgas': ['vol_oil_t', 'vol_gas_mmcm', 'vol_refined_t', 'vol_lng_t', 'vol_condensate_t'],
+    'chemistry': ['vol_fertilizer_kt', 'vol_polymer_kt'],
 }
 # обратная совместимость (металлургия по умолчанию)
 PRICE_FEATURES = INDUSTRY_PRICE_FEATURES['metallurgy']
@@ -59,6 +62,20 @@ VOL_FEATURES = INDUSTRY_VOL_FEATURES['metallurgy']
 # объёмная колонка → металл-ключ структурной модели (металлургия)
 VOL_TO_METAL = {'vol_copper_t': 'copper', 'vol_nickel_t': 'nickel', 'vol_pd_oz': 'palladium',
                 'vol_pt_oz': 'platinum', 'vol_gold_oz': 'gold'}
+
+# Структурная модель ХИМИИ (Фаза C). Цена_период = base × (биржевой_драйвер / реф_2025),
+# где base — 2025-калиброванная avg-цена-за-тонну из osl_chemistry (reuse доменного модуля),
+# а драйвер (dap/urea/crude_brent) даёт per-period вариацию — как steel-proxy в металлургии.
+# Формула выручки — из osl_chemistry: Rev = vol(kt→т) × $/т × FX × (1+other). Скаляр k
+# (median actual/raw по train) поглощает бленд продуктов/домест-экспорт. КуйбышевАзот без
+# объёма → None (идёт по learned/persistence). reф_2025 = World Bank-значение серии за 2025FY.
+# issuer: (vol_col, price_series, ref_2025, osl_chemistry.PRICES-ключ base, other_income_pct)
+CHEM_DRIVERS = {
+    'ФосАгро':      ('vol_fertilizer_kt', 'dap',         660.0, 'avg_phosphate_company', 0.04),
+    'Акрон':        ('vol_fertilizer_kt', 'urea',        430.0, 'avg_nitrogen_company',  0.05),
+    'КуйбышевАзот': ('vol_fertilizer_kt', 'urea',        430.0, 'avg_nitrogen_company',  0.05),
+    'КОС':          ('vol_polymer_kt',    'crude_brent',  70.0, 'polymers_avg',          0.05),  # объём только 2024-25 → k на n=2, хрупко
+}
 
 
 def _industry_of(rows) -> str:
@@ -100,7 +117,10 @@ class StructuralOSL:
             всегда module-default 1050. Норникелевский Pd-компонент не реагирует на год.
           • Байпродукты Норникеля (золото/кобальт/родий ≈7%) — нет объёмов в панели,
             в прогноз не входят (систематический недоучёт, поглощается скаляром k).
-        Возвращает None (не падает), если нет ключевого объёма (напр. сталь 2025 — gap)."""
+        Возвращает None (не падает), если нет ключевого объёма (напр. сталь 2025 — gap).
+        Для химии диспетчеризуется в _raw_chemistry; нефтегаз (не в M.PROFILES) → None (Фаза C ждёт НДПИ)."""
+        if row.industry == 'chemistry':
+            return self._raw_chemistry(row)
         if row.issuer not in M.PROFILES:
             return None
         prof = M.PROFILES[row.issuer]
@@ -137,6 +157,26 @@ class StructuralOSL:
             production = [M.ProductionData(row.issuer, 'steel', v, 't', row.period)]
             pred = M.predict_hybrid(row.issuer, production, prices, prof, fx)
         return pred.predicted_rub_bn if row.revenue_currency == 'RUB' else pred.predicted_usd_bn
+
+    def _raw_chemistry(self, row) -> Optional[float]:
+        """Структурный сырой прогноз химии (млрд ₽). Reuse из osl_chemistry — цена-константа
+        (Ch.PRICES[base].avg) + форма выручки vol×$/т×FX×(1+other) (НЕ predict_fertilizer целиком:
+        домест/экспорт-сплит не используется, его поглощает k). Цена_период = base × драйвер/реф_2025
+        (биржевой драйвер: dap/urea — реализованная цена; crude_brent — прокси-фидсток полимеров КОС).
+        Возвращает None при отсутствии объёма (КуйбышевАзот — gap) или цены/FX → learned/persistence."""
+        drv = CHEM_DRIVERS.get(row.issuer)
+        if not drv:
+            return None
+        vcol, pkey, ref, base_key, other = drv
+        vol = row.volumes.get(vcol)
+        price = row.prices.get(pkey)
+        fx = row.prices.get('usd_rub')
+        if not (vol and price and fx):
+            return None
+        base = Ch.PRICES[base_key].avg_price_usd_per_t          # 2025-калибровка osl_chemistry
+        price_t = base * price / ref                            # per-period вариация через драйвер
+        rev_usd = vol * 1000.0 * price_t * (1 + other)          # vol kt→т × $/т (формула osl_chemistry)
+        return rev_usd * fx / 1e9                               # → млрд ₽ (таргет химии — RUB)
 
     def fit(self, rows):
         ratios_all = []

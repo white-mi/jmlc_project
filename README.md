@@ -10,7 +10,7 @@ portfolio data.
 
 [![tests](https://github.com/white-mi/jmlc_project/actions/workflows/test.yml/badge.svg)](https://github.com/white-mi/jmlc_project/actions/workflows/test.yml)
 ![python](https://img.shields.io/badge/python-3.11%2B-blue)
-![tests-count](https://img.shields.io/badge/tests-214%20passed%2C%200%20skipped-brightgreen)
+![tests-count](https://img.shields.io/badge/tests-223%20passed%2C%200%20skipped-brightgreen)
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 ---
@@ -60,7 +60,7 @@ git clone https://github.com/white-mi/jmlc_project.git
 cd jmlc_project/_tools
 
 pip install -r ../requirements.lock pytest   # pinned numeric stack (TF-IDF, offline)
-python -m pytest tests/ -q                    # 214 passed, 0 skipped
+python -m pytest tests/ -q                    # 223 passed, 0 skipped
 
 # End-to-end smoke run — numbers at every layer, no LLM call:
 python run_pipeline.py --smoke-shock 4.2 --smoke-industry oilgas
@@ -106,6 +106,13 @@ because naive "last-year = this-year" fails harder on geopolitical swings. The s
 deliberately deferred (annual НДПИ/fuel-damper history is a documented gap), so the comparison
 baseline is persistence. Write-up: [`docs/DS_REPORT_OILGAS.md`](docs/DS_REPORT_OILGAS.md).
 
+A **third industry — chemistry** (4 issuers, FY2021–2025) closes the loop with the finding flipping
+a *third* way: here the **structural domain model is wired in** (chemistry has public annual
+fertilizer/crude prices and no tax wedge) and turns out **competitive** — `structural_osl` 13.8 %
+MAPE beats naive persistence (16.1 %) and ties the best learned model, all Diebold–Mariano p > 0.76
+at N≈10–16. So across three industries the winner differs by data regime: persistence (metallurgy),
+learned (oil & gas), structural (chemistry). Write-up: [`docs/DS_REPORT_CHEMISTRY.md`](docs/DS_REPORT_CHEMISTRY.md).
+
 ## Repository layout
 
 ```
@@ -132,7 +139,7 @@ Design facts, not bugs:
   out-of-sample validation lives only in the DS layer (`conformal_split.py`).
 - **L3 is not calibrated on bank data** (`confidence='low'`, expert priors).
 - The ×1.30 spillover amplifier is a Fialkowski heuristic, **not yet calibrated on Russian shocks**.
-- The DS layer is deep on two industries (metallurgy N = 24, oil & gas N = 18); the other five rely on in-sample actuals.
+- The DS layer is deep on three industries (metallurgy N = 24, oil & gas N = 18, chemistry N = 18); the other four rely on in-sample actuals.
 
 ## Built with AI
 
