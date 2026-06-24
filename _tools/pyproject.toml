@@ -73,7 +73,9 @@ line-length = 100
 target-version = "py310"
 # E501 (длина) и др. — не блокируем на старте; включать постепенно.
 lint.select = ["E", "F", "W"]
-lint.ignore = ["E501", "E741", "W605"]
+# E501 длина · E741 имена l/I · W605 escape · E402 импорт после sys.stdout.reconfigure (cross-OS) ·
+# E702 ; в тестовых хелперах (стиль). Остальные E/F/W — реальный гейт.
+lint.ignore = ["E501", "E741", "W605", "E402", "E702"]
 
 [tool.black]
 line-length = 100

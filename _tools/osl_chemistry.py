@@ -19,8 +19,8 @@ Operational Signal Layer (OSL) — Химия v0.3.
 
 import argparse
 import sys
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from dataclasses import dataclass
+from typing import Dict, List
 
 from osl_common import RevenuePredict  # S3.1: общая структура
 
@@ -254,7 +254,7 @@ def main():
     targets = list(PROFILES.keys()) if args.company == 'all' else [args.company]
 
     print('=' * 70)
-    print(f'  OSL Backtest — Химия 12М 2025')
+    print('  OSL Backtest — Химия 12М 2025')
     print(f'  USD/RUB avg: {FX_AVG_2025}')
     print('=' * 70)
 
@@ -264,18 +264,18 @@ def main():
         result = backtest_one(pred)
         results.append(result)
 
-        print(f'─' * 70)
+        print('─' * 70)
         print(f'  {company} ({PROFILES[company].business_model})')
-        print(f'─' * 70)
+        print('─' * 70)
         print(f'  Прогноз: {result.predicted_rub_bn:,.0f} млрд ₽')
         if result.actual_rub_bn:
             print(f'  Факт: {result.actual_rub_bn:,.0f} млрд ₽')
         else:
-            print(f'  Факт: непубличная')
+            print('  Факт: непубличная')
         if result.mae_pct is not None:
             mark = '✅' if result.mae_pct <= 10 else ('⚠️' if result.mae_pct <= 20 else '❌')
             print(f'  MAE: {result.mae_pct:.1f}% {mark}')
-        print(f'  Breakdown:')
+        print('  Breakdown:')
         for k, v in result.breakdown_rub_bn.items():
             print(f'    {k}: {v:.0f} млрд ₽')
 

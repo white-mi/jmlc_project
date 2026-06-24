@@ -153,7 +153,7 @@ def render_report(industry, summary, fold_log, common, n_total):
     lines = [f'# Walk-forward валидация OSL — {industry}', '',
              '> Expanding-window: train = все годы < t, test = год t. Сплит по времени, '
              'группировка по периоду. Out-of-sample.', '',
-             f'**Фолды:** ' + '; '.join(f"test {f['test_year']} "
+             '**Фолды:** ' + '; '.join(f"test {f['test_year']} "
                                         f"(train {f['n_train']} → test {f['n_test']})"
                                         for f in fold_log),
              f'**Общий набор для skill/DM (все модели дали прогноз):** {len(common)} строк '

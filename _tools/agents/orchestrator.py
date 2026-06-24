@@ -453,7 +453,7 @@ def main():
     print(f'  Дата: {args.date}', file=sys.stderr)
     print(f'  Длина текста: {len(news_text)} символов', file=sys.stderr)
     if args.bifurcation:
-        print(f'  ⚡ Bifurcation mode', file=sys.stderr)
+        print('  ⚡ Bifurcation mode', file=sys.stderr)
     print('-' * 70, file=sys.stderr)
 
     state, markdown = run_pipeline(

@@ -4,7 +4,6 @@ import sqlite3
 import sys
 from pathlib import Path
 
-import pytest
 
 TOOLS = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(TOOLS / 'agents' / 'rag'))

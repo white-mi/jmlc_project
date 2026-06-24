@@ -134,13 +134,13 @@ def test_subsegment_stratification_diverges_from_base():
     # Не-нефтегазовые подсегменты страдают меньше base (или вообще выигрывают)
     assert 'ml_large_corp_retail' in impacts
     assert impacts['ml_large_corp_retail'].delta_pd < impacts['ml_large_corp'].delta_pd, (
-        f'ml_large_corp_retail должен реагировать иначе чем base (ритейл выигрывает '
-        f'от снижения инфляционного давления)'
+        'ml_large_corp_retail должен реагировать иначе чем base (ритейл выигрывает '
+        'от снижения инфляционного давления)'
     )
 
     assert 'ml_public_diversified' in impacts
     assert impacts['ml_public_diversified'].delta_pd < impacts['ml_public'].delta_pd, (
-        f'ml_public_diversified (Москва, СПб) должен страдать меньше нефтегазового'
+        'ml_public_diversified (Москва, СПб) должен страдать меньше нефтегазового'
     )
 
 

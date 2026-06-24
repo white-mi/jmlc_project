@@ -35,7 +35,6 @@ import argparse
 import json
 import re
 import sys
-from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -281,7 +280,7 @@ def main():
           f'({result.n_negative_texts}/{result.n_uncertainty_texts} negative '
           f'из uncertainty)')
     if result.negative_files:
-        print(f'  Negative uncertainty:')
+        print('  Negative uncertainty:')
         for f in result.negative_files[:10]:
             print(f'    • {f}')
         if len(result.negative_files) > 10:

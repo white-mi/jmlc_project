@@ -9,7 +9,6 @@ import sys
 import re
 import argparse
 import yaml
-import numpy as np
 from pathlib import Path
 
 if hasattr(sys.stdout, 'reconfigure'):
@@ -214,7 +213,7 @@ def index_all(db_path: Path = DB_PATH, analyses_dir: Path = ANALYSES_DIR,
     if not parsed:
         return 0
 
-    print(f"\n  Инициализация embedder...")
+    print("\n  Инициализация embedder...")
     embedder = get_embedder(prefer_st=use_st)
     corpus_texts = []
     for p in parsed:
@@ -255,7 +254,7 @@ if __name__ == '__main__':
         ok = index_single(args.file, use_st=args.use_st)
         sys.exit(0 if ok else 1)
     else:
-        print(f"  RAG — full reindex from _Анализы/")
+        print("  RAG — full reindex from _Анализы/")
         print("=" * 70)
         n = index_all(use_st=args.use_st)
         print(f"\n  Total: {n} files indexed")

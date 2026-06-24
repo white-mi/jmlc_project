@@ -180,7 +180,7 @@ def main():
     args = parser.parse_args()
 
     print("=" * 70)
-    print(f"  RAG v1.1 — Search for Analogs")
+    print("  RAG v1.1 — Search for Analogs")
     print("=" * 70)
     print(f"  Query: {args.query[:80]}")
     print(f"  Filters: subcat={args.subcategory}, region={args.region}, sev=[{args.severity_min},{args.severity_max}]")

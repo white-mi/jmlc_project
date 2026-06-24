@@ -467,8 +467,8 @@ def render_markdown(state: dict) -> str:
         if 'error' in data:
             lines.append(f'⚠️ {data["error"]}')
             continue
-        lines.append(f'| Эмитент | Прогноз | 90% interval | Факт | Inside |')
-        lines.append(f'|---|---|---|---|---|')
+        lines.append('| Эмитент | Прогноз | 90% interval | Факт | Inside |')
+        lines.append('|---|---|---|---|---|')
         for em in data.get('emitents', []):
             inside = '✅' if em.get('inside_interval') else (
                 '❌' if em.get('inside_interval') is False else '—')
@@ -500,8 +500,8 @@ def render_markdown(state: dict) -> str:
     l2 = state.get('L2_spillover', {})
     lines.append('\n## L2 — Industry Spillover')
     lines.append(f'**Источник шока:** {l2.get("source", "?")} (magnitude {l2.get("magnitude_pp", "?")} п.п.)')
-    lines.append(f'\n| Отрасль | ΔPD (п.п.) |')
-    lines.append(f'|---|---|')
+    lines.append('\n| Отрасль | ΔPD (п.п.) |')
+    lines.append('|---|---|')
     for ind, dpp in l2.get('ranked', []):
         marker = '🔴' if dpp >= 0.5 else ('🟡' if dpp >= 0.2 else '🟢')
         lines.append(f'| {marker} {ind} | {dpp:+.3f} |')
@@ -509,8 +509,8 @@ def render_markdown(state: dict) -> str:
     # L3
     l3 = state.get('L3_segments', {})
     lines.append('\n## L3 — Client Behavior (10 сегментов, channel-decomposition v0.8)')
-    lines.append(f'\n| Сегмент | ΔPD (п.п.) | Δdemand (%) | Δchurn (п.п.) | Confidence |')
-    lines.append(f'|---|---|---|---|---|')
+    lines.append('\n| Сегмент | ΔPD (п.п.) | Δdemand (%) | Δchurn (п.п.) | Confidence |')
+    lines.append('|---|---|---|---|---|')
     for sgmt, data in l3.items():
         # Маркер бифуркации: ΔPD < 0 → улучшение, > 0 → ухудшение
         pd = data["delta_pd_pp"]

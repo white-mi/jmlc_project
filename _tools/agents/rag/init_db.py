@@ -33,10 +33,10 @@ def init_db(db_path: Path = DB_PATH, embedding_dim: int = 384) -> sqlite3.Connec
         import sqlite_vec
         sqlite_vec.load(conn)
         vec_loaded = True
-        print(f"  ✅ sqlite-vec loaded successfully")
+        print("  ✅ sqlite-vec loaded successfully")
     except Exception as e:
         print(f"  ⚠️ sqlite-vec не загрузился: {e}")
-        print(f"  → fallback на чистый SQLite + numpy для cosine")
+        print("  → fallback на чистый SQLite + numpy для cosine")
 
     # Основная таблица анализов
     conn.execute("""
@@ -102,9 +102,9 @@ def init_db(db_path: Path = DB_PATH, embedding_dim: int = 384) -> sqlite3.Connec
 
 
 if __name__ == '__main__':
-    print(f"=" * 60)
-    print(f"  RAG v1.1 — DB initialization")
-    print(f"=" * 60)
+    print("=" * 60)
+    print("  RAG v1.1 — DB initialization")
+    print("=" * 60)
     conn = init_db()
 
     # Показать что есть
@@ -113,7 +113,7 @@ if __name__ == '__main__':
     print(f"\n  Tables created: {tables}")
 
     cursor = conn.execute("SELECT key, value FROM db_meta")
-    print(f"\n  Meta:")
+    print("\n  Meta:")
     for row in cursor:
         print(f"    {row[0]}: {row[1]}")
     conn.close()

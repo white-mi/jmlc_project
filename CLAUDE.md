@@ -25,7 +25,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 cd _tools
 
-# Тесты (136 собирается, 1 skipped — out-of-sample conformal без независимых actuals)
+# Тесты (202 собирается, 0 skipped)
 python -m pytest tests/ -v
 python -m pytest tests/test_v09.py -v                          # один файл
 python -m pytest tests/test_l1_l2_l3.py::test_churn_always_positive -v   # один тест

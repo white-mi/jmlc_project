@@ -211,7 +211,7 @@ def main():
         c = l0_by_id[nid]
         out.append(f'{i}. **[{c["subcategory"]}] {news_by_id[nid]["title"]}** — {c["one_line"]}')
     out.append('')
-    out.append(f'## Индивидуальные отчёты\n')
+    out.append('## Индивидуальные отчёты\n')
     out.append(f'Сохранены в `_Анализы/_batch/` ({n_total} файлов).')
     out.append('')
     out.append(f'*Перегон {n_total} новостей · pipeline v0.8 · {date}*')

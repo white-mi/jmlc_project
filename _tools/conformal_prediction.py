@@ -35,8 +35,8 @@ Validation против факта:
 import sys
 import argparse
 import numpy as np
-from dataclasses import dataclass, asdict
-from typing import Dict, List, Callable, Optional
+from dataclasses import dataclass
+from typing import Callable, Optional
 
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8')
@@ -556,7 +556,7 @@ def main():
     args = parser.parse_args()
 
     print("=" * 70)
-    print(f"  OSL v0.4 — Conformal Prediction (all industries)")
+    print("  OSL v0.4 — Conformal Prediction (all industries)")
     print(f"  N simulations: {args.n_sim}, confidence: {args.confidence}")
     print("=" * 70)
 
@@ -606,8 +606,6 @@ def main():
 
     # Summary
     valid = [(ind, r) for ind, r in all_results if r.actual is not None]
-    inside = [(ind, r) for ind, r in valid if r.actual_in_interval]
-    coverage_rate = len(inside) / len(valid) if valid else 0
 
     # Считаем только эмитентов с **non-zero interval** — значит perturbation действительно работает
     perturbed = [(ind, r) for ind, r in valid if r.interval_width_pct > 0.5]
@@ -615,16 +613,16 @@ def main():
     perturbed_rate = len(inside_perturbed) / len(perturbed) if perturbed else 0
 
     print(f"\n{'=' * 70}")
-    print(f"  ИТОГИ CONFORMAL PREDICTION (все отрасли)")
+    print("  ИТОГИ CONFORMAL PREDICTION (все отрасли)")
     print(f"{'=' * 70}")
     print(f"  Эмитентов с actual: {len(valid)}")
     print(f"  Эмитентов с РАБОТАЮЩИМ perturbation (width>0.5%): {len(perturbed)}")
     print(f"  ✅ INSIDE 90% interval (на perturbed): {len(inside_perturbed)} ({perturbed_rate*100:.0f}%)")
     print(f"  Цель покрытия: {args.confidence*100:.0f}%")
     print()
-    print(f"  ⚠️ Эмитенты с width=0% — Conformal wrapper НЕ работает")
-    print(f"     (модули energy/pharma/oiv/retail используют параметры вне PRICES_12M_2025)")
-    print(f"     → требуют индивидуальной адаптации в v0.5")
+    print("  ⚠️ Эмитенты с width=0% — Conformal wrapper НЕ работает")
+    print("     (модули energy/pharma/oiv/retail используют параметры вне PRICES_12M_2025)")
+    print("     → требуют индивидуальной адаптации в v0.5")
     print()
 
     by_industry = {}
@@ -636,7 +634,7 @@ def main():
         if r.actual_in_interval and r.interval_width_pct > 0.5:
             by_industry[ind]['inside'] += 1
 
-    print(f"  Покрытие по отраслям (только эмитенты с работающим perturbation):")
+    print("  Покрытие по отраслям (только эмитенты с работающим perturbation):")
     for ind, stats in by_industry.items():
         if stats['perturbed'] == 0:
             print(f"    {ind:15s}: 0/0 perturbation NOT working — требует v0.5 рефакторинга")

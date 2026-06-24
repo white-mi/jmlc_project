@@ -27,8 +27,8 @@ Operational Signal Layer (OSL) — Нефтегаз v0.3.
 
 import argparse
 import sys
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from dataclasses import dataclass
+from typing import Dict, List
 
 from osl_common import RevenuePredict, FXRate  # S3.1: общие структуры
 
@@ -503,10 +503,10 @@ def main():
                if args.company == 'all' else [args.company])
 
     print('=' * 70)
-    print(f'  OSL Backtest — Нефтегаз 12М 2025')
+    print('  OSL Backtest — Нефтегаз 12М 2025')
     print(f'  Period: 12M 2025 | USD/RUB avg: {FX_12M_2025.avg_usd_rub}')
     print('=' * 70)
-    print(f'\n  Цены 12М 2025:')
+    print('\n  Цены 12М 2025:')
     for k, v in PRICES_12M_2025.items():
         if 'rub' in k:
             print(f'    {k}: ₽{v.avg_price_usd:,.0f}/{v.unit}')
@@ -523,9 +523,9 @@ def main():
         result = backtest_one(pred)
         results.append(result)
 
-        print(f'─' * 70)
+        print('─' * 70)
         print(f'  {company} ({PROFILES[company].business_model})')
-        print(f'─' * 70)
+        print('─' * 70)
         print(f'  Прогноз: ${result.predicted_usd_bn:.2f} млрд = '
               f'{result.predicted_rub_bn:,.0f} млрд ₽')
         if result.actual_rub_bn:
@@ -535,14 +535,14 @@ def main():
             mark = '✅' if result.mae_pct <= 10 else ('⚠️' if result.mae_pct <= 20 else '❌')
             print(f'  MAE: {result.mae_pct:.1f}% {mark}')
 
-        print(f'  Breakdown (млрд ₽):')
+        print('  Breakdown (млрд ₽):')
         for k, v in result.breakdown_rub_bn.items():
             sign = '−' if 'minus' in k else ' '
             print(f'    {sign}{k.lstrip("minus_"):30s}: {abs(v):>8,.0f}')
 
     # ИТОГ
     print(f'\n{"=" * 70}')
-    print(f'  ИТОГИ БЭК-ТЕСТА (заглушка фактов)')
+    print('  ИТОГИ БЭК-ТЕСТА (заглушка фактов)')
     print(f'{"=" * 70}')
     success = [r for r in results if r.mae_pct is not None and r.mae_pct <= 10]
     accept = [r for r in results if r.mae_pct is not None and 10 < r.mae_pct <= 20]

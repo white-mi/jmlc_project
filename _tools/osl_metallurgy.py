@@ -24,7 +24,7 @@ Operational Signal Layer (OSL) — Металлургия.
 import argparse
 import sys
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from osl_common import RevenuePredict, FXRate  # S3.1: общие структуры
 
@@ -396,10 +396,10 @@ def main():
                if args.company == 'all' else [args.company])
 
     print('=' * 70)
-    print(f'  OSL Backtest — Металлургия 12М 2025')
+    print('  OSL Backtest — Металлургия 12М 2025')
     print(f'  Period: 12M 2025 | USD/RUB avg: {FX_12M_2025.avg_usd_rub}')
     print('=' * 70)
-    print(f'\n  Цены 12М 2025 (среднегодовые):')
+    print('\n  Цены 12М 2025 (среднегодовые):')
     for k, v in PRICES_12M_2025.items():
         if k.endswith('_rub'):
             print(f'    {k}: ₽{v.avg_price_usd:,.0f}/{v.unit}')
@@ -413,9 +413,9 @@ def main():
         result = backtest_one(pred)
         results.append(result)
 
-        print(f'─' * 70)
+        print('─' * 70)
         print(f'  {company} ({PROFILES[company].revenue_model})')
-        print(f'─' * 70)
+        print('─' * 70)
         print(f'  Прогноз: ${result.predicted_usd_bn:.2f} млрд = '
               f'{result.predicted_rub_bn:.0f} млрд ₽')
         if result.actual_usd_bn is not None:
@@ -429,14 +429,14 @@ def main():
             print(f'  MAE: {result.mae_pct:.1f}% {mark}  '
                   f'(цель ≤ 10%, приемлемо ≤ 20%)')
 
-        print(f'  Breakdown:')
+        print('  Breakdown:')
         for metal, val in result.breakdown_usd_bn.items():
             print(f'    {metal}: ${val:.2f} млрд' if not metal.endswith('rub_bn')
                   else f'    {metal}: {val:.0f} млрд ₽')
 
     # ИТОГ
     print(f'\n{"=" * 70}')
-    print(f'  ИТОГИ БЭК-ТЕСТА')
+    print('  ИТОГИ БЭК-ТЕСТА')
     print(f'{"=" * 70}')
     success = [r for r in results if r.mae_pct is not None and r.mae_pct <= 10]
     accept = [r for r in results if r.mae_pct is not None and 10 < r.mae_pct <= 20]

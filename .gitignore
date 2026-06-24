@@ -32,6 +32,11 @@ output/
 # ...но научные статьи в docs/ трекаем (напр. Fialkowski 2025, arXiv:2502.17044)
 !docs/*.pdf
 
+# Secrets / local env (шаблон .env.example — трекается)
+.env
+.env.*
+!.env.example
+
 # Editor / tooling / local config
 .claude/
 .obsidian/

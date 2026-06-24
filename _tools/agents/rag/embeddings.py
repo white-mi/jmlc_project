@@ -11,7 +11,6 @@ RAG v1.1 — embedding provider с двумя режимами.
 import os
 import sys
 import numpy as np
-from pathlib import Path
 
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8')
@@ -88,8 +87,8 @@ class SentenceTransformerEmbedder:
             self.available = True
             print(f"  ✅ SentenceTransformer loaded: {model_name}")
         except ImportError:
-            print(f"  ⚠️ sentence-transformers не установлен.")
-            print(f"     Для production: pip install sentence-transformers")
+            print("  ⚠️ sentence-transformers не установлен.")
+            print("     Для production: pip install sentence-transformers")
             self.model = None
             self.available = False
 
@@ -115,11 +114,11 @@ def get_embedder(prefer_st: bool = RAG_USE_ST):
     """
     if prefer_st:
         try:
-            import sentence_transformers
+            import sentence_transformers  # noqa: F401  — проба доступности ST
             return SentenceTransformerEmbedder()
         except ImportError:
             pass
-    print(f"  → Using TF-IDF embedder (always available)")
+    print("  → Using TF-IDF embedder (always available)")
     return TfidfEmbedder()
 
 

@@ -19,8 +19,7 @@ Operational Signal Layer (OSL) — ОИВ (регионы).
 
 import argparse
 import sys
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from dataclasses import dataclass
 
 from osl_common import RevenuePredict  # S3.1: общая структура
 
@@ -179,7 +178,7 @@ def main():
     targets = list(PROFILES.keys()) if args.region == 'all' else [args.region]
 
     print('=' * 70)
-    print(f'  OSL Backtest — ОИВ (регионы) 12М 2025')
+    print('  OSL Backtest — ОИВ (регионы) 12М 2025')
     print(f'  Налог на прибыль нефти: {OIL_PROFIT_TAX_PER_TON_RUB:,} ₽/т')
     print(f'  Налог на прибыль газа: {GAS_PROFIT_TAX_PER_BCM_RUB/1e9:.2f} млрд ₽/млрд м³')
     print('=' * 70)
@@ -190,16 +189,16 @@ def main():
         result = backtest_one(pred)
         results.append(result)
 
-        print(f'─' * 70)
+        print('─' * 70)
         print(f'  {region} ({PROFILES[region].region_type})')
-        print(f'─' * 70)
+        print('─' * 70)
         print(f'  Прогноз: {result.predicted_rub_bn:,.0f} млрд ₽')
         if result.actual_rub_bn:
             print(f'  Факт СД: {result.actual_rub_bn:,.0f} млрд ₽')
         if result.mae_pct is not None:
             mark = '✅' if result.mae_pct <= 10 else ('⚠️' if result.mae_pct <= 20 else '❌')
             print(f'  MAE: {result.mae_pct:.1f}% {mark}')
-        print(f'  Breakdown:')
+        print('  Breakdown:')
         for k, v in result.breakdown_rub_bn.items():
             print(f'    {k}: {v:.0f} млрд ₽')
 

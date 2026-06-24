@@ -1,8 +1,9 @@
 """
-Тесты backtest_analyses.py — воспроизводимая сводка корпуса `_Анализы/` (proxy-feedback).
+Тесты backtest_analyses.py — воспроизводимая сводка корпуса разборов (proxy-feedback).
 
-Аддитивный модуль продуктового слоя: читает только `_Анализы/`, не пишет туда, stdlib-only.
-Тесты мягко SKIP-аются, если корпус не найден (например, у контрибьютора без полного vault).
+Детерминизм: тесты гоняются на **bundled-фикстуре** `tests/fixtures/analyses/` (синтетические
+разборы), а не на реальном корпусе `_Анализы/` — тот внутренний и в публичный репозиторий не входит.
+Поэтому тесты всегда выполняются (без skip) на чистом клоне.
 """
 
 import os
@@ -11,23 +12,25 @@ import pytest
 
 import backtest_analyses as ba
 
-_HAS_CORPUS = os.path.isdir(ba.ANALYSES_DIR)
-pytestmark = pytest.mark.skipif(
-    not _HAS_CORPUS, reason="корпус _Анализы/ недоступен в этой среде"
-)
+FIXTURE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures", "analyses")
+
+
+@pytest.fixture(autouse=True)
+def _use_fixture_corpus(monkeypatch):
+    # Подменяем каталог корпуса на bundled-фикстуру (load/summarize резолвят ANALYSES_DIR при вызове).
+    monkeypatch.setattr(ba, "ANALYSES_DIR", FIXTURE_DIR)
 
 
 def test_corpus_loads():
     items = ba.load_corpus()
-    assert len(items) >= 10, "ожидаем ≥10 разборов в корпусе"
-    # каждый элемент имеет ожидаемые поля
+    assert len(items) >= 3, "ожидаем ≥3 разбора в фикстуре"
     for it in items:
         assert {"file", "date", "tags", "is_osl_backtest", "size"} <= set(it)
 
 
 def test_summary_keys_and_dates():
     s = ba.summarize_corpus()
-    assert s["n_total"] >= 10
+    assert s["n_total"] >= 3
     assert s["n_dated"] >= 1
     # даты в формате YYYY-MM-DD, max не раньше min
     assert s["date_min"] and s["date_min"].count("-") == 2
@@ -35,7 +38,7 @@ def test_summary_keys_and_dates():
 
 
 def test_osl_backtest_present():
-    # в корпусе есть хотя бы один OSL/conformal/бэктест-разбор
+    # в фикстуре есть OSL- и conformal-разборы
     assert ba.summarize_corpus()["n_osl"] >= 1
 
 

@@ -24,7 +24,7 @@ OSL Calibrator v0.6 — auto-tune параметров OSL-моделей.
 import json
 import sys
 from pathlib import Path
-from typing import Callable, Dict, Any
+from typing import Callable, Dict
 import importlib
 
 if hasattr(sys.stdout, 'reconfigure'):
@@ -385,7 +385,6 @@ def calibrate_pharma() -> dict:
         if not actual:
             continue
         profile = m.PROFILES[company]
-        orig = profile.market_share_retail
 
         def predict_with(p):
             profile.market_share_retail = max(0.05, min(0.30, p))
@@ -468,8 +467,6 @@ def calibrate_metallurgy() -> dict:
             continue
 
         profile = m.PROFILES[company]
-        orig_other = profile.other_income_pct
-        orig_dom_premium = getattr(profile, 'domestic_premium_pct', None)
 
         # Tune other_income_pct
         def predict_with_other(p):
@@ -625,7 +622,7 @@ def main():
     args = parser.parse_args()
 
     print("=" * 70)
-    print(f"  OSL Calibrator v0.6")
+    print("  OSL Calibrator v0.6")
     print("=" * 70)
 
     calibrators = {
@@ -647,7 +644,7 @@ def main():
         for c, r in res.items():
             val = r.get(param_name, '?')
             print(f"  {c}: {param_name}={val}, MAE={r['mae_pct']:.1f}%")
-        print(f"  ✅ Saved")
+        print("  ✅ Saved")
 
     if args.module == 'metallurgy_multiparam':
         print("\nMulti-parameter калибровка металлургии (scipy.differential_evolution)...")

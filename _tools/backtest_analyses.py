@@ -54,8 +54,13 @@ def _is_osl_or_backtest(name):
     return "бэк-тест" in low or "бэктест" in low or "osl" in low or "conformal" in low
 
 
-def load_corpus(directory=ANALYSES_DIR):
-    """Читает все *.md из `_Анализы/` (без подпапки `_batch`). Возвращает список dict."""
+def load_corpus(directory=None):
+    """Читает все *.md из `_Анализы/` (без подпапки `_batch`). Возвращает список dict.
+
+    directory=None → берётся `ANALYSES_DIR` в момент вызова (позволяет тестам подменять каталог).
+    """
+    if directory is None:
+        directory = ANALYSES_DIR
     items = []
     for path in sorted(glob.glob(os.path.join(directory, "*.md"))):
         name = os.path.basename(path)
@@ -79,7 +84,7 @@ def load_corpus(directory=ANALYSES_DIR):
     return items
 
 
-def summarize_corpus(directory=ANALYSES_DIR):
+def summarize_corpus(directory=None):
     """Агрегированная сводка корпуса (без побочных эффектов)."""
     items = load_corpus(directory)
     dated = [it for it in items if it["date"]]

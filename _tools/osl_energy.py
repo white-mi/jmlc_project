@@ -25,8 +25,7 @@ Operational Signal Layer (OSL) — Энергетика (v0.7).
 
 import argparse
 import sys
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from dataclasses import dataclass
 
 from osl_common import RevenuePredict  # S3.1: общая структура
 
@@ -203,7 +202,7 @@ def main():
     targets = list(PROFILES.keys()) if args.company == 'all' else [args.company]
 
     print('=' * 70)
-    print(f'  OSL Backtest — Энергетика 12М 2025 (v0.7 abs-sum formula)')
+    print('  OSL Backtest — Энергетика 12М 2025 (v0.7 abs-sum formula)')
     print(f'  Tariff: ₽{TARIFFS_2025.avg_tariff_rub_per_mwh}/МВт·ч')
     print(f'  КОМ: ₽{TARIFFS_2025.capacity_payment_per_gw_year/1e9:.2f} млрд/ГВт/год')
     print('=' * 70)
@@ -224,7 +223,7 @@ def main():
             mark = '✅' if result.mae_pct <= 5 else ('⚠️' if result.mae_pct <= 10 else '❌')
             print(f'  MAE: {result.mae_pct:.1f}% {mark}')
         print(f'  tariff_multiplier: {PROFILES[company].tariff_multiplier:.3f}')
-        print(f'  Breakdown:')
+        print('  Breakdown:')
         for k, v in result.breakdown_rub_bn.items():
             print(f'    {k}: {v:.0f} млрд ₽')
 

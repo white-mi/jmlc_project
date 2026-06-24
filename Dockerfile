@@ -8,14 +8,13 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
-# Зависимости рантайма/тестов (совпадают с CI). Тяжёлый ML-стек (ST/LLM) не нужен
-# для тестов и smoke — подключается отдельно через extras в pyproject.
-COPY requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt pytest
+# Зависимости — из закреплённого lock-файла (детерминизм численных результатов). Тяжёлый ML-стек
+# (sentence-transformers/LLM) не нужен для тестов и smoke — он в extras pyproject.
+COPY requirements.lock /app/requirements.lock
+RUN pip install --no-cache-dir -r /app/requirements.lock pytest
 
-# Исходники проекта
+# Исходники проекта (тесты гоняются на bundled-фикстуре tests/fixtures/, корпус _Анализы/ не нужен)
 COPY _tools/ /app/_tools/
-COPY _Анализы/ /app/_Анализы/
 
 WORKDIR /app/_tools
 

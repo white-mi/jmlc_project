@@ -22,7 +22,7 @@ CLI:
 
 import argparse
 import sys
-from typing import List, Optional
+from typing import Optional
 
 import numpy as np
 from sklearn.linear_model import ElasticNetCV, RidgeCV
