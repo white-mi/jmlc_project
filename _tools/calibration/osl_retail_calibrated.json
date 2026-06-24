@@ -1,0 +1,12 @@
+{
+  "Wildberries": {
+    "take_rate": 0.1485,
+    "mae_pct": 0.92,
+    "actual_rub_bn": 945
+  },
+  "Ozon": {
+    "take_rate": 0.41,
+    "mae_pct": 0.54,
+    "actual_rub_bn": 998
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "_comment": "Текущее состояние и historical baseline для РФ-CAI. Обновлять вручную раз в месяц/квартал.",
+  "_version": "0.7",
+  "_last_updated": "2026-04-25",
+
+  "indicators": {
+    "key_rate": {
+      "name": "Ключевая ставка ЦБ РФ (%)",
+      "baseline_mean": 8.5,
+      "baseline_std": 4.0,
+      "direction": -1,
+      "weight": 1.5,
+      "source": "ЦБ РФ"
+    },
+    "usd_rub": {
+      "name": "USD/RUB (среднемесячный)",
+      "baseline_mean": 72.0,
+      "baseline_std": 14.0,
+      "direction": -1,
+      "weight": 1.0,
+      "source": "ЦБ РФ"
+    },
+    "brent_usd": {
+      "name": "Brent crude (USD/баррель, среднемесячный)",
+      "baseline_mean": 72.0,
+      "baseline_std": 18.0,
+      "direction": 1,
+      "weight": 1.2,
+      "source": "Reuters"
+    },
+    "rosstat_ipp": {
+      "name": "Росстат: индекс промышленного производства (год/год, %)",
+      "baseline_mean": 102.5,
+      "baseline_std": 4.0,
+      "direction": 1,
+      "weight": 1.0,
+      "source": "Росстат"
+    },
+    "inflation_yoy": {
+      "name": "Инфляция год/год (%)",
+      "baseline_mean": 6.5,
+      "baseline_std": 3.0,
+      "direction": -1,
+      "weight": 1.0,
+      "source": "Росстат"
+    },
+    "credit_demand_index": {
+      "name": "Спрос на кредиты — индекс ЦБ (нормализован к 100=baseline)",
+      "baseline_mean": 100.0,
+      "baseline_std": 12.0,
+      "direction": 1,
+      "weight": 1.0,
+      "source": "ЦБ обзор финстабильности"
+    }
+  },
+
+  "current_state": {
+    "_period": "2026-06",
+    "key_rate": 14.5,
+    "usd_rub": 76.5,
+    "brent_usd": 68.0,
+    "rosstat_ipp": 98.2,
+    "inflation_yoy": 5.9,
+    "credit_demand_index": 96.0,
+    "_yield_curve_slope_pp": -1.2,
+    "_notes": "Снимок 2026-06-14 (Фаза 1.1 перед перегоном 15 новостей). КС 14.50% сохраняется — заседание ЦБ 19.06.2026 ещё впереди (консенсус: пауза или снижение ≤50 бп). Рубль USD/RUB ~76.5 (Минфин покупает валюту 5.8 млрд ₽/день). Brent ~68 на фоне деэскалации США–Иран (открытие Ормуза, рост поставок ОПЕК+). Дефицит бюджета 6 трлн ₽ (2.6% ВВП) за 5 мес, НГ-доходы -38.3% г/г"
+  },
+
+  "historical_snapshots": [
+    {
+      "period": "2020-04",
+      "label": "COVID-2020",
+      "expected_phase": "contraction",
+      "key_rate": 5.5,
+      "usd_rub": 76.0,
+      "brent_usd": 18.0,
+      "rosstat_ipp": 92.0,
+      "inflation_yoy": 3.2,
+      "credit_demand_index": 78.0,
+      "yield_curve_slope_pp": -1.5
+    },
+    {
+      "period": "2022-03",
+      "label": "Санкции-02.2022",
+      "expected_phase": "contraction",
+      "key_rate": 20.0,
+      "usd_rub": 105.0,
+      "brent_usd": 110.0,
+      "rosstat_ipp": 97.0,
+      "inflation_yoy": 16.7,
+      "credit_demand_index": 70.0,
+      "yield_curve_slope_pp": -3.0
+    },
+    {
+      "period": "2024-12",
+      "label": "Ставочный шок 12.2024",
+      "expected_phase": "contraction",
+      "key_rate": 21.0,
+      "usd_rub": 100.0,
+      "brent_usd": 73.0,
+      "rosstat_ipp": 103.0,
+      "inflation_yoy": 9.5,
+      "credit_demand_index": 85.0,
+      "yield_curve_slope_pp": -2.5
+    },
+    {
+      "period": "2018-06",
+      "label": "Норма 2018",
+      "expected_phase": "expansion",
+      "key_rate": 7.25,
+      "usd_rub": 62.0,
+      "brent_usd": 75.0,
+      "rosstat_ipp": 103.5,
+      "inflation_yoy": 2.3,
+      "credit_demand_index": 105.0,
+      "yield_curve_slope_pp": 0.8
+    }
+  ]
+}

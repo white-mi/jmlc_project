@@ -1,0 +1,37 @@
+{
+  "_comment": "S2.1: маршрутизация всех 27 подкатегорий шоков на затронутые отрасли (primary первой — её берёт propagate_shock как источник). Ключи согласованы с shock_subcategories из segment_impact_table_v0_8.json и с mapping-таблицей 'Таксономия шоков.md'. Отрасли: oilgas, metallurgy, chemistry, retail, energy, oiv, pharma. Пустой список = использовать primary_industry из L0 (для информационного шума 5.x).",
+  "version": "0.9",
+  "map": {
+    "1.1": ["oilgas", "oiv", "metallurgy"],
+    "1.2": ["oilgas", "oiv", "metallurgy"],
+    "1.3": ["oilgas", "energy"],
+    "1.4": ["metallurgy", "oilgas", "chemistry", "oiv"],
+    "1.5": ["oilgas", "metallurgy"],
+
+    "2.1": ["retail", "oiv", "metallurgy", "oilgas"],
+    "2.2": ["retail", "metallurgy", "oiv"],
+    "2.3": ["retail", "pharma", "energy"],
+    "2.4": ["energy", "oilgas", "retail"],
+    "2.5": ["oiv", "oilgas", "metallurgy"],
+    "2.6": ["metallurgy", "oiv", "retail"],
+
+    "3.1": ["oiv", "energy", "retail"],
+    "3.2": ["oiv", "energy", "oilgas"],
+    "3.3": ["oiv", "metallurgy"],
+    "3.4": ["oiv", "retail", "energy"],
+    "3.5": ["oiv", "energy"],
+
+    "4.1": ["retail", "oiv", "metallurgy", "chemistry", "oilgas"],
+    "4.2": ["retail", "oiv", "metallurgy", "chemistry", "oilgas"],
+    "4.3": ["retail", "oiv"],
+    "4.4": ["retail", "oiv"],
+    "4.5": ["energy", "metallurgy", "oiv"],
+    "4.6": ["retail", "oiv", "metallurgy", "chemistry", "energy"],
+    "4.7": ["oilgas", "metallurgy", "retail", "oiv"],
+
+    "5.1": [],
+    "5.2": [],
+    "5.3": [],
+    "5.4": []
+  }
+}

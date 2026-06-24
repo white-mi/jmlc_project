@@ -1,0 +1,42 @@
+{
+  "Роснефть": {
+    "other_share": 0.0,
+    "targets": {
+      "12M": 8236,
+      "9M": 6170
+    },
+    "best_avg_mae_pct": 0.45,
+    "mae_12M_pct": 0.44,
+    "mae_9M_pct": 0.46
+  },
+  "ЛУКОЙЛ": {
+    "other_share": 0.0269,
+    "targets": {
+      "12M": 3768,
+      "9M": 2830
+    },
+    "best_avg_mae_pct": 0.01,
+    "mae_12M_pct": 0.01,
+    "mae_9M_pct": 0.0
+  },
+  "Газпром": {
+    "other_share": 0.2833,
+    "targets": {
+      "12M": 7000,
+      "9M": 5200
+    },
+    "best_avg_mae_pct": 0.03,
+    "mae_12M_pct": 0.02,
+    "mae_9M_pct": 0.04
+  },
+  "Новатэк": {
+    "other_share": 0.2102,
+    "targets": {
+      "12M": 1446,
+      "9M": 1080
+    },
+    "best_avg_mae_pct": 0.1,
+    "mae_12M_pct": 0.11,
+    "mae_9M_pct": 0.09
+  }
+}

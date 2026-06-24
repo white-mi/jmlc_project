@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Test / lint caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Virtualenvs
+.venv/
+venv/
+env/
+
+# Generated outputs (pipeline / EDA / metrics / backtest)
+_tools/output/
+output/
+
+# Generated vector DB (RAG)
+*.db
+*.sqlite
+*.sqlite3
+
+# Generated presentation PDFs (regenerate from .md via marp)
+*.pdf
+# ...но научные статьи в docs/ трекаем (напр. Fialkowski 2025, arXiv:2502.17044)
+!docs/*.pdf
+
+# Editor / tooling / local config
+.claude/
+.obsidian/
+.vscode/
+.idea/
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Внутренний справочный файл — не публикуется, кодом/тестами не используется.
+_tools/data/tbank_partners.json
+
+# Внутренние Obsidian-навигаторы, презентация и корпус разборов — в публичный
+# репозиторий не идут.
+_Анализы/
+_Презентации/
+Макро-радар — Хаб.md
+Архитектура — План v1.md
+Промпт — Анализ новости.md

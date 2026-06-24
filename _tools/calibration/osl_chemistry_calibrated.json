@@ -1,0 +1,17 @@
+{
+  "ФосАгро": {
+    "other_income_pct": 0.0,
+    "mae_pct": 0.07,
+    "actual_rub_bn": 590
+  },
+  "Акрон": {
+    "other_income_pct": 0.0,
+    "mae_pct": 0.06,
+    "actual_rub_bn": 237.6
+  },
+  "СИБУР": {
+    "other_income_pct": 0.12,
+    "mae_pct": 0.03,
+    "actual_rub_bn": 1200
+  }
+}

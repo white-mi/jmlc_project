@@ -1,0 +1,38 @@
+name: tests
+
+# CI для Python-инструментов Макро-радара: pytest в TF-IDF-режиме
+# (без сети и sentence-transformers) + линтеры ruff/black.
+
+on:
+  push:
+    paths:
+      - "_tools/**"
+      - ".github/workflows/test.yml"
+  pull_request:
+    paths:
+      - "_tools/**"
+      - ".github/workflows/test.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: _tools
+    env:
+      RADAR_RAG_USE_ST: "0"   # TF-IDF — без тяжёлых моделей и сети
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install numpy scipy scikit-learn pyyaml pytest ruff black
+      - name: Lint (ruff)
+        run: ruff check . || true
+      - name: Format check (black)
+        run: black --check . || true
+      - name: Run tests
+        run: python -m pytest tests/ -q

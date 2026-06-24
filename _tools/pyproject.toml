@@ -1,0 +1,80 @@
+[project]
+name = "makro-radar-tools"
+version = "0.9.0"
+description = "Макро-радар: OSL + Multi-Agent + RAG + калибровка"
+requires-python = ">=3.10"
+dependencies = [
+    "pyyaml>=6.0",
+    "numpy>=1.24",
+    "scikit-learn>=1.3",
+    "scipy>=1.11",
+    "sqlite-vec>=0.1.9",
+    "sentence-transformers>=2.5",
+    "anthropic>=0.30",
+    "feedparser>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "ruff>=0.5",
+    "black>=24.0",
+]
+# LangChain-агент (langchain_agent.py). Тулы/симуляция работают без ключа;
+# реальный агент — ChatAnthropic с ANTHROPIC_API_KEY.
+agent = [
+    "langchain>=1.0",
+    "langchain-core>=0.3",
+    "langchain-anthropic>=0.2",
+]
+# DS-слой: EDA (eda_osl.py / notebooks) и обучаемые модели (osl_models.py).
+# Не в core — чтобы CI/основные тесты не тянули тяжёлый стек (eda_osl на pandas/matplotlib).
+eda = [
+    "pandas>=2.0",
+    "matplotlib>=3.7",
+    "jupyter>=1.0",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = [
+    "osl_common",
+    "osl_metallurgy",
+    "osl_oilgas",
+    "osl_chemistry",
+    "osl_pharma",
+    "osl_retail",
+    "osl_energy",
+    "osl_oiv",
+    "osl_calibrator",
+    "conformal_prediction",
+    # DS-слой (доработка для Junior ML Contest): панель + модели + валидация + split-conformal
+    "osl_panel",
+    "osl_models",
+    "osl_walkforward",
+    "conformal_split",
+    "eda_osl",
+    # Продуктовый слой: сводка корпуса _Анализы/ (proxy-feedback)
+    "backtest_analyses",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+addopts = "-v --tb=short"
+
+# S5.3: линтеры. ruff/black — мягкий старт (line-length 100, без агрессивных правил).
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+# E501 (длина) и др. — не блокируем на старте; включать постепенно.
+lint.select = ["E", "F", "W"]
+lint.ignore = ["E501", "E741", "W605"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]

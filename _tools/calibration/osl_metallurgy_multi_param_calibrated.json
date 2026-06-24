@@ -1,0 +1,23 @@
+{
+  "Северсталь": {
+    "other_income_pct": 0.2277,
+    "domestic_share": 0.5649,
+    "domestic_premium_pct": 0.2886,
+    "mae_pct": 0.0,
+    "actual_rub_bn": 712.9
+  },
+  "ММК": {
+    "other_income_pct": 0.128,
+    "domestic_share": 0.4027,
+    "domestic_premium_pct": 0.0889,
+    "mae_pct": 0.0,
+    "actual_rub_bn": 609.87
+  },
+  "НЛМК": {
+    "other_income_pct": 0.1416,
+    "domestic_share": 0.6186,
+    "domestic_premium_pct": 0.0045,
+    "mae_pct": 0.0,
+    "actual_rub_bn": 831.35
+  }
+}

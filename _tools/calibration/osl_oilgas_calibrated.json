@@ -1,0 +1,22 @@
+{
+  "Роснефть": {
+    "other_share": 0.0,
+    "mae_pct": 0.44,
+    "actual_rub_bn": 8236
+  },
+  "ЛУКОЙЛ": {
+    "other_share": 0.0269,
+    "mae_pct": 0.01,
+    "actual_rub_bn": 3768
+  },
+  "Газпром": {
+    "other_share": 0.2833,
+    "mae_pct": 0.02,
+    "actual_rub_bn": 7000
+  },
+  "Новатэк": {
+    "other_share": 0.2102,
+    "mae_pct": 0.11,
+    "actual_rub_bn": 1446
+  }
+}

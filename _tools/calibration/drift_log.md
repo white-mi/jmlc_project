@@ -1,0 +1,38 @@
+# OSL Drift Log
+
+Еженедельный мониторинг качества калибровки. Запускается через cron / Task Scheduler.
+
+## 2026-04-25 23:35
+
+- ✅ osl_metallurgy.Северсталь: current_mae=0.0%, drift=+0.0% [OK]
+- ✅ osl_metallurgy.ММК: current_mae=0.1%, drift=-0.0% [OK]
+- ✅ osl_metallurgy.НЛМК: current_mae=0.1%, drift=-0.0% [OK]
+- ✅ osl_oilgas.Роснефть: current_mae=0.4%, drift=-0.0% [OK]
+- ✅ osl_oilgas.ЛУКОЙЛ: current_mae=0.0%, drift=-0.0% [OK]
+- ✅ osl_oilgas.Газпром: current_mae=0.0%, drift=-0.0% [OK]
+- ✅ osl_oilgas.Новатэк: current_mae=0.1%, drift=-0.0% [OK]
+- ✅ osl_chemistry.ФосАгро: current_mae=0.1%, drift=-0.0% [OK]
+- ✅ osl_chemistry.Акрон: current_mae=0.1%, drift=+0.0% [OK]
+- ✅ osl_chemistry.СИБУР: current_mae=0.0%, drift=+0.0% [OK]
+- ✅ osl_pharma.Пульс: current_mae=1.1%, drift=-0.0% [OK]
+- ✅ osl_pharma.Протек: current_mae=1.2%, drift=-0.0% [OK]
+- ✅ osl_pharma.Катрен: current_mae=1.2%, drift=-0.0% [OK]
+- ✅ osl_pharma.Ирвин-2: current_mae=40.8%, drift=+0.0% [OK]
+- ✅ osl_pharma.Р-Фарм: current_mae=49.0%, drift=+0.0% [OK]
+- ✅ osl_pharma.БСС: current_mae=51.1%, drift=+0.0% [OK]
+- ✅ osl_retail.Wildberries: current_mae=0.9%, drift=-0.0% [OK]
+- ✅ osl_retail.Ozon: current_mae=0.5%, drift=-0.0% [OK]
+- ✅ osl_retail.Melon Fashion: current_mae=0.0%, drift=+0.0% [OK]
+- ✅ osl_retail.Золотое яблоко: current_mae=0.0%, drift=+0.0% [OK]
+- ✅ osl_retail.Лемана Про: current_mae=0.0%, drift=+0.0% [OK]
+- ✅ osl_retail.М.Видео: current_mae=0.0%, drift=+0.0% [OK]
+- ✅ osl_energy.Интер РАО: current_mae=0.2%, drift=-0.0% [OK]
+- ✅ osl_energy.РусГидро: current_mae=0.6%, drift=+0.0% [OK]
+- ✅ osl_energy.Юнипро: current_mae=0.4%, drift=-0.0% [OK]
+- ✅ osl_energy.Т Плюс: current_mae=0.2%, drift=-0.0% [OK]
+- ✅ osl_energy.Росатом-Энергоатом: current_mae=0.4%, drift=+0.0% [OK]
+- ✅ osl_oiv.ХМАО-Югра: current_mae=1.3%, drift=+0.0% [OK]
+- ✅ osl_oiv.Тюменская обл.: current_mae=1.4%, drift=+0.0% [OK]
+- ✅ osl_oiv.ЯНАО: current_mae=156.3%, drift=+0.0% [OK]
+- ✅ osl_oiv.Татарстан: current_mae=0.4%, drift=+0.0% [OK]
+- ✅ osl_oiv.Сахалинская обл.: current_mae=0.3%, drift=-0.1% [OK]

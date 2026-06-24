@@ -1,0 +1,13 @@
+# Нормализация переводов строк: в репозитории — LF, авто-конверсия при checkout.
+* text=auto eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.csv text eol=lf
+*.toml text eol=lf
+*.yml text eol=lf
+*.ipynb text eol=lf
+# Бинарники — без конверсии
+*.png binary
+*.pdf binary
+*.svg binary

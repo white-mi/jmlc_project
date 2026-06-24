@@ -1,0 +1,27 @@
+{
+  "Интер РАО": {
+    "tariff_multiplier": 0.97,
+    "mae_pct": 0.21,
+    "actual_rub_bn": 1540
+  },
+  "РусГидро": {
+    "tariff_multiplier": 1.0,
+    "mae_pct": 0.62,
+    "actual_rub_bn": 580
+  },
+  "Юнипро": {
+    "tariff_multiplier": 0.95,
+    "mae_pct": 0.44,
+    "actual_rub_bn": 130
+  },
+  "Т Плюс": {
+    "tariff_multiplier": 1.05,
+    "mae_pct": 0.24,
+    "actual_rub_bn": 470
+  },
+  "Росатом-Энергоатом": {
+    "tariff_multiplier": 0.9215,
+    "mae_pct": 0.43,
+    "actual_rub_bn": 480
+  }
+}

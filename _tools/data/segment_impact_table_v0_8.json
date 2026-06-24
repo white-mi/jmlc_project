@@ -1,0 +1,368 @@
+{
+  "_comment": "L3 v0.8 — Channel Decomposition. Шок раскладывается на 5 каналов (consumer/oil_revenue/fiscal/fx/supply_chain), каждый сегмент имеет карту чувствительности. ΔPD = Σ_каналов [sensitivity × intensity × direction × baseline] × kc_amp. Решает проблему бифуркации (один шок ↑ для одних сегментов, ↓ для других).",
+  "_version": "0.8",
+  "_last_updated": "2026-05-06",
+  "confidence_default": "low",
+  "_confidence_note": "S3.5: confidence — поле данных, а не литерал в коде. 'low' = экспертные оценки, НЕ калиброваны на реальных PD-данных банка. Поднимать до 'medium'/'high' только после бэк-теста на исторических данных (Фаза 3+).",
+  "_units": {
+    "delta_pd": "процентные пункты к 12М PD сегмента",
+    "delta_demand": "процентное изменение спроса на кредиты",
+    "delta_churn": "процентные пункты к месячному оттоку",
+    "intensity": "0..1 — сила канала на единицу шока",
+    "direction": "+1 (ухудшение) или -1 (улучшение)",
+    "sensitivity": "0..1 — чувствительность сегмента к каналу"
+  },
+
+  "kc_regimes": {
+    "normal": {"range_pct": "≤10", "amplifier": 1.0,
+               "comment": "Норма: 2017-2021, июль 2022 - середина 2023"},
+    "moderate_stress": {"range_pct": "10-18", "amplifier": 1.5,
+                        "comment": "Умеренный стресс: 2014-2016, авг 2023 - окт 2024"},
+    "acute_stress": {"range_pct": ">18", "amplifier": 2.2,
+                     "comment": "Острый стресс: 02.2022-06.2022, 12.2024 - н.в."}
+  },
+
+  "segments": [
+    "fl_massovy", "fl_sredniy", "fl_premium", "fl_private",
+    "sme_micro", "sme_small", "sme_mid",
+    "ml_mid_corp",
+    "ml_large_corp",
+    "ml_large_corp_oilgas", "ml_large_corp_metallurgy",
+    "ml_large_corp_retail", "ml_large_corp_finance", "ml_large_corp_chemistry",
+    "ml_public",
+    "ml_public_oilgas", "ml_public_metallurgy", "ml_public_diversified"
+  ],
+
+  "subsegment_parents": {
+    "_comment": "Подсегменты — стратификация base-сегмента по реальной экспозиции. Base-сегмент остаётся как «среднее по группе»; подсегменты позволяют отделить тех, на кого шок повлиял в частности — без потери представления о среднем.",
+    "ml_large_corp_oilgas":     {"parent": "ml_large_corp", "examples": "Роснефть, Газпром, ЛУКОЙЛ, Татнефть, Сургутнефтегаз, Новатэк"},
+    "ml_large_corp_metallurgy": {"parent": "ml_large_corp", "examples": "Северсталь, ММК, НЛМК, Норникель, Полюс, УГМК"},
+    "ml_large_corp_retail":     {"parent": "ml_large_corp", "examples": "Х5, Магнит, Озон, Wildberries, Лента"},
+    "ml_large_corp_finance":    {"parent": "ml_large_corp", "examples": "Сбер, ВТБ, Газпромбанк, Альфа-банк, Открытие"},
+    "ml_large_corp_chemistry":  {"parent": "ml_large_corp", "examples": "ФосАгро, Акрон, СИБУР, Куйбышев Азот"},
+    "ml_public_oilgas":         {"parent": "ml_public", "examples": "ХМАО-Югра, Тюменская обл., Сахалинская обл., ЯНАО"},
+    "ml_public_metallurgy":     {"parent": "ml_public", "examples": "Челябинская, Вологодская, Липецкая, Свердловская, Кемеровская обл."},
+    "ml_public_diversified":    {"parent": "ml_public", "examples": "Москва, Санкт-Петербург, Татарстан, Краснодарский край"}
+  },
+
+  "channels": ["consumer", "oil_revenue", "fiscal", "fx", "supply_chain"],
+
+  "channel_baseline": {
+    "_comment": "Базовый эффект на сегмент со sensitivity=1.0 при шоке intensity=1.0, direction=+1",
+    "consumer":     {"delta_pd": 0.40, "delta_demand": -10.0, "delta_churn": 0.40},
+    "oil_revenue":  {"delta_pd": 0.50, "delta_demand": -5.0,  "delta_churn": 0.20},
+    "fiscal":       {"delta_pd": 0.30, "delta_demand": -3.0,  "delta_churn": 0.10},
+    "fx":           {"delta_pd": 0.20, "delta_demand": -4.0,  "delta_churn": 0.50},
+    "supply_chain": {"delta_pd": 0.30, "delta_demand": -6.0,  "delta_churn": 0.30}
+  },
+
+  "channel_sensitivity": {
+    "_comment": "Чувствительность сегмента к каждому каналу (0..1). Подсегменты унаследуют идею от base, но имеют разную экспозицию по каналам — там где это важно для стратификации.",
+    "fl_massovy":     {"consumer": 1.00, "oil_revenue": 0.00, "fiscal": 0.10, "fx": 0.20, "supply_chain": 0.00},
+    "fl_sredniy":     {"consumer": 0.70, "oil_revenue": 0.00, "fiscal": 0.05, "fx": 0.40, "supply_chain": 0.00},
+    "fl_premium":     {"consumer": 0.40, "oil_revenue": 0.00, "fiscal": 0.00, "fx": 0.70, "supply_chain": 0.00},
+    "fl_private":     {"consumer": 0.20, "oil_revenue": 0.00, "fiscal": 0.00, "fx": 0.80, "supply_chain": 0.00},
+    "sme_micro":      {"consumer": 0.90, "oil_revenue": 0.00, "fiscal": 0.20, "fx": 0.30, "supply_chain": 0.40},
+    "sme_small":      {"consumer": 0.70, "oil_revenue": 0.10, "fiscal": 0.20, "fx": 0.30, "supply_chain": 0.40},
+    "sme_mid":        {"consumer": 0.50, "oil_revenue": 0.20, "fiscal": 0.30, "fx": 0.40, "supply_chain": 0.40},
+    "ml_mid_corp":    {"consumer": 0.30, "oil_revenue": 0.40, "fiscal": 0.30, "fx": 0.40, "supply_chain": 0.50},
+
+    "ml_large_corp":             {"consumer": 0.10, "oil_revenue": 0.70, "fiscal": 0.30, "fx": 0.50, "supply_chain": 0.40},
+    "ml_large_corp_oilgas":      {"consumer": 0.05, "oil_revenue": 1.00, "fiscal": 0.20, "fx": 0.55, "supply_chain": 0.35},
+    "ml_large_corp_metallurgy":  {"consumer": 0.10, "oil_revenue": 0.10, "fiscal": 0.30, "fx": 0.65, "supply_chain": 0.65},
+    "ml_large_corp_retail":      {"consumer": 0.50, "oil_revenue": 0.05, "fiscal": 0.10, "fx": 0.65, "supply_chain": 0.55},
+    "ml_large_corp_finance":     {"consumer": 0.30, "oil_revenue": 0.10, "fiscal": 0.20, "fx": 0.40, "supply_chain": 0.20},
+    "ml_large_corp_chemistry":   {"consumer": 0.05, "oil_revenue": 0.50, "fiscal": 0.20, "fx": 0.50, "supply_chain": 0.45},
+
+    "ml_public":              {"consumer": 0.10, "oil_revenue": 0.50, "fiscal": 0.90, "fx": 0.20, "supply_chain": 0.20},
+    "ml_public_oilgas":       {"consumer": 0.05, "oil_revenue": 0.95, "fiscal": 1.00, "fx": 0.25, "supply_chain": 0.20},
+    "ml_public_metallurgy":   {"consumer": 0.10, "oil_revenue": 0.10, "fiscal": 0.85, "fx": 0.40, "supply_chain": 0.50},
+    "ml_public_diversified":  {"consumer": 0.20, "oil_revenue": 0.05, "fiscal": 0.70, "fx": 0.20, "supply_chain": 0.15}
+  },
+
+  "shock_categories": ["1", "2", "3", "4", "5"],
+
+  "shock_subcategories": {
+    "_comment": "Для каждой подкатегории — intensity и direction по 5 каналам. Direction: +1 ухудшение, -1 улучшение для сегмента с sensitivity>0 к этому каналу. Канал может быть отключён (intensity=0).",
+
+    "1.1": {
+      "category": "1", "label": "Военный конфликт — старт/эскалация",
+      "channels": {
+        "consumer":     {"intensity": 1.0, "direction":  1},
+        "oil_revenue":  {"intensity": 0.7, "direction": -1},
+        "fiscal":       {"intensity": 0.5, "direction": -1},
+        "fx":           {"intensity": 1.0, "direction":  1},
+        "supply_chain": {"intensity": 0.6, "direction":  1}
+      }
+    },
+    "1.2": {
+      "category": "1", "label": "Военный конфликт — деэскалация/завершение",
+      "channels": {
+        "consumer":     {"intensity": 0.7, "direction": -1},
+        "oil_revenue":  {"intensity": 0.6, "direction":  1},
+        "fiscal":       {"intensity": 0.5, "direction":  1},
+        "fx":           {"intensity": 0.7, "direction": -1},
+        "supply_chain": {"intensity": 0.4, "direction": -1}
+      }
+    },
+    "1.3": {
+      "category": "1", "label": "Точечные удары / диверсии",
+      "channels": {
+        "consumer":     {"intensity": 0.3, "direction":  1},
+        "oil_revenue":  {"intensity": 0.4, "direction":  1},
+        "fiscal":       {"intensity": 0.2, "direction":  1},
+        "fx":           {"intensity": 0.3, "direction":  1},
+        "supply_chain": {"intensity": 0.5, "direction":  1}
+      }
+    },
+    "1.4": {
+      "category": "1", "label": "Новый санкционный пакет",
+      "channels": {
+        "consumer":     {"intensity": 0.6, "direction":  1},
+        "oil_revenue":  {"intensity": 0.7, "direction":  1},
+        "fiscal":       {"intensity": 0.5, "direction":  1},
+        "fx":           {"intensity": 0.8, "direction":  1},
+        "supply_chain": {"intensity": 1.0, "direction":  1}
+      }
+    },
+    "1.5": {
+      "category": "1", "label": "Прокси-конфликт / расширение фронта",
+      "channels": {
+        "consumer":     {"intensity": 0.3, "direction":  1},
+        "oil_revenue":  {"intensity": 0.4, "direction": -1},
+        "fiscal":       {"intensity": 0.3, "direction": -1},
+        "fx":           {"intensity": 0.4, "direction":  1},
+        "supply_chain": {"intensity": 0.5, "direction":  1}
+      }
+    },
+
+    "2.1": {
+      "category": "2", "label": "Финансовый кризис (системный)",
+      "channels": {
+        "consumer":     {"intensity": 1.0, "direction":  1},
+        "oil_revenue":  {"intensity": 0.5, "direction":  1},
+        "fiscal":       {"intensity": 0.7, "direction":  1},
+        "fx":           {"intensity": 0.9, "direction":  1},
+        "supply_chain": {"intensity": 0.7, "direction":  1}
+      }
+    },
+    "2.2": {
+      "category": "2", "label": "Корпоративный дефолт крупного игрока",
+      "channels": {
+        "consumer":     {"intensity": 0.4, "direction":  1},
+        "oil_revenue":  {"intensity": 0.3, "direction":  1},
+        "fiscal":       {"intensity": 0.3, "direction":  1},
+        "fx":           {"intensity": 0.3, "direction":  1},
+        "supply_chain": {"intensity": 0.7, "direction":  1}
+      }
+    },
+    "2.3": {
+      "category": "2", "label": "Эпидемия / пандемия",
+      "channels": {
+        "consumer":     {"intensity": 1.0, "direction":  1},
+        "oil_revenue":  {"intensity": 0.6, "direction":  1},
+        "fiscal":       {"intensity": 0.6, "direction":  1},
+        "fx":           {"intensity": 0.5, "direction":  1},
+        "supply_chain": {"intensity": 0.8, "direction":  1}
+      }
+    },
+    "2.4": {
+      "category": "2", "label": "Кибератака / инфраструктурный сбой",
+      "channels": {
+        "consumer":     {"intensity": 0.3, "direction":  1},
+        "oil_revenue":  {"intensity": 0.4, "direction":  1},
+        "fiscal":       {"intensity": 0.3, "direction":  1},
+        "fx":           {"intensity": 0.2, "direction":  1},
+        "supply_chain": {"intensity": 0.6, "direction":  1}
+      }
+    },
+    "2.5": {
+      "category": "2", "label": "Бюджетный кризис РФ / секвестр",
+      "channels": {
+        "consumer":     {"intensity": 0.7, "direction":  1},
+        "oil_revenue":  {"intensity": 0.4, "direction":  1},
+        "fiscal":       {"intensity": 1.0, "direction":  1},
+        "fx":           {"intensity": 0.5, "direction":  1},
+        "supply_chain": {"intensity": 0.3, "direction":  1}
+      }
+    },
+    "2.6": {
+      "category": "2", "label": "Корп.отчётность хуже консенсуса",
+      "channels": {
+        "consumer":     {"intensity": 0.2, "direction":  1},
+        "oil_revenue":  {"intensity": 0.3, "direction":  1},
+        "fiscal":       {"intensity": 0.2, "direction":  1},
+        "fx":           {"intensity": 0.2, "direction":  1},
+        "supply_chain": {"intensity": 0.5, "direction":  1}
+      }
+    },
+
+    "3.1": {
+      "category": "3", "label": "Наводнение / паводок крупного масштаба",
+      "channels": {
+        "consumer":     {"intensity": 0.4, "direction":  1},
+        "oil_revenue":  {"intensity": 0.2, "direction":  1},
+        "fiscal":       {"intensity": 0.3, "direction":  1},
+        "fx":           {"intensity": 0.1, "direction":  1},
+        "supply_chain": {"intensity": 0.5, "direction":  1}
+      }
+    },
+    "3.2": {
+      "category": "3", "label": "Ураган / шторм",
+      "channels": {
+        "consumer":     {"intensity": 0.3, "direction":  1},
+        "oil_revenue":  {"intensity": 0.3, "direction":  1},
+        "fiscal":       {"intensity": 0.2, "direction":  1},
+        "fx":           {"intensity": 0.1, "direction":  1},
+        "supply_chain": {"intensity": 0.6, "direction":  1}
+      }
+    },
+    "3.3": {
+      "category": "3", "label": "Землетрясение / геофизика",
+      "channels": {
+        "consumer":     {"intensity": 0.4, "direction":  1},
+        "oil_revenue":  {"intensity": 0.2, "direction":  1},
+        "fiscal":       {"intensity": 0.3, "direction":  1},
+        "fx":           {"intensity": 0.2, "direction":  1},
+        "supply_chain": {"intensity": 0.6, "direction":  1}
+      }
+    },
+    "3.4": {
+      "category": "3", "label": "Экстремальная жара / засуха",
+      "channels": {
+        "consumer":     {"intensity": 0.5, "direction":  1},
+        "oil_revenue":  {"intensity": 0.1, "direction":  1},
+        "fiscal":       {"intensity": 0.4, "direction":  1},
+        "fx":           {"intensity": 0.2, "direction":  1},
+        "supply_chain": {"intensity": 0.4, "direction":  1}
+      }
+    },
+    "3.5": {
+      "category": "3", "label": "Пожары крупного масштаба",
+      "channels": {
+        "consumer":     {"intensity": 0.3, "direction":  1},
+        "oil_revenue":  {"intensity": 0.1, "direction":  1},
+        "fiscal":       {"intensity": 0.3, "direction":  1},
+        "fx":           {"intensity": 0.1, "direction":  1},
+        "supply_chain": {"intensity": 0.4, "direction":  1}
+      }
+    },
+
+    "4.1": {
+      "category": "4", "label": "Резкое повышение КС (≥+200 бп)",
+      "channels": {
+        "consumer":     {"intensity": 1.0, "direction":  1},
+        "oil_revenue":  {"intensity": 0.3, "direction":  1},
+        "fiscal":       {"intensity": 0.6, "direction":  1},
+        "fx":           {"intensity": 0.5, "direction": -1},
+        "supply_chain": {"intensity": 0.4, "direction":  1}
+      }
+    },
+    "4.2": {
+      "category": "4", "label": "Резкое снижение КС (≥−200 бп)",
+      "channels": {
+        "consumer":     {"intensity": 1.0, "direction": -1},
+        "oil_revenue":  {"intensity": 0.3, "direction": -1},
+        "fiscal":       {"intensity": 0.6, "direction": -1},
+        "fx":           {"intensity": 0.5, "direction":  1},
+        "supply_chain": {"intensity": 0.4, "direction": -1}
+      }
+    },
+    "4.3": {
+      "category": "4", "label": "Ястребиная риторика без изменения",
+      "channels": {
+        "consumer":     {"intensity": 0.4, "direction":  1},
+        "oil_revenue":  {"intensity": 0.1, "direction":  1},
+        "fiscal":       {"intensity": 0.2, "direction":  1},
+        "fx":           {"intensity": 0.2, "direction": -1},
+        "supply_chain": {"intensity": 0.2, "direction":  1}
+      }
+    },
+    "4.4": {
+      "category": "4", "label": "Голубиная риторика без изменения",
+      "channels": {
+        "consumer":     {"intensity": 0.4, "direction": -1},
+        "oil_revenue":  {"intensity": 0.1, "direction": -1},
+        "fiscal":       {"intensity": 0.2, "direction": -1},
+        "fx":           {"intensity": 0.2, "direction":  1},
+        "supply_chain": {"intensity": 0.2, "direction": -1}
+      }
+    },
+    "4.5": {
+      "category": "4", "label": "Изменение нормативов / макропруденциальные меры",
+      "channels": {
+        "consumer":     {"intensity": 0.5, "direction":  1},
+        "oil_revenue":  {"intensity": 0.4, "direction":  1},
+        "fiscal":       {"intensity": 0.3, "direction":  1},
+        "fx":           {"intensity": 0.2, "direction":  1},
+        "supply_chain": {"intensity": 0.3, "direction":  1}
+      }
+    },
+    "4.6": {
+      "category": "4", "label": "Инфляционный сюрприз (выше ожиданий)",
+      "channels": {
+        "consumer":     {"intensity": 0.7, "direction":  1},
+        "oil_revenue":  {"intensity": 0.2, "direction":  1},
+        "fiscal":       {"intensity": 0.3, "direction":  1},
+        "fx":           {"intensity": 0.4, "direction":  1},
+        "supply_chain": {"intensity": 0.3, "direction":  1}
+      }
+    },
+    "4.7": {
+      "category": "4", "label": "Валютная интервенция / обяз. конвертация",
+      "channels": {
+        "consumer":     {"intensity": 0.3, "direction": -1},
+        "oil_revenue":  {"intensity": 0.2, "direction":  1},
+        "fiscal":       {"intensity": 0.2, "direction":  1},
+        "fx":           {"intensity": 0.8, "direction": -1},
+        "supply_chain": {"intensity": 0.2, "direction": -1}
+      }
+    },
+
+    "5.1": {
+      "category": "5", "label": "Риторика официальных лиц без действия",
+      "channels": {
+        "consumer":     {"intensity": 0.10, "direction":  1},
+        "oil_revenue":  {"intensity": 0.05, "direction":  1},
+        "fiscal":       {"intensity": 0.05, "direction":  1},
+        "fx":           {"intensity": 0.10, "direction":  1},
+        "supply_chain": {"intensity": 0.05, "direction":  1}
+      }
+    },
+    "5.2": {
+      "category": "5", "label": "Ожидаемое решение / consensus в СМИ",
+      "channels": {
+        "consumer":     {"intensity": 0.05, "direction":  1},
+        "oil_revenue":  {"intensity": 0.05, "direction":  1},
+        "fiscal":       {"intensity": 0.05, "direction":  1},
+        "fx":           {"intensity": 0.05, "direction":  1},
+        "supply_chain": {"intensity": 0.05, "direction":  1}
+      }
+    },
+    "5.3": {
+      "category": "5", "label": "Громкая угроза / ультиматум без эскалации",
+      "channels": {
+        "consumer":     {"intensity": 0.20, "direction":  1},
+        "oil_revenue":  {"intensity": 0.10, "direction":  1},
+        "fiscal":       {"intensity": 0.10, "direction":  1},
+        "fx":           {"intensity": 0.20, "direction":  1},
+        "supply_chain": {"intensity": 0.10, "direction":  1}
+      }
+    },
+    "5.4": {
+      "category": "5", "label": "Календарный артефакт",
+      "channels": {
+        "consumer":     {"intensity": 0.05, "direction":  1},
+        "oil_revenue":  {"intensity": 0.05, "direction":  1},
+        "fiscal":       {"intensity": 0.05, "direction":  1},
+        "fx":           {"intensity": 0.05, "direction":  1},
+        "supply_chain": {"intensity": 0.05, "direction":  1}
+      }
+    }
+  },
+
+  "category_default_subcategory": {
+    "_comment": "Если передана только category без subcategory — используем эту подкатегорию как default",
+    "1": "1.1", "2": "2.1", "3": "3.1", "4": "4.1", "5": "5.1"
+  }
+}

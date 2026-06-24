@@ -1,0 +1,27 @@
+{
+  "ХМАО-Югра": {
+    "oil_production_mt": 49.2,
+    "mae_pct": 1.28,
+    "actual_rub_bn": 360
+  },
+  "Тюменская обл.": {
+    "oil_production_mt": 30.9,
+    "mae_pct": 1.39,
+    "actual_rub_bn": 240
+  },
+  "ЯНАО": {
+    "oil_production_mt": 0.0,
+    "mae_pct": 156.27,
+    "actual_rub_bn": 295
+  },
+  "Татарстан": {
+    "oil_production_mt": 61.2,
+    "mae_pct": 0.38,
+    "actual_rub_bn": 480
+  },
+  "Сахалинская обл.": {
+    "oil_production_mt": 14.3,
+    "mae_pct": 0.39,
+    "actual_rub_bn": 172
+  }
+}

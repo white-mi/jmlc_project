@@ -1,0 +1,35 @@
+{
+  "_comment": "Spillover-матрица 7×7: вес трансмиссии шока от отрасли FROM (строка) к отрасли TO (колонка). Веса 0.0-1.0. Базовая идея: ΔPD_TO ≈ magnitude × matrix[FROM][TO].",
+  "_version": "0.7",
+  "_basis": "Fialkowski 2025 supply-chain stress test (качественная карта H/M/L → числовые веса) + экспертная корректировка",
+  "_last_updated": "2026-04-25",
+
+  "industries": [
+    "metallurgy",
+    "oilgas",
+    "chemistry",
+    "retail",
+    "energy",
+    "pharma",
+    "oiv"
+  ],
+
+  "matrix": {
+    "metallurgy":  {"metallurgy": 1.00, "oilgas": 0.20, "chemistry": 0.15, "retail": 0.10, "energy": 0.40, "pharma": 0.05, "oiv": 0.20},
+    "oilgas":      {"metallurgy": 0.30, "oilgas": 1.00, "chemistry": 0.40, "retail": 0.15, "energy": 0.50, "pharma": 0.10, "oiv": 0.70},
+    "chemistry":   {"metallurgy": 0.15, "oilgas": 0.20, "chemistry": 1.00, "retail": 0.10, "energy": 0.20, "pharma": 0.30, "oiv": 0.05},
+    "retail":      {"metallurgy": 0.10, "oilgas": 0.05, "chemistry": 0.10, "retail": 1.00, "energy": 0.05, "pharma": 0.05, "oiv": 0.30},
+    "energy":      {"metallurgy": 0.30, "oilgas": 0.20, "chemistry": 0.20, "retail": 0.20, "energy": 1.00, "pharma": 0.20, "oiv": 0.40},
+    "pharma":      {"metallurgy": 0.05, "oilgas": 0.05, "chemistry": 0.10, "retail": 0.10, "energy": 0.10, "pharma": 1.00, "oiv": 0.10},
+    "oiv":         {"metallurgy": 0.20, "oilgas": 0.30, "chemistry": 0.10, "retail": 0.40, "energy": 0.30, "pharma": 0.20, "oiv": 1.00}
+  },
+
+  "rationale_examples": {
+    "oilgas → oiv = 0.70": "Нефтегазовые регионы (ХМАО, ЯНАО, Татарстан) имеют 50-70% бюджета от НДПИ — прямая зависимость",
+    "oilgas → chemistry = 0.40": "Сырьё для нефтехимии (Сибур, Нижнекамскнефтехим) — газ как feedstock",
+    "energy → metallurgy = 0.30": "Электроэнергия — 15-25% себестоимости стали; алюминий ещё чувствительнее",
+    "pharma → all = low": "Фармацевтика слабо связана с другими отраслями кроме химии (intermediates)",
+    "retail → oiv = 0.30": "Региональные бюджеты получают доход от НДС/налога с продаж розницы",
+    "diagonal = 1.00": "Прямой удар шока на ту же отрасль (по определению)"
+  }
+}

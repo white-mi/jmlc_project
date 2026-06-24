@@ -1,0 +1,95 @@
+{
+  "_comment": "L3 lookup-таблица: для (категория шока × сегмент) даёт baseline ΔPD/Δdemand/Δchurn. Усилители по режиму КС перемножаются. ВНИМАНИЕ: коэффициенты — экспертные оценки (confidence=low), это интерфейс под будущую ML-модель. Точные числа появятся после калибровки на исторических данных банка.",
+  "_version": "0.7",
+  "_last_updated": "2026-04-25",
+  "_units": {
+    "delta_pd": "процентные пункты к 12М PD сегмента",
+    "delta_demand": "процентное изменение спроса на кредиты",
+    "delta_churn": "процентные пункты к месячному оттоку"
+  },
+
+  "kc_regimes": {
+    "normal": {"range_pct": "≤10", "amplifier": 1.0,
+               "comment": "Норма: 2017-2021, июль 2022 - середина 2023"},
+    "moderate_stress": {"range_pct": "10-18", "amplifier": 1.5,
+                        "comment": "Умеренный стресс: 2014-2016, авг 2023 - окт 2024"},
+    "acute_stress": {"range_pct": ">18", "amplifier": 2.2,
+                     "comment": "Острый стресс: 02.2022-06.2022, 12.2024 - н.в."}
+  },
+
+  "segments": [
+    "fl_massovy", "fl_sredniy", "fl_premium", "fl_private",
+    "sme_micro", "sme_small", "sme_mid",
+    "ml_mid_corp", "ml_large_corp", "ml_public"
+  ],
+
+  "shock_categories": ["1", "2", "3", "4", "5"],
+
+  "baseline_impact": {
+    "1": {
+      "_label": "Война / геополитика",
+      "fl_massovy":   {"delta_pd": 0.30, "delta_demand": -5.0, "delta_churn": 0.5, "confidence": "low"},
+      "fl_sredniy":   {"delta_pd": 0.20, "delta_demand": -3.5, "delta_churn": 0.7, "confidence": "low"},
+      "fl_premium":   {"delta_pd": 0.10, "delta_demand": -2.0, "delta_churn": 1.0, "confidence": "low"},
+      "fl_private":   {"delta_pd": 0.05, "delta_demand": -1.0, "delta_churn": 1.5, "confidence": "low"},
+      "sme_micro":    {"delta_pd": 0.50, "delta_demand": -8.0, "delta_churn": 0.4, "confidence": "low"},
+      "sme_small":    {"delta_pd": 0.45, "delta_demand": -7.0, "delta_churn": 0.4, "confidence": "low"},
+      "sme_mid":      {"delta_pd": 0.35, "delta_demand": -5.0, "delta_churn": 0.3, "confidence": "low"},
+      "ml_mid_corp":  {"delta_pd": 0.30, "delta_demand": -3.0, "delta_churn": 0.2, "confidence": "low"},
+      "ml_large_corp":{"delta_pd": 0.20, "delta_demand": -2.0, "delta_churn": 0.1, "confidence": "low"},
+      "ml_public":    {"delta_pd": 0.10, "delta_demand": -1.0, "delta_churn": 0.0, "confidence": "low"}
+    },
+    "2": {
+      "_label": "Кризис / экономика",
+      "fl_massovy":   {"delta_pd": 0.50, "delta_demand": -10.0, "delta_churn": 0.6, "confidence": "low"},
+      "fl_sredniy":   {"delta_pd": 0.35, "delta_demand": -7.0,  "delta_churn": 0.5, "confidence": "low"},
+      "fl_premium":   {"delta_pd": 0.20, "delta_demand": -4.0,  "delta_churn": 0.4, "confidence": "low"},
+      "fl_private":   {"delta_pd": 0.10, "delta_demand": -2.0,  "delta_churn": 0.3, "confidence": "low"},
+      "sme_micro":    {"delta_pd": 0.80, "delta_demand": -15.0, "delta_churn": 0.5, "confidence": "low"},
+      "sme_small":    {"delta_pd": 0.60, "delta_demand": -12.0, "delta_churn": 0.4, "confidence": "low"},
+      "sme_mid":      {"delta_pd": 0.40, "delta_demand": -8.0,  "delta_churn": 0.3, "confidence": "low"},
+      "ml_mid_corp":  {"delta_pd": 0.40, "delta_demand": -5.0,  "delta_churn": 0.2, "confidence": "low"},
+      "ml_large_corp":{"delta_pd": 0.25, "delta_demand": -3.0,  "delta_churn": 0.1, "confidence": "low"},
+      "ml_public":    {"delta_pd": 0.10, "delta_demand": -1.0,  "delta_churn": 0.0, "confidence": "low"}
+    },
+    "3": {
+      "_label": "Климат / природа",
+      "fl_massovy":   {"delta_pd": 0.15, "delta_demand": -2.0, "delta_churn": 0.2, "confidence": "low"},
+      "fl_sredniy":   {"delta_pd": 0.10, "delta_demand": -1.5, "delta_churn": 0.2, "confidence": "low"},
+      "fl_premium":   {"delta_pd": 0.05, "delta_demand": -1.0, "delta_churn": 0.1, "confidence": "low"},
+      "fl_private":   {"delta_pd": 0.02, "delta_demand": -0.5, "delta_churn": 0.1, "confidence": "low"},
+      "sme_micro":    {"delta_pd": 0.40, "delta_demand": -5.0, "delta_churn": 0.3, "confidence": "low"},
+      "sme_small":    {"delta_pd": 0.30, "delta_demand": -4.0, "delta_churn": 0.2, "confidence": "low"},
+      "sme_mid":      {"delta_pd": 0.20, "delta_demand": -2.5, "delta_churn": 0.1, "confidence": "low"},
+      "ml_mid_corp":  {"delta_pd": 0.15, "delta_demand": -1.5, "delta_churn": 0.1, "confidence": "low"},
+      "ml_large_corp":{"delta_pd": 0.10, "delta_demand": -1.0, "delta_churn": 0.0, "confidence": "low"},
+      "ml_public":    {"delta_pd": 0.05, "delta_demand": -0.5, "delta_churn": 0.0, "confidence": "low"}
+    },
+    "4": {
+      "_label": "Ставка ЦБ",
+      "fl_massovy":   {"delta_pd": 0.40, "delta_demand": -12.0, "delta_churn": 0.3, "confidence": "low"},
+      "fl_sredniy":   {"delta_pd": 0.30, "delta_demand": -10.0, "delta_churn": 0.4, "confidence": "low"},
+      "fl_premium":   {"delta_pd": 0.15, "delta_demand": -6.0,  "delta_churn": 0.3, "confidence": "low"},
+      "fl_private":   {"delta_pd": 0.05, "delta_demand": -3.0,  "delta_churn": 0.2, "confidence": "low"},
+      "sme_micro":    {"delta_pd": 0.70, "delta_demand": -20.0, "delta_churn": 0.4, "confidence": "low"},
+      "sme_small":    {"delta_pd": 0.55, "delta_demand": -17.0, "delta_churn": 0.3, "confidence": "low"},
+      "sme_mid":      {"delta_pd": 0.40, "delta_demand": -12.0, "delta_churn": 0.2, "confidence": "low"},
+      "ml_mid_corp":  {"delta_pd": 0.35, "delta_demand": -8.0,  "delta_churn": 0.1, "confidence": "low"},
+      "ml_large_corp":{"delta_pd": 0.20, "delta_demand": -5.0,  "delta_churn": 0.0, "confidence": "low"},
+      "ml_public":    {"delta_pd": 0.05, "delta_demand": -2.0,  "delta_churn": 0.0, "confidence": "low"}
+    },
+    "5": {
+      "_label": "Информационный шум",
+      "fl_massovy":   {"delta_pd": 0.02, "delta_demand": -0.5, "delta_churn": 0.1, "confidence": "low"},
+      "fl_sredniy":   {"delta_pd": 0.02, "delta_demand": -0.3, "delta_churn": 0.1, "confidence": "low"},
+      "fl_premium":   {"delta_pd": 0.01, "delta_demand": -0.2, "delta_churn": 0.1, "confidence": "low"},
+      "fl_private":   {"delta_pd": 0.00, "delta_demand": 0.0,  "delta_churn": 0.0, "confidence": "low"},
+      "sme_micro":    {"delta_pd": 0.05, "delta_demand": -1.0, "delta_churn": 0.1, "confidence": "low"},
+      "sme_small":    {"delta_pd": 0.03, "delta_demand": -0.5, "delta_churn": 0.0, "confidence": "low"},
+      "sme_mid":      {"delta_pd": 0.02, "delta_demand": -0.3, "delta_churn": 0.0, "confidence": "low"},
+      "ml_mid_corp":  {"delta_pd": 0.01, "delta_demand": -0.2, "delta_churn": 0.0, "confidence": "low"},
+      "ml_large_corp":{"delta_pd": 0.00, "delta_demand": 0.0,  "delta_churn": 0.0, "confidence": "low"},
+      "ml_public":    {"delta_pd": 0.00, "delta_demand": 0.0,  "delta_churn": 0.0, "confidence": "low"}
+    }
+  }
+}

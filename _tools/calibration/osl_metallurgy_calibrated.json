@@ -1,0 +1,27 @@
+{
+  "Норникель": {
+    "other_income_pct": 0.14,
+    "mae_pct": 0.03,
+    "actual_rub_bn": 1224.907
+  },
+  "Северсталь": {
+    "other_income_pct": 0.0659,
+    "mae_pct": 0.03,
+    "actual_rub_bn": 712.9
+  },
+  "ММК": {
+    "other_income_pct": 0.0,
+    "mae_pct": 0.14,
+    "actual_rub_bn": 609.87
+  },
+  "НЛМК": {
+    "other_income_pct": 0.0582,
+    "mae_pct": 0.07,
+    "actual_rub_bn": 831.35
+  },
+  "Полюс": {
+    "other_income_pct": 0.03,
+    "mae_pct": 0.04,
+    "actual_rub_bn": 776.3470000000001
+  }
+}

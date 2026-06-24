@@ -1,0 +1,57 @@
+{
+  "Норникель": {
+    "other_income_pct": 0.14,
+    "unit": "usd_bn",
+    "targets": {
+      "12M": 13.763,
+      "9M": 9.5
+    },
+    "best_avg_mae_pct": 0.02,
+    "mae_12M_pct": 0.03,
+    "mae_9M_pct": 0.01
+  },
+  "Северсталь": {
+    "other_income_pct": 0.0659,
+    "unit": "rub_bn",
+    "targets": {
+      "12M": 712.9,
+      "9M": 530
+    },
+    "best_avg_mae_pct": 0.23,
+    "mae_12M_pct": 0.03,
+    "mae_9M_pct": 0.43
+  },
+  "ММК": {
+    "other_income_pct": 0.0,
+    "unit": "rub_bn",
+    "targets": {
+      "12M": 609.87,
+      "9M": 440
+    },
+    "best_avg_mae_pct": 0.1,
+    "mae_12M_pct": 0.14,
+    "mae_9M_pct": 0.06
+  },
+  "НЛМК": {
+    "other_income_pct": 0.053,
+    "unit": "rub_bn",
+    "targets": {
+      "12M": 831.35,
+      "9M": 620
+    },
+    "best_avg_mae_pct": 0.28,
+    "mae_12M_pct": 0.42,
+    "mae_9M_pct": 0.14
+  },
+  "Полюс": {
+    "other_income_pct": 0.0235,
+    "unit": "usd_bn",
+    "targets": {
+      "12M": 8.723,
+      "9M": 6.5
+    },
+    "best_avg_mae_pct": 0.32,
+    "mae_12M_pct": 0.59,
+    "mae_9M_pct": 0.05
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "Пульс": {
+    "market_share_retail": 0.22,
+    "mae_pct": 1.14,
+    "actual_rub_bn": 386
+  },
+  "Протек": {
+    "market_share_retail": 0.2133,
+    "mae_pct": 1.22,
+    "actual_rub_bn": 374
+  },
+  "Катрен": {
+    "market_share_retail": 0.1854,
+    "mae_pct": 1.23,
+    "actual_rub_bn": 325
+  }
+}

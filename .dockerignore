@@ -1,0 +1,16 @@
+.git
+.gitignore
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+_tools/output/
+output/
+*.db
+*.pdf
+.claude/
+.obsidian/
+.vscode/
+.idea/

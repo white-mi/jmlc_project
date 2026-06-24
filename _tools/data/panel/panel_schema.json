@@ -1,0 +1,72 @@
+{
+  "meta": {
+    "name": "panel_metallurgy",
+    "version": "0.1",
+    "description": "Панель эмитент×период для supervised-обучения и walk-forward валидации OSL (Макро-радар, DS-доработка для Junior ML Contest). Граница: ТОЛЬКО публичные данные МСФО/IR + биржевые цены. Никаких клиентских/банковских данных.",
+    "isolation": "public-only: IFRS/IR reports + LME/LBMA/CBR market data. No T-Bank client data, no portfolio data.",
+    "primary_industry": "metallurgy",
+    "issuers": ["Норникель", "Северсталь", "ММК", "НЛМК", "Полюс"],
+    "granularity": "FY (annual) primary; H1/9M optional where independently disclosed",
+    "join_rule": "panel_prices джойнится к panel_revenue по ТОЧНОМУ совпадению поля `period`. (Date-overlap join для разнородных period-кодов — TODO при добавлении H1/9M строк.)",
+    "leakage_rule": "Для каждой строки prices окно усреднения [window_start, window_end] ДОЛЖНО лежать внутри отчётного периода [period_start, period_end] эмитента. Проверяется test_panel.py."
+  },
+  "files": {
+    "panel_revenue.csv": "Одна строка = эмитент × период. Таргет revenue_*_bn. Драйверы (объёмы) — где раскрыты.",
+    "panel_prices.csv": "Длинная форма период × series. Средние цены сырья и FX за период."
+  },
+  "revenue_columns": {
+    "issuer": "str — канонично как ключи PROFILES в osl_metallurgy.py",
+    "industry": "str — metallurgy",
+    "period": "str — код периода, напр. 2023FY / 2023H1 / 2023_9M",
+    "period_end": "date YYYY-MM-DD — конец периода (сортировка во времени)",
+    "period_start": "date YYYY-MM-DD — начало периода (для leakage-проверки цен)",
+    "period_kind": "str — FY | H1 | 9M | Q",
+    "is_cumulative": "bool (true/false) — накопительно ли (МСФО 9M/H1 — да)",
+    "period_months": "int — 12 | 9 | 6 | 3 (длина экспозиции, анти-аннуализация)",
+    "revenue_rub_bn": "float|'' — выручка в млрд ₽ (таргет для RUB-репортеров)",
+    "revenue_usd_bn": "float|'' — выручка в млрд $ (таргет для USD-репортеров: Норникель, Полюс)",
+    "revenue_currency": "str — USD | RUB (валюта раскрытия исходной цифры)",
+    "report_date": "date|'' — когда цифра была раскрыта. Опционально; КОГДА ЗАПОЛНЕНО, обязано быть > period_end (enforced test_panel.py). Для годовой walk-forward (прогноз t+1 по ≤t) look-ahead исключён самой схемой валидации, поэтому поле необязательно",
+    "vol_copper_t": "float|'' — производство/продажи меди, тонн",
+    "vol_nickel_t": "float|'' — никель, тонн",
+    "vol_pd_oz": "float|'' — палладий, тр. унций",
+    "vol_pt_oz": "float|'' — платина, тр. унций",
+    "vol_gold_oz": "float|'' — золото, тр. унций",
+    "vol_steel_t": "float|'' — сталь, тонн",
+    "source_url": "str — URL источника цифры выручки",
+    "source_quote": "str — дословная цитата с цифрой",
+    "confidence": "str — high | med | low (low/спорное → ручная сверка пользователем)"
+  },
+  "prices_columns": {
+    "period": "str — код периода (джойнится с revenue по совпадению period ИЛИ по перекрытию дат)",
+    "period_end": "date YYYY-MM-DD",
+    "series": "str — lme_copper | lme_nickel | lbma_gold | lbma_palladium | lbma_platinum | steel_fob_bsea | usd_rub",
+    "avg_value": "float — среднее значение за период",
+    "unit": "str — usd_per_t | usd_per_oz | rub_per_usd",
+    "averaging": "str — simple_annual_mean | monthly_mean | daily_mean (штамп методики)",
+    "window_start": "date YYYY-MM-DD — начало окна усреднения (ДОЛЖНО ≥ period_start эмитента)",
+    "window_end": "date YYYY-MM-DD — конец окна усреднения (ДОЛЖНО ≤ period_end эмитента)",
+    "source_url": "str",
+    "source": "str — короткое имя источника",
+    "confidence": "str — high | med | low"
+  },
+  "series_to_profile_metal": {
+    "lme_copper": "copper",
+    "lme_nickel": "nickel",
+    "lbma_gold": "gold",
+    "lbma_palladium": "palladium",
+    "lbma_platinum": "platinum",
+    "steel_fob_bsea": "steel_fob_chm"
+  },
+  "series_registry": {
+    "comment": "Явный реестр серий: что ОБЯЗАНО быть в panel_prices.csv, что — задекларированный пробел (честная фиксация вместо тихого нуля), что — прокси. Проверяется test_panel.py (test_required_series_have_rows_or_documented_gap, test_issuer_relevant_price_present).",
+    "required_series": ["lme_copper", "lme_nickel", "lbma_platinum", "lbma_gold", "usd_rub"],
+    "proxy_series": {
+      "steel_proxy_iron_ore": "World Bank Iron ore $/dmt — прокси цены сталелитейного сектора (годовая HRC FOB Чёрное море недоступна в открытых источниках). Признак для learned-моделей; в StructuralOSL не используется."
+    },
+    "documented_gaps": {
+      "lbma_palladium": "Среднегодовая цена палладия недоступна в открытых источниках (World Bank не ведёт Pd; kitco/macrotrends/BullionByPost — 402/403/нет годовой таблицы). Pd ≈30% выручки Норникеля. StructuralOSL фолбэчит на встроенную PRICES_12M_2025['palladium']; learned-модели не получают Pd-признак. Снять при появлении источника (Johnson Matthey PGM).",
+      "steel_fob_bsea": "Среднегодовая HRC FOB Чёрное море недоступна (Argus/Fastmarkets/Kallanish — paywall; SteelBenchmarker — только biweekly spot, без годового среднего). Сталевары: StructuralOSL держит цену стали константой module-default; вариация выручки идёт через объём+FX. Прокси сектора — steel_proxy_iron_ore."
+    }
+  }
+}
