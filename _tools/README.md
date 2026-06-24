@@ -12,15 +12,17 @@ Python-пакет для расчёта индикаторов и моделей
 
 **Состояние v0.9.2 (июнь 2026):**
 - `pyproject` version = **0.9.0**, `pipeline_version='0.9'`.
-- **204 pytest зелёных, 0 skipped** (был 1 skip — снят DS-доработкой; +6 продуктовым `backtest_analyses`).
+- **214 pytest зелёных, 0 skipped** (был 1 skip — снят DS-доработкой; +6 продуктовым `backtest_analyses`; +10 DS-нефтегаз).
 - Архитектурная оценка независимым ревьюером — **9.2/10**.
 - OSL в продакшене для **7 отраслей**; conformal-интервалы работают.
 - `fetch_macro_state.py` тянет **4 живых макрофида**.
 
-**DS-слой металлургии (доработка для Junior ML Contest, июнь 2026):** реальная панель
-данных FY2021–2025 + сравнение 3 моделей + честная **out-of-sample** walk-forward
-валидация + **split-conformal**. Разблокирован `test_holdout_coverage_metallurgy`
-(0 skipped). Подробно — [DS-отчёт](../docs/DS_REPORT.md). Модули:
+**DS-слой (доработка для Junior ML Contest, июнь 2026):** реальная панель FY2021–2025 +
+сравнение 3 моделей + честная **out-of-sample** walk-forward + **split-conformal**. Глубоко
+проработаны **две отрасли**: металлургия ([DS-отчёт](../docs/DS_REPORT.md), N=24) и нефтегаз
+([DS-отчёт нефтегаза](../docs/DS_REPORT_OILGAS.md), N=18; выручка верифицирована двойным
+`/doublecheck`+`/fact-check`). DS-харнесс **industry-параметрический** (одна разовая инвестиция
+на все 7 отраслей). Модули:
 
 | Файл | Назначение |
 |---|---|
@@ -101,7 +103,7 @@ Python-пакет для расчёта индикаторов и моделей
 |---|---|
 | `.github/workflows/test.yml` | CI: pytest + ruff + black (TF-IDF режим без сети) |
 | `pyproject.toml` | Зависимости + конфигурация ruff/black/pytest |
-| `tests/` | 204 теста (0 skipped) |
+| `tests/` | 214 теста (0 skipped) |
 
 ---
 
@@ -151,7 +153,7 @@ python batch_run.py                     # пакетный прогон неск
 
 ```bash
 cd _tools
-python -m pytest tests/ -v              # 204 зелёных, 0 skipped
+python -m pytest tests/ -v              # 214 зелёных, 0 skipped
 ```
 
 ---
@@ -210,7 +212,7 @@ python -m pytest tests/ -v              # 204 зелёных, 0 skipped
 | **B2** | Multi-source spillover (`propagate_multi_source` + `propagate_credit_channel`) |
 | **D1** | CI на GitHub Actions (`.github/workflows/test.yml`): pytest + ruff + black |
 | **D2** | ruff/black в `pyproject.toml` |
-| **D (частично)** | Расширение тестов — 204 зелёных (0 skipped) |
+| **D (частично)** | Расширение тестов — 214 зелёных (0 skipped) |
 | **Рефакторинг** | `osl_common.py` — общие `RevenuePredict`/`FXRate`/`mae_pct` для 7 модулей; `batch_run.py` — пакетный прогон |
 
 ### ⏳ Осознанно не закрыто (нет данных)
@@ -243,7 +245,7 @@ _tools/
 ├── agents/                    ← orchestrator.py + rag/
 ├── data/                      ← macro_state, shock_to_industries, brent_scenarios, ...
 ├── calibration/               ← <module>_calibrated.json (7 шт.)
-└── tests/                     ← 204 теста (0 skipped)
+└── tests/                     ← 214 теста (0 skipped)
 ```
 
 ---

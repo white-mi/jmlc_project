@@ -25,7 +25,8 @@ tags: [макро-радар, docs, индекс]
 
 | Документ | Критерий JMLC |
 |---|---|
-| 🔬 [DS_REPORT](DS_REPORT.md) | **Data Science** — панель, EDA, модели, walk-forward, conformal (out-of-sample) |
+| 🔬 [DS_REPORT](DS_REPORT.md) | **Data Science (металлургия)** — панель, EDA, модели, walk-forward, conformal (out-of-sample) |
+| 🛢️ [DS_REPORT_OILGAS](DS_REPORT_OILGAS.md) | **Data Science (нефтегаз)** — 2-я отрасль: панель FY2021–2025 (выручка через `/doublecheck`+`/fact-check`), walk-forward, conformal |
 | 🎯 [PRODUCT_REPORT](PRODUCT_REPORT.md) | **Продуктовое мышление** — флагман: проблема, ЦА, конкуренты, MVP, импакт, обратная связь |
 | ↳ [PERSONAS_JTBD](product/PERSONAS_JTBD.md) | проблема + ЦА + персоны + JTBD |
 | ↳ [COMPETITORS](product/COMPETITORS.md) | анализ конкурентов (продуктовые/рыночные) |

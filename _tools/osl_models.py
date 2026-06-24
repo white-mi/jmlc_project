@@ -46,7 +46,7 @@ IRON_ORE_REF_2025 = 100.18
 # объёмные колонки — из osl_panel.VOL_COLUMNS). Отрасль выводится из rows[0].industry.
 INDUSTRY_PRICE_FEATURES = {
     'metallurgy': ['gold', 'copper', 'nickel', 'platinum', 'steel_proxy_iron_ore', 'usd_rub'],
-    'oilgas': ['urals', 'gas_export', 'lng_jkm', 'usd_rub'],
+    'oilgas': ['urals', 'gas_eu', 'lng_jkm', 'usd_rub'],
 }
 INDUSTRY_VOL_FEATURES = {
     'metallurgy': ['vol_copper_t', 'vol_nickel_t', 'vol_pd_oz', 'vol_pt_oz',

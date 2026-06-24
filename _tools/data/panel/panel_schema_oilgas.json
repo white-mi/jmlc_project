@@ -32,23 +32,23 @@
     "common_columns": "issuer/industry/period/period_end/period_start/period_kind/is_cumulative/period_months/revenue_usd_bn/report_date — как в panel_schema.json"
   },
   "prices_columns": "как в panel_schema.json (period/period_end/series/avg_value/unit/averaging/window_*/source_url/source/confidence)",
-  "series_to_profile_metal": {
-    "urals_crude": "urals",
-    "comment": "gas_export / lng_jkm / usd_rub / ndpi_rate / dempfer_rub_t именуются = feature-ключам (SERIES_TO_METAL.get дефолтит на имя серии)."
+  "series_used": {
+    "urals": "Средняя цена Urals $/баррель (Минфин РФ). Драйвер нефтяной выручки.",
+    "gas_eu": "ПРОКСИ цены газа: World Bank Pink Sheet «Natural gas, Europe» (TTF) $/MMBtu. Берём публичный TTF вместо непрозрачной реализованной экспортной цены Газпрома (как steel_proxy_iron_ore в металлургии). Драйвер газовой выручки.",
+    "lng_jkm": "World Bank Pink Sheet «LNG, Japan» $/MMBtu — азиатский СПГ, релевантен Новатэку.",
+    "usd_rub": "FX (общий с металлургией, уже в panel_prices.csv)."
   },
   "series_registry": {
-    "comment": "required — для learned-моделей; documented_gaps — честная фиксация труднодоступного (НДПИ/демпфер по годам).",
-    "required_series": ["urals", "gas_export", "usd_rub"],
+    "comment": "required — для learned-моделей (NaN-free цены); documented_gaps — честная фиксация труднодоступного.",
+    "required_series": ["urals", "gas_eu", "usd_rub"],
     "optional_series": {
-      "lng_jkm": "JKM СПГ $/MMBtu (World Bank/IMF) — релевантно Новатэку; для остальных пусто/не используется.",
-      "ndpi_rate": "Доля НДПИ от валового нефтяного дохода по году (Минфин-декрет) — для StructuralOSL (Фаза C).",
-      "dempfer_rub_t": "Топливный демпфер ₽/т по году (Минфин) — для StructuralOSL (Фаза C)."
+      "lng_jkm": "World Bank LNG Japan $/MMBtu — релевантно Новатэку."
     },
     "documented_gaps": {
-      "ndpi_rate_2021_2024": "Поквартальный коэф. Кдм/ставка НДПИ за 2021–2024 — труднодоступен (декреты Минфина, не сведены в годовую таблицу). Где не найдём — StructuralOSL фолбэчит на встроенный NDPI_BASE_RATE с дисклеймером (как Pd в металлургии). Снять при появлении сводной таблицы.",
-      "dempfer_2021_2024": "Годовой топливный демпфер 2021–2024 (знак менялся) — месячные данные Минфина не агрегированы публично. Аналогичный фолбэк.",
-      "transfer_pricing": "Внутренние трансфертные цены crude upstream→refining непрозрачны (внутригрупповые). Структурная модель аппроксимирует Urals + downstream-маржа; consolidated revenue фиксирует только final sales.",
-      "gas_export_realized_2021_2024": "Реализованные цены экспортного газа (Сила Сибири/контракты) за 2021–2024 — раскрытие Газпрома неполное (хеджирование). Используем оценки из квартальных отчётов с confidence=med/low."
+      "gas_export_realized": "Реализованная экспортная цена Газпрома непрозрачна (хеджирование, неполное раскрытие) → используем публичный TTF-прокси (series gas_eu). Снять при появлении раскрытия.",
+      "ndpi_dempfer_history": "Годовые ставка НДПИ/Кдм и топливный демпфер 2021–2025 не сведены публично — нужны структурной модели (Фаза C, ещё не подключена). До тех пор oilgas-структурная модель отключена (StructuralOSL возвращает None для нефтегаза).",
+      "vol_lng_t": "Новатэк раскрывает СПГ в bcm продаж, не в млн т производства → vol_lng_t пуст; сигнал СПГ входит через газовый объём и цену lng_jkm.",
+      "transfer_pricing": "Внутренние трансфертные цены upstream→refining внутригрупповые; consolidated revenue фиксирует только финальные продажи."
     }
   }
 }

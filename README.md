@@ -10,7 +10,7 @@ portfolio data.
 
 [![tests](https://github.com/white-mi/jmlc_project/actions/workflows/test.yml/badge.svg)](https://github.com/white-mi/jmlc_project/actions/workflows/test.yml)
 ![python](https://img.shields.io/badge/python-3.11%2B-blue)
-![tests-count](https://img.shields.io/badge/tests-204%20passed%2C%200%20skipped-brightgreen)
+![tests-count](https://img.shields.io/badge/tests-214%20passed%2C%200%20skipped-brightgreen)
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 ---
@@ -60,7 +60,7 @@ git clone https://github.com/white-mi/jmlc_project.git
 cd jmlc_project/_tools
 
 pip install -r ../requirements.lock pytest   # pinned numeric stack (TF-IDF, offline)
-python -m pytest tests/ -q                    # 204 passed, 0 skipped
+python -m pytest tests/ -q                    # 214 passed, 0 skipped
 
 # End-to-end smoke run — numbers at every layer, no LLM call:
 python run_pipeline.py --smoke-shock 4.2 --smoke-industry oilgas
@@ -98,6 +98,14 @@ clearly overfit. We *show* this rather than overclaim. The OSL's value is the op
 point-accuracy on a 24-row panel. Split-conformal coverage is reported as a small-N artifact, not a
 calibrated 90 %. Full write-up: [`docs/DS_REPORT.md`](docs/DS_REPORT.md).
 
+A **second industry — oil & gas** (4 issuers × FY2021–2025, revenue verified via a two-pass
+`/doublecheck` + `/fact-check` audit that caught 6 corrupted aggregator cells) is now validated the
+same way. Here the finding *flips*: on volatile oil-&-gas revenue the price/volume models **beat
+naive persistence** — `hist_gbm` 19.0 % vs. persistence 21.9 % MAPE, skill +13 %, DM p = 0.053 —
+because naive "last-year = this-year" fails harder on geopolitical swings. The structural model is
+deliberately deferred (annual НДПИ/fuel-damper history is a documented gap), so the comparison
+baseline is persistence. Write-up: [`docs/DS_REPORT_OILGAS.md`](docs/DS_REPORT_OILGAS.md).
+
 ## Repository layout
 
 ```
@@ -124,7 +132,7 @@ Design facts, not bugs:
   out-of-sample validation lives only in the DS layer (`conformal_split.py`).
 - **L3 is not calibrated on bank data** (`confidence='low'`, expert priors).
 - The ×1.30 spillover amplifier is a Fialkowski heuristic, **not yet calibrated on Russian shocks**.
-- The DS layer is deep on one industry (metallurgy, N = 24); the other six rely on in-sample actuals.
+- The DS layer is deep on two industries (metallurgy N = 24, oil & gas N = 18); the other five rely on in-sample actuals.
 
 ## Built with AI
 

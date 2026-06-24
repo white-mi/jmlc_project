@@ -87,12 +87,24 @@ def metrics_for(records):
 
 
 def _common_keys(preds):
-    """Ключи (issuer,period), где ВСЕ модели дали конечный прогноз — для честного skill/DM."""
+    """Ключи (issuer,period), где ВСЕ предсказывающие модели дали конечный прогноз — для честного
+    skill/DM. Модель без единого прогноза (напр. StructuralOSL, отключённый для нефтегаза) НЕ
+    зануляет пересечение — её пустой keyset исключается."""
     keysets = []
     for recs in preds.values():
         ks = {(i, per) for (i, per, _t, a, p) in recs if np.isfinite(p) and np.isfinite(a)}
-        keysets.append(ks)
+        if ks:
+            keysets.append(ks)
     return set.intersection(*keysets) if keysets else set()
+
+
+def _pick_base(preds, base='structural_osl'):
+    """Референс для skill/DM. Если базовая модель не дала НИ ОДНОГО прогноза (structural
+    отключён для нефтегаза — нет per-year НДПИ) → наивный persistence как честный нулевой
+    уровень. Для металлургии structural предсказывает → база не меняется."""
+    if base in preds and any(np.isfinite(p) for (*_x, p) in preds[base]):
+        return base
+    return 'persistence' if 'persistence' in preds else base
 
 
 def _abs_err_on_keys(records, keys):
@@ -119,8 +131,10 @@ def diebold_mariano(ae_a, ae_b):
 
 
 def evaluate(preds):
-    """Полная сводка: per-model метрики (на своих валидных строках) + skill/DM на общем наборе."""
-    base = 'structural_osl'
+    """Полная сводка: per-model метрики (на своих валидных строках) + skill/DM на общем наборе.
+    Ключи skill_vs_struct/dm_*_vs_struct исторические — фактическая база = _pick_base (structural
+    для металлургии, persistence когда structural отключён)."""
+    base = _pick_base(preds)
     common = _common_keys(preds)
     base_ae = _abs_err_on_keys(preds[base], common) if base in preds else np.array([])
     base_mape_common = float(np.mean(base_ae) * 100) if len(base_ae) else None
@@ -149,7 +163,9 @@ def _fmt(v, f='.2f'):
     return '—' if v is None else format(v, f)
 
 
-def render_report(industry, summary, fold_log, common, n_total):
+def render_report(industry, summary, fold_log, common, n_total, base='structural_osl'):
+    bl = 'struct' if base == 'structural_osl' else base
+    struct_absent = summary.get('structural_osl', {}).get('n', 0) == 0
     lines = [f'# Walk-forward валидация OSL — {industry}', '',
              '> Expanding-window: train = все годы < t, test = год t. Сплит по времени, '
              'группировка по периоду. Out-of-sample.', '',
@@ -158,7 +174,7 @@ def render_report(industry, summary, fold_log, common, n_total):
                                         for f in fold_log),
              f'**Общий набор для skill/DM (все модели дали прогноз):** {len(common)} строк '
              f'из {n_total} тест-строк.', '',
-             '| model | n | MAE | MAPE % | RMSE | MAPE_common % | skill_vs_struct | DM p (vs struct) |',
+             f'| model | n | MAE | MAPE % | RMSE | MAPE_common % | skill_vs_{bl} | DM p (vs {bl}) |',
              '|---|---|---|---|---|---|---|---|']
     order = ['structural_osl', 'ridge', 'elasticnet', 'hist_gbm']
     for name in [n for n in order if n in summary] + [n for n in summary if n not in order]:
@@ -167,15 +183,17 @@ def render_report(industry, summary, fold_log, common, n_total):
                      f"{_fmt(s['rmse'])} | {_fmt(s['mape_common'])} | "
                      f"{_fmt(s['skill_vs_struct'], '+.3f')} | {_fmt(s['dm_p_vs_struct'], '.3f')} |")
     lines += ['',
-              '- **skill_vs_struct** = 1 − MAPE_model/MAPE_struct на общем наборе (>0 ⇒ бьёт '
-              'структурный бейзлайн).',
-              '- **DM p** — Diebold–Mariano (двусторонний, t, df=n−1) по |ошибкам%| структурный vs '
-              'модель; p<0.05 ⇒ различие точности значимо (на N столь малом — ориентир, не доказательство).',
-              '- StructuralOSL на gap-строках (нет объёма, напр. сталь 2025) даёт NaN → его n меньше; '
-              'поэтому честное сравнение — по колонке MAPE_common.',
-              '- Прозрачность: номинальный перевес hist_gbm частично опирается на фолд 2025, где '
-              'frozen-2025 калибровка структурной модели наиболее благоприятна; формальное '
-              'сравнение (MAPE_common/DM) считается на общем 16-строчном наборе и этим нейтрализуется.']
+              f'- **Базовая модель сравнения:** `{base}`. '
+              + ('StructuralOSL отключён для нефтегаза (нет годовых НДПИ/демпфера — Фаза C) → '
+                 'референс = наивный `persistence`; skill>0 ⇒ модель точнее наивного floor.'
+                 if struct_absent else
+                 'StructuralOSL — интерпретируемый структурный бейзлайн.'),
+              f'- **skill_vs_{bl}** = 1 − MAPE_model/MAPE_{bl} на общем наборе ({len(common)} строк, '
+              'где все предсказывающие модели дали прогноз); >0 ⇒ точнее базовой.',
+              '- **DM p** — Diebold–Mariano (двусторонний, t, df=n−1) по |ошибкам%| база vs модель; '
+              'p<0.05 ⇒ различие точности значимо (на N столь малом — ориентир, не доказательство).',
+              '- Модель, давшая NaN на gap-строке (нет объёма), не штрафуется: её n меньше, '
+              'сравнение skill/DM — по общему набору (MAPE_common).']
     return '\n'.join(lines)
 
 
@@ -186,12 +204,13 @@ def run(industry='metallurgy'):
         print('Панель мала — walk-forward пропущен.'); return None
     preds, fold_log = walk_forward(rows, Mo.MODELS)
     summary, common = evaluate(preds)
+    base = _pick_base(preds)
     n_total = max(len(v) for v in preds.values())
     OUT.mkdir(parents=True, exist_ok=True)
-    md = render_report(industry, summary, fold_log, common, n_total)
+    md = render_report(industry, summary, fold_log, common, n_total, base)
     (OUT / f'{industry}.md').write_text(md, encoding='utf-8')
     (OUT / f'{industry}_metrics.json').write_text(
-        json.dumps({'summary': summary, 'folds': fold_log,
+        json.dumps({'summary': summary, 'folds': fold_log, 'base': base,
                     'n_common': len(common), 'n_total': n_total}, ensure_ascii=False, indent=2),
         encoding='utf-8')
     return summary, md

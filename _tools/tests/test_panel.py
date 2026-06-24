@@ -18,6 +18,13 @@ import osl_panel
 import osl_metallurgy
 
 SCHEMA = json.loads((osl_panel.PANEL_DIR / 'panel_schema.json').read_text(encoding='utf-8'))
+# Панель — мультиотраслевой CSV (металлургия + нефтегаз). Схема нефтегаза добавляет
+# объёмные колонки и ценовые серии; тесты структуры/серий валидируют ОБЪЕДИНЕНИЕ.
+SCHEMA_OG = json.loads((osl_panel.PANEL_DIR / 'panel_schema_oilgas.json').read_text(encoding='utf-8'))
+# oilgas-объёмы = всё из VOL_COLUMNS, чего нет в металлургической схеме (source of truth — код)
+OILGAS_VOLS = [c for c in osl_panel.VOL_COLUMNS if c not in SCHEMA['revenue_columns']]
+_OG_REG = SCHEMA_OG.get('series_registry', {})
+OILGAS_SERIES = set(_OG_REG.get('required_series', [])) | set(_OG_REG.get('optional_series', {}))
 
 
 def _csv_header(path: Path):
@@ -213,7 +220,11 @@ def test_prices_present_for_panel_periods():
 def test_csv_headers_match_schema():
     """Заголовки CSV обязаны точно совпадать с ключами схемы (детект дрейфа)."""
     rev_header = _csv_header(osl_panel.REVENUE_CSV)
-    assert rev_header == list(SCHEMA['revenue_columns']), 'panel_revenue.csv ≠ schema.revenue_columns'
+    # ожидаемый заголовок = металлургическая схема + oilgas-объёмы после vol_steel_t
+    expected = list(SCHEMA['revenue_columns'])
+    i = expected.index('vol_steel_t') + 1
+    expected = expected[:i] + OILGAS_VOLS + expected[i:]
+    assert rev_header == expected, 'panel_revenue.csv ≠ schema.revenue_columns (+ oilgas vols)'
     if osl_panel.PRICES_CSV.exists():
         price_header = _csv_header(osl_panel.PRICES_CSV)
         assert price_header == list(SCHEMA['prices_columns']), 'panel_prices.csv ≠ schema.prices_columns'
@@ -226,6 +237,7 @@ def test_all_used_series_are_known():
         pytest.skip('panel_prices.csv пуст')
     known = set(SCHEMA['series_to_profile_metal']) | {'usd_rub'}
     known |= set(SCHEMA.get('series_registry', {}).get('proxy_series', {}))
+    known |= OILGAS_SERIES  # urals / gas_eu / lng_jkm
     used = {p.series for p in prices}
     unknown = used - known
     assert not unknown, f'неизвестные series (нет в схеме): {unknown}'
