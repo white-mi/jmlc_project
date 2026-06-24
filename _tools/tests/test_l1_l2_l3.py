@@ -36,10 +36,15 @@ def test_cai_backtest_4_of_4_correct():
 # ============================================================
 
 def test_epu_returns_value_in_range():
+    # Считаем EPU на bundled-фикстуре (реальный корпус _Анализы/ внутренний и не входит в репо),
+    # чтобы тест был детерминирован и проходил на чистом клоне/в CI.
+    from pathlib import Path
+
     from calc_rf_epu import compute_epu
-    r = compute_epu()
+    fixtures = Path(__file__).parent / 'fixtures' / 'analyses'
+    r = compute_epu(analyses_dir=fixtures)
     assert 0 <= r.epu_value <= 100
-    assert r.n_total_texts > 0, 'No analyses found in _Анализы/'
+    assert r.n_total_texts > 0, 'EPU должен прочитать фикстуру-корпус'
 
 
 # ============================================================

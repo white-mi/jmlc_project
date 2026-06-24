@@ -68,9 +68,12 @@ def test_epu_degraded_on_empty_window():
 
 
 def test_epu_not_degraded_on_full_corpus():
-    """Без окна корпус анализов даёт валидный EPU, degraded=False."""
+    """Корпус анализов (bundled-фикстура) даёт валидный EPU, degraded=False."""
+    from pathlib import Path
+
     from calc_rf_epu import compute_epu
-    res = compute_epu(window_days=None)
+    fixtures = Path(__file__).parent / 'fixtures' / 'analyses'
+    res = compute_epu(analyses_dir=fixtures, window_days=None)
     assert res.n_total_texts >= 3
     assert res.epu_degraded is False
     assert 0.0 <= res.epu_value <= 100.0
