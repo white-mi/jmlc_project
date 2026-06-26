@@ -6,9 +6,10 @@
 Слои L0/L1/L2/L3 покрывают все отрасли одинаково; тиры различаются только в L1.5. Числа валидации
 читаются ВЖИВУЮ из `output/osl_metrics/*.json` (в манифесте не дублируются → нет дрейфа).
 
-  python coverage.py            # печать сводки + (пере)генерация docs/COVERAGE_TIERS.md
+  python coverage_tiers.py      # печать сводки + (пере)генерация docs/COVERAGE_TIERS.md
 
-Только core-зависимости (json) — без matplotlib/pandas, чтобы гонялось в core-CI.
+Имя модуля — `coverage_tiers` (НЕ `coverage`): иначе шадовит библиотеку `coverage`, которую
+тянет pytest-cov (`pytest --cov`) → падение сбора тестов в CI. Только core-зависимости (json).
 """
 
 import json
@@ -101,7 +102,7 @@ def render_markdown(manifest=None) -> str:
     n_val = sum(1 for r in rs if r['tier'].startswith('validated'))
     n_ill = len(rs) - n_val
     L = ['---', 'tags: [макро-радар, архитектура, покрытие]', f'версия: "{man["_version"]}"',
-         'note: "сгенерировано _tools/coverage.py — не редактировать вручную"', '---',
+         'note: "сгенерировано _tools/coverage_tiers.py — не редактировать вручную"', '---',
          '', '# Покрытие отраслей — тиринг по доступности данных', '',
          f'> Радар покрывает **{len(rs)} отраслей**, но обрабатывает их на **разной глубине** — '
          'осознанно. **Слои L0 (фильтр новостей) / L1 (макро) / L2 (спилловер) / L3 (сегменты) '
@@ -150,7 +151,7 @@ def render_markdown(manifest=None) -> str:
             doc = Path(v['doc']).name
             L.append(f'- ⛔ **{v["ru"]}** — гипотеза: {v["hypothesis"]} **Вердикт ({v["evaluated"]}):** '
                      f'{v["verdict"]} Полный разбор: [{doc}]({doc}).')
-    L += ['', '---', '', '_Сгенерировано `python _tools/coverage.py` из `industry_coverage.json`. '
+    L += ['', '---', '', '_Сгенерировано `python _tools/coverage_tiers.py` из `industry_coverage.json`. '
           'Не редактировать вручную — править манифест._', '']
     return '\n'.join(L)
 

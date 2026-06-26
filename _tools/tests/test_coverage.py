@@ -8,7 +8,7 @@ output/osl_metrics/*.json (они в .gitignore) → тест детермини
 
 import json
 
-import coverage
+import coverage_tiers as coverage  # модуль переименован из coverage.py (шадовил lib `coverage`/pytest-cov)
 import osl_models
 
 REPO = coverage.REPO
