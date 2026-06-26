@@ -8,6 +8,18 @@ import pytest
 import ds_synthesis  # noqa: E402
 
 
+@pytest.fixture(scope='module', autouse=True)
+def _ensure_metrics():
+    """Гарантирует наличие output/osl_metrics/<ind>_metrics.json. `output/` в .gitignore → на
+    ЧИСТОМ клоне (CI) JSON отсутствуют; генерим их walk-forward'ом. Делает синтез-тесты
+    воспроизводимыми без закоммиченных артефактов. osl_walkforward — core (numpy/sklearn),
+    БЕЗ matplotlib, поэтому фикстура работает и в core-CI без extra [eda]."""
+    import osl_walkforward
+    for ind in ds_synthesis.INDUSTRIES:
+        if not (ds_synthesis.METRICS_DIR / f'{ind}_metrics.json').exists():
+            osl_walkforward.run(ind)
+
+
 def test_load_metrics_has_core_industries():
     m = ds_synthesis.load_metrics()
     # как минимум металлургия и энергетика должны быть посчитаны walk-forward'ом

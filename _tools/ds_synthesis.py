@@ -21,10 +21,11 @@ import json
 import sys
 from pathlib import Path
 
-import matplotlib
-matplotlib.use('Agg')  # headless
-import matplotlib.pyplot as plt
 import numpy as np
+
+# matplotlib импортится ЛЕНИВО внутри plot_*-функций: агрегация чисел (load/assemble/таблица) —
+# чистый core (numpy), а тяжёлый matplotlib только для графиков (extra [eda]). Так `import
+# ds_synthesis` работает в core-CI без [eda], и data-тесты гоняются без графического стека.
 
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8')
@@ -126,6 +127,9 @@ def assemble(metrics: dict) -> list:
 # ============================================================
 
 def plot_mape(rows: list, out: Path) -> Path:
+    import matplotlib
+    matplotlib.use('Agg')  # headless
+    import matplotlib.pyplot as plt
     labels = [RU[r['industry']] for r in rows]
     x = np.arange(len(rows))
     w = 0.26
@@ -161,6 +165,9 @@ def plot_mape(rows: list, out: Path) -> Path:
 
 
 def plot_conformal(out: Path) -> Path:
+    import matplotlib
+    matplotlib.use('Agg')  # headless
+    import matplotlib.pyplot as plt
     items = [('structural_osl', 'Структурная\n(контемпоральные физданные)', 'tab:blue'),
              ('elasticnet', 'ElasticNet (stale)', 'tab:orange'),
              ('persistence', 'Persistence (stale)', 'tab:green')]
