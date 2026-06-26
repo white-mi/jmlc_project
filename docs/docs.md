@@ -31,6 +31,7 @@ tags: [макро-радар, docs, индекс]
 | ⚡ [DS_REPORT_ENERGY](DS_REPORT_ENERGY.md) | **Data Science (энергетика)** — 4-я отрасль (N=30): двухкомпонентная структурная + урок про честность; conformal 100% (контемпоральные физданные) |
 | 🧭 [DS_REPORT_SYNTHESIS](DS_REPORT_SYNTHESIS.md) | **Data Science (синтез)** — кросс-отраслевой разбор 4 отраслей: победитель зависит от режима данных (паттерн, не закон); все DM p>0.05; ценность OSL в conformal |
 | 🗂️ [COVERAGE_TIERS](COVERAGE_TIERS.md) | **Архитектура (покрытие)** — тиринг отраслей по доступности данных: какие слои у каждой отрасли и ПОЧЕМУ (4 валидированы / 3 иллюстративны); генерится из `industry_coverage.json` |
+| 🧪 [DEVELOPERS_EVALUATION](DEVELOPERS_EVALUATION.md) | **Гипотеза → проверка → отклонение** — девелопмент: проверили как 5-ю Q×P-отрасль (N=15, walk-forward), структурная 26.8% проиграла наивному persistence 19.1% (over-time IFRS-15) → честно отклонили |
 | 🎯 [PRODUCT_REPORT](PRODUCT_REPORT.md) | **Продуктовое мышление** — флагман: проблема, ЦА, конкуренты, MVP, импакт, обратная связь |
 | ↳ [PERSONAS_JTBD](product/PERSONAS_JTBD.md) | проблема + ЦА + персоны + JTBD |
 | ↳ [COMPETITORS](product/COMPETITORS.md) | анализ конкурентов (продуктовые/рыночные) |

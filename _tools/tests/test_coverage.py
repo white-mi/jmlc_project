@@ -100,6 +100,22 @@ def test_render_markdown_smoke():
     assert isinstance(coverage.summary(), str)
 
 
+def test_rejected_candidates_documented_and_absent():
+    """Отклонённые кандидаты (напр. developers): задокументированы (гипотеза+вердикт+существующий
+    doc) И реально отсутствуют в активном пайплайне (не в PRICE_FEATURES, не в ds_synthesis).
+    Страж против «тихого» возврата отклонённой отрасли в пайплайн без снятия из rejected."""
+    import ds_synthesis
+    rej = coverage._rejected(_man())
+    assert rej, 'ожидался хотя бы один отклонённый кандидат (developers)'
+    for k, v in rej.items():
+        for field in ('ru', 'hypothesis', 'verdict', 'doc'):
+            assert v.get(field), f'rejected {k}: пусто поле {field}'
+        assert (REPO / v['doc']).exists(), f'rejected {k}: нет дока {v["doc"]}'
+        assert k not in osl_models.INDUSTRY_PRICE_FEATURES, f'{k} отклонён, но в INDUSTRY_PRICE_FEATURES'
+        assert k not in ds_synthesis.INDUSTRIES, f'{k} отклонён, но в ds_synthesis.INDUSTRIES'
+        assert k not in _man()['industries'], f'{k} и отклонён, и в industries — конфликт'
+
+
 def test_committed_doc_matches_generator():
     """Закоммиченный COVERAGE_TIERS.md == вывод генератора ВНЕ таблицы живых чисел (числа зависят
     от версии sklearn → сравниваем детерминированную манифест-driven часть). Ловит ручные правки

@@ -26,7 +26,7 @@ DOC = REPO / 'docs' / 'COVERAGE_TIERS.md'
 
 RU = {'metallurgy': 'Металлургия', 'oilgas': 'Нефтегаз', 'chemistry': 'Химия',
       'energy': 'Энергетика', 'pharma': 'Фарма', 'retail': 'Розница', 'oiv': 'ОИВ',
-      'development': 'Девелопмент'}
+      'developers': 'Девелопмент'}
 LAYER_COLS = ['L0', 'L1', 'L1.5', 'L2', 'L3']
 # отметка ячейки слоя в сетке
 LAYER_MARK = {'full': '✅', 'validated': '✅ структ', 'structural_deferred': '◐ learned',
@@ -78,14 +78,21 @@ def rows(manifest=None) -> list:
     return out
 
 
+def _rejected(man: dict) -> dict:
+    return {k: v for k, v in man.get('rejected', {}).items() if not k.startswith('_')}
+
+
 def summary(manifest=None) -> str:
     """Однострочная сводка по тирам (для CLI/печати)."""
-    rs = rows(manifest)
+    man = manifest or load()
+    rs = rows(man)
     by_tier = {}
     for r in rs:
         by_tier.setdefault(r['tier'], []).append(RU.get(r['industry'], r['industry']))
     parts = [f'{TIER_RU.get(t, t)}: {", ".join(v)}' for t, v in by_tier.items()]
-    return f'{len(rs)} отраслей — ' + ' | '.join(parts)
+    rej = _rejected(man)
+    tail = f' | отклонено: {", ".join(v["ru"].split(" ")[0] for v in rej.values())}' if rej else ''
+    return f'{len(rs)} отраслей — ' + ' | '.join(parts) + tail
 
 
 def render_markdown(manifest=None) -> str:
@@ -134,6 +141,15 @@ def render_markdown(manifest=None) -> str:
         tag = '🟢' if r['tier'].startswith('validated') else '⚪'
         L.append(f'- {tag} **{RU.get(r["industry"], r["industry"])}** ({TIER_RU.get(r["tier"], r["tier"])}) — '
                  + r['rationale'])
+    rejected = _rejected(man)
+    if rejected:
+        L += ['', '## Оценённые и отклонённые кандидаты', '',
+              'Гипотезы, которые мы выдвинули, проверили на данных и **отклонили**. Отклонение по '
+              'данным — полноценный результат и часть того же принципа (глубина = применимость данных).', '']
+        for v in rejected.values():
+            doc = Path(v['doc']).name
+            L.append(f'- ⛔ **{v["ru"]}** — гипотеза: {v["hypothesis"]} **Вердикт ({v["evaluated"]}):** '
+                     f'{v["verdict"]} Полный разбор: [{doc}]({doc}).')
     L += ['', '---', '', '_Сгенерировано `python _tools/coverage.py` из `industry_coverage.json`. '
           'Не редактировать вручную — править манифест._', '']
     return '\n'.join(L)
