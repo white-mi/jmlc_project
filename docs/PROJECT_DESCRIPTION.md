@@ -8,7 +8,8 @@ turning *"what just happened"* into ΔPD / Δdemand / Δchurn estimates **2–3 
 effect reaches financial statements**. It is built around one discipline: every number is
 attributable to a transmission channel and a public source, and every claim is either
 validated out-of-sample or marked as illustrative. This document is the five-page tour; the
-companion write-ups are [`DS_REPORT.md`](DS_REPORT.md) (data science),
+companion write-ups are [`DS_REPORT.md`](DS_REPORT.md) (data science, with the
+cross-industry [`DS_REPORT_SYNTHESIS.md`](DS_REPORT_SYNTHESIS.md) over all four industries),
 [`PRODUCT_REPORT.md`](PRODUCT_REPORT.md) (product), and
 [`4_Tech_Architecture.md`](4_Tech_Architecture.md) (engineering).
 
@@ -171,7 +172,7 @@ figure are marked **illustrative / not calibrated on Russian data**.
 The whole pipeline is a Python package in `_tools/` with a thin, deterministic core
 (numpy / scipy / scikit-learn / pyyaml) and heavy ML dependencies kept behind optional extras.
 
-- **233 tests, 0 skipped** (`pytest tests/ -q`), including leakage guards (train < test;
+- **244 tests, 0 skipped** (`pytest tests/ -q`), including leakage guards (train < test;
   scaler / fixed-effects / calibration fit on train only), metric/DM/conformal-coverage tests,
   and a contract test that `run_pipeline.py --json` keeps stdout pure JSON (import-time prints
   go to stderr).
@@ -191,7 +192,7 @@ A first end-to-end result is one command away:
 ```bash
 cd _tools
 pip install -r ../requirements.txt pytest
-python -m pytest tests/ -q                                   # 233 passed, 0 skipped
+python -m pytest tests/ -q                                   # 244 passed, 0 skipped
 python run_pipeline.py --smoke-shock 4.2 --smoke-industry oilgas   # numbers at every layer, no LLM
 ```
 

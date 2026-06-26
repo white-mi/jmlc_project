@@ -10,7 +10,7 @@ portfolio data.
 
 [![tests](https://github.com/white-mi/jmlc_project/actions/workflows/test.yml/badge.svg)](https://github.com/white-mi/jmlc_project/actions/workflows/test.yml)
 ![python](https://img.shields.io/badge/python-3.11%2B-blue)
-![tests-count](https://img.shields.io/badge/tests-233%20passed%2C%200%20skipped-brightgreen)
+![tests-count](https://img.shields.io/badge/tests-244%20passed%2C%200%20skipped-brightgreen)
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 ---
@@ -60,7 +60,7 @@ git clone https://github.com/white-mi/jmlc_project.git
 cd jmlc_project/_tools
 
 pip install -r ../requirements.lock pytest   # pinned numeric stack (TF-IDF, offline)
-python -m pytest tests/ -q                    # 233 passed, 0 skipped
+python -m pytest tests/ -q                    # 244 passed, 0 skipped
 
 # End-to-end smoke run — numbers at every layer, no LLM call:
 python run_pipeline.py --smoke-shock 4.2 --smoke-industry oilgas
@@ -101,7 +101,7 @@ calibrated 90 %. Full write-up: [`docs/DS_REPORT.md`](docs/DS_REPORT.md).
 A **second industry — oil & gas** (4 issuers × FY2021–2025, revenue verified via a two-pass
 `/doublecheck` + `/fact-check` audit that caught 6 corrupted aggregator cells) is now validated the
 same way. Here the finding *flips*: on volatile oil-&-gas revenue the price/volume models **beat
-naive persistence** — `hist_gbm` 19.0 % vs. persistence 21.9 % MAPE, skill +13 %, DM p = 0.053 —
+naive persistence** — `hist_gbm` 19.0 % vs. persistence 21.8 % MAPE, skill +13 %, DM p = 0.053 —
 because naive "last-year = this-year" fails harder on geopolitical swings. The structural model is
 deliberately deferred (annual НДПИ/fuel-damper history is a documented gap), so the comparison
 baseline is persistence. Write-up: [`docs/DS_REPORT_OILGAS.md`](docs/DS_REPORT_OILGAS.md).
@@ -122,6 +122,13 @@ split-conformal flips it: the structural covers **12/12 = 100%** while persisten
 because the structural reads *contemporaneous* prices/generation (the OSL premise) while autoregression
 trained on ≤2022 goes stale. That is the operational-signal value in one number. Write-up:
 [`docs/DS_REPORT_ENERGY.md`](docs/DS_REPORT_ENERGY.md).
+
+Across all four industries the honest finding is that **the winning model depends on the data regime —
+a pattern, not a law**: persistence wins on the small isolated metallurgy panel, learned wins on
+volatile oil & gas, structural is competitive on clean-Q×P chemistry, and learned/persistence beat the
+smooth-trend energy structural — yet **every Diebold-Mariano test is `p>0.05`** (nothing is statistically
+significant on N=18–30). The cross-industry synthesis (auto-built from the walk-forward JSONs via
+`python _tools/ds_synthesis.py`) is in [`docs/DS_REPORT_SYNTHESIS.md`](docs/DS_REPORT_SYNTHESIS.md).
 
 ## Repository layout
 

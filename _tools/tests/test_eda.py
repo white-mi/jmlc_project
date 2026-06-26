@@ -1,6 +1,6 @@
 """
-Smoke-тесты EDA (eda_osl.py). Пропускаются, если нет extra [eda] (pandas/matplotlib),
-чтобы core-CI без тяжёлого стека оставался зелёным.
+Smoke-тесты EDA (eda_osl.py), industry-параметрические. Пропускаются, если нет extra [eda]
+(pandas/matplotlib), чтобы core-CI без тяжёлого стека оставался зелёным.
 """
 
 import pytest
@@ -13,31 +13,53 @@ import eda_osl       # noqa: E402
 import osl_panel     # noqa: E402
 
 
-def _has_panel():
-    return bool(osl_panel.load_panel('metallurgy'))
+def _has_panel(ind):
+    return bool(osl_panel.load_panel(ind))
 
 
-def test_build_df_shape():
-    if not _has_panel():
-        pytest.skip('панель пуста')
-    df = eda_osl.build_df()
-    assert len(df) >= 20
+@pytest.mark.parametrize('industry,price_cols', [
+    ('metallurgy', {'p_gold', 'p_copper', 'p_usd_rub'}),
+    ('energy', {'p_electricity_rsv', 'p_capacity_kom', 'p_usd_rub'}),
+])
+def test_build_df_shape(industry, price_cols):
+    if not _has_panel(industry):
+        pytest.skip(f'панель {industry} пуста')
+    df = eda_osl.build_df(industry)
+    assert len(df) >= 18
     assert {'issuer', 'year', 'target', 'currency'}.issubset(df.columns)
-    # цены приджойнены
-    assert {'p_gold', 'p_copper', 'p_usd_rub'}.issubset(df.columns)
+    assert price_cols.issubset(df.columns)  # цены отрасли приджойнены
 
 
-def test_run_generates_all_figures(tmp_path, monkeypatch):
-    if not _has_panel():
-        pytest.skip('панель пуста')
-    monkeypatch.setattr(eda_osl, 'OUT', tmp_path)
-    notes = eda_osl.run()
+@pytest.mark.parametrize('industry', ['metallurgy', 'energy', 'chemistry'])
+def test_run_generates_all_figures(industry, tmp_path):
+    if not _has_panel(industry):
+        pytest.skip(f'панель {industry} пуста')
+    notes = eda_osl.run(industry, out_dir=tmp_path)
     assert len(notes) == len(eda_osl.FIGURES) == 8
     assert len(list(tmp_path.glob('*.png'))) == 8
     assert (tmp_path / 'implications.md').exists()
     # ни одна фигура не должна упасть (run() ловит исключения в строку 'ОШИБКА')
     errs = [n for n in notes if 'ОШИБКА' in n]
     assert not errs, errs
+
+
+def test_metallurgy_anchor_fx_present(tmp_path):
+    """Металлургия — регрессионный якорь: FX-фигура (USD-корзина) ДОЛЖНА строиться, не пропускаться."""
+    if not _has_panel('metallurgy'):
+        pytest.skip('панель пуста')
+    notes = eda_osl.run('metallurgy', out_dir=tmp_path)
+    fx = [n for n in notes if n.startswith('03')]
+    assert fx and 'ПРОПУЩЕНО' not in fx[0], 'у металлургии FX-фигура должна строиться (USD-корзина)'
+
+
+def test_fx_skipped_for_rub_industry(tmp_path):
+    """RUB-отрасль (энергетика): FX-фигура честно ПРОПУЩЕНА, но PNG-заглушка всё равно создаётся."""
+    if not _has_panel('energy'):
+        pytest.skip('панель пуста')
+    notes = eda_osl.run('energy', out_dir=tmp_path)
+    fx = [n for n in notes if n.startswith('03')]
+    assert fx and 'ПРОПУЩЕНО' in fx[0]
+    assert (tmp_path / '03_fx_passthrough.png').exists()
 
 
 def test_vif_detects_collinearity():

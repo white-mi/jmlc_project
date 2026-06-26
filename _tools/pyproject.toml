@@ -58,6 +58,7 @@ py-modules = [
     "osl_walkforward",
     "conformal_split",
     "eda_osl",
+    "ds_synthesis",
     # Продуктовый слой: сводка корпуса _Анализы/ (proxy-feedback)
     "backtest_analyses",
 ]
