@@ -13,8 +13,11 @@ WORKDIR /app
 COPY requirements.lock /app/requirements.lock
 RUN pip install --no-cache-dir -r /app/requirements.lock pytest
 
-# Исходники проекта (тесты гоняются на bundled-фикстуре tests/fixtures/, корпус _Анализы/ не нужен)
+# Исходники проекта (тесты гоняются на bundled-фикстуре tests/fixtures/, корпус _Анализы/ не нужен).
 COPY _tools/ /app/_tools/
+# docs/ нужен тестам: test_coverage проверяет, что манифест industry_coverage.json ссылается на
+# реальные DS-отчёты / COVERAGE_TIERS.md / DEVELOPERS_EVALUATION.md (они лежат в docs/, не в _tools/).
+COPY docs/ /app/docs/
 
 WORKDIR /app/_tools
 
