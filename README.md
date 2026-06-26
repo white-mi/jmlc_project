@@ -10,7 +10,7 @@ portfolio data.
 
 [![tests](https://github.com/white-mi/jmlc_project/actions/workflows/test.yml/badge.svg)](https://github.com/white-mi/jmlc_project/actions/workflows/test.yml)
 ![python](https://img.shields.io/badge/python-3.11%2B-blue)
-![tests-count](https://img.shields.io/badge/tests-244%20passed%2C%200%20skipped-brightgreen)
+![tests-count](https://img.shields.io/badge/tests-253%20passed%2C%200%20skipped-brightgreen)
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 ---
@@ -51,7 +51,12 @@ flowchart TD
 | **L2** Industry spillover | 7×7 dependency matrix (Fialkowski), credit-channel propagation | ΔPD by industry |
 | **L3** Client segments | Channel decomposition across 18 segments (5 channels) | ΔPD / Δdemand / Δchurn |
 
-Seven industries: oil & gas, metallurgy, chemicals, retail, power, regional governments, pharma.
+**Coverage is tiered by data availability** — a documented design choice, not a gap. All seven
+industries (oil & gas, metallurgy, chemicals, retail, power, regional governments, pharma) flow
+through L0/L1/L2/L3, but **L1.5 OSL is validated out-of-sample for only 4** (metallurgy, oil & gas,
+chemicals, power — public volume×price) and **illustrative for 3** (retail, pharma, regional
+governments — no public Q×P structure). Each industry sits at the depth its public data supports;
+the full tier map and the *why* per industry are in [`docs/COVERAGE_TIERS.md`](docs/COVERAGE_TIERS.md).
 
 ## Quickstart
 
@@ -60,7 +65,7 @@ git clone https://github.com/white-mi/jmlc_project.git
 cd jmlc_project/_tools
 
 pip install -r ../requirements.lock pytest   # pinned numeric stack (TF-IDF, offline)
-python -m pytest tests/ -q                    # 244 passed, 0 skipped
+python -m pytest tests/ -q                    # 253 passed, 0 skipped
 
 # End-to-end smoke run — numbers at every layer, no LLM call:
 python run_pipeline.py --smoke-shock 4.2 --smoke-industry oilgas

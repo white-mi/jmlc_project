@@ -41,7 +41,7 @@ tags: [макро-радар, docs, architecture, для-IT]
 │  ├── _Анализы/        (history of analyses)                │
 │  ├── _Справочники/    (taxonomy + segments)                │
 │  ├── _tools/                                                │
-│  │   ├── osl_*.py          (7 industry models)             │
+│  │   ├── osl_*.py          (7 models: 4 validated/3 illustr)│
 │  │   ├── conformal_*.py    (prediction intervals)          │
 │  │   ├── osl_calibrator.py (auto-calibration)              │
 │  │   ├── calibration/*.json (calibrated params)            │

@@ -57,8 +57,11 @@ to a markdown note.
 | **L2** Industry spillover | 7×7 dependency matrix (Fialkowski); credit-channel propagation for central-bank shocks | ΔPD by industry |
 | **L3** Client segments | Channel decomposition across client segments (5 channels × key-rate amplifier) | ΔPD / Δdemand / Δchurn |
 
-Seven industries are covered: oil & gas, metallurgy, chemicals, retail, power, regional
-governments, and pharma.
+Seven industries are covered, but **L1.5 OSL coverage is tiered by public-data availability** — a
+documented principle, not a gap. All seven (oil & gas, metallurgy, chemicals, retail, power, regional
+governments, pharma) flow through L0/L1/L2/L3; at L1.5, **4 are validated out-of-sample** (metallurgy,
+oil & gas, chemicals, power) and **3 are illustrative** (retail, pharma, regional governments — revenue
+isn't a public volume×price). Full tier map and per-industry rationale: [`COVERAGE_TIERS.md`](COVERAGE_TIERS.md).
 
 Two design invariants distinguish the architecture from a naive scorecard:
 
@@ -172,7 +175,7 @@ figure are marked **illustrative / not calibrated on Russian data**.
 The whole pipeline is a Python package in `_tools/` with a thin, deterministic core
 (numpy / scipy / scikit-learn / pyyaml) and heavy ML dependencies kept behind optional extras.
 
-- **244 tests, 0 skipped** (`pytest tests/ -q`), including leakage guards (train < test;
+- **253 tests, 0 skipped** (`pytest tests/ -q`), including leakage guards (train < test;
   scaler / fixed-effects / calibration fit on train only), metric/DM/conformal-coverage tests,
   and a contract test that `run_pipeline.py --json` keeps stdout pure JSON (import-time prints
   go to stderr).
@@ -192,7 +195,7 @@ A first end-to-end result is one command away:
 ```bash
 cd _tools
 pip install -r ../requirements.txt pytest
-python -m pytest tests/ -q                                   # 244 passed, 0 skipped
+python -m pytest tests/ -q                                   # 253 passed, 0 skipped
 python run_pipeline.py --smoke-shock 4.2 --smoke-industry oilgas   # numbers at every layer, no LLM
 ```
 

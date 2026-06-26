@@ -1,0 +1,65 @@
+{
+  "_version": "1.0",
+  "_comment": "Тиринг покрытия отраслей радаром. ГЛАВНЫЙ ПРИНЦИП: глубина L1.5-обработки (OSL) осознанно масштабируется под ДОСТУПНОСТЬ ПУБЛИЧНЫХ ДАННЫХ. Слои L0/L1/L2/L3 покрывают ВСЕ отрасли одинаково; различие тиров — только в L1.5. Это источник правды для tests/test_coverage.py и docs/COVERAGE_TIERS.md. Числа валидации НЕ дублируются здесь — coverage.py читает их вживую из output/osl_metrics/*.json (без дрейфа).",
+  "tiers": {
+    "validated": "Реальная панель FY2021–2025 + out-of-sample walk-forward + split-conformal + DS-отчёт. Структурная Q×P активна.",
+    "validated_structural_deferred": "Как validated (walk-forward + conformal + DS-отчёт), но структурная Q×P ОТЛОЖЕНА — нет публичных годовых драйверов; база сравнения = persistence.",
+    "illustrative": "Иллюстративный OSL (захардкоженные ACTUAL_*, бектест-only). НЕ Q×P-wireable публичными данными → нет walk-forward/conformal/DS-отчёта. Полноценно участвует в L0/L2/L3.",
+    "illustrative_pending": "Кандидат на валидацию; панель собирается (data-gate не пройден)."
+  },
+  "layer_legend": {
+    "L0": "Фильтр новостей / маршрутизация шока",
+    "L1": "Макро-состояние (отрасле-агностично)",
+    "L1.5": "OSL — прогноз выручки эмитентов",
+    "L2": "Межотраслевой спилловер (матрица Fialkowski)",
+    "L3": "Клиентские сегменты"
+  },
+  "industries": {
+    "metallurgy": {
+      "tier": "validated",
+      "layers": {"L0": "full", "L1": "full", "L1.5": "validated", "L2": "full", "L3": "full"},
+      "ds_report": "docs/DS_REPORT.md",
+      "metrics": "_tools/output/osl_metrics/metallurgy_metrics.json",
+      "rationale": "Чистый Q×P: выручка = объёмы × биржевые цены металлов × FX. Цены публичны (World Bank Pink Sheet / LME / LBMA), 5 крупных эмитентов с полной МСФО → структурная активна, walk-forward валиден."
+    },
+    "oilgas": {
+      "tier": "validated_structural_deferred",
+      "layers": {"L0": "full", "L1": "full", "L1.5": "structural_deferred", "L2": "full", "L3": "full"},
+      "ds_report": "docs/DS_REPORT_OILGAS.md",
+      "metrics": "_tools/output/osl_metrics/oilgas_metrics.json",
+      "rationale": "Структурная Q×P ОТЛОЖЕНА: годовые НДПИ/демпфер не публикуются, а ЛУКОЙЛ-2025 — деконсолидация (структурное событие, не операционное). База = persistence; learned-модели бьют наивное на волатильности нефти/газа/FX."
+    },
+    "chemistry": {
+      "tier": "validated",
+      "layers": {"L0": "full", "L1": "full", "L1.5": "validated", "L2": "full", "L3": "full"},
+      "ds_report": "docs/DS_REPORT_CHEMISTRY.md",
+      "metrics": "_tools/output/osl_metrics/chemistry_metrics.json",
+      "rationale": "Чистый Q×P с публичными годовыми ценами (DAP/карбамид/фосфат/Brent, World Bank) и без налогового клина → структурная подключена и competitive. Эмитенты без объёма (КуйбышевАзот) идут по learned; плохие клиенты (Уралхим/НКНХ) исключены."
+    },
+    "energy": {
+      "tier": "validated",
+      "layers": {"L0": "full", "L1": "full", "L1.5": "validated", "L2": "full", "L3": "full"},
+      "ds_report": "docs/DS_REPORT_ENERGY.md",
+      "metrics": "_tools/output/osl_metrics/energy_metrics.json",
+      "rationale": "Двухкомпонентная регулируемая выручка: генерация × РСВ + мощность × КОМ. Цены публикует Совет рынка → структурная активна. Самая полная панель (N=30); тепло/сбыт вне модели (поглощается k). В conformal структурная покрывает тренд 100% vs 17% у stale — ценность OSL."
+    },
+    "pharma": {
+      "tier": "illustrative",
+      "layers": {"L0": "full", "L1": "full", "L1.5": "illustrative", "L2": "full", "L3": "full"},
+      "module": "_tools/osl_pharma.py",
+      "rationale": "Выручка ≈ доля рынка × объём рынка (DSM Group — вторичный/приватный источник), НЕ Q×P. Публичных поэмитентных физобъёмов нет; аптечный рынок измеряется в упаковках, госзакупки (ДЛО/ВЗН/ОНЛС) доминируют над ценовым сигналом → физическую структурную модель не построить. OSL иллюстративен (бектест против ACTUAL_REVENUE_2025)."
+    },
+    "retail": {
+      "tier": "illustrative",
+      "layers": {"L0": "full", "L1": "full", "L1.5": "illustrative", "L2": "full", "L3": "full"},
+      "module": "_tools/osl_retail.py",
+      "rationale": "Маркетплейсы: выручка = GMV × take-rate (бухгалтерская формула, не объём×цена); омниканальные — выручка as-is. Поштучные цены SKU непубличны, публичны только GMV/трафик → нет Q×P-структуры. OSL иллюстративен (бектест против ACTUAL_REVENUE_2025)."
+    },
+    "oiv": {
+      "tier": "illustrative",
+      "layers": {"L0": "full", "L1": "full", "L1.5": "illustrative", "L2": "full", "L3": "full"},
+      "module": "_tools/osl_oiv.py",
+      "rationale": "Региональные бюджеты = нефте/газ-налог + НДФЛ + трансферты (фискальная модель, не МСФО-выручка). Ставка налога — захардкоженная константа (≈4500 ₽/т), не привязана к ценам; бюджеты Казначейства ≠ консолидированная выручка эмитента. OSL иллюстративен (бектест против ACTUAL_BUDGET_2025). Несёт сильнейшее ребро спилловера (нефтегаз→ОИВ) и фискальный канал L3."
+    }
+  }
+}

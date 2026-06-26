@@ -35,7 +35,8 @@ python -m pytest tests/ -k bifurcation -v                     # по подст�
 ruff check .
 black --check .          # black . чтобы применить
 
-# OSL по отрасли (7 отраслей: metallurgy/oilgas/chemistry/energy/pharma/retail/oiv)
+# OSL по отрасли (7 модулей; тиринг по доступности данных — 4 валидированы / 3 иллюстративны,
+# см. docs/COVERAGE_TIERS.md: metallurgy/oilgas/chemistry/energy валидированы; pharma/retail/oiv — нет)
 python osl_metallurgy.py
 python osl_oilgas.py --company Газпром
 
