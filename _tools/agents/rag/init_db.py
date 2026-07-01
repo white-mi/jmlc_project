@@ -9,8 +9,8 @@ import sqlite3
 import sys
 from pathlib import Path
 
-if hasattr(sys.stdout, 'reconfigure'):
-    sys.stdout.reconfigure(encoding='utf-8')
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 DB_PATH = Path(__file__).parent / "radar_rag.db"
 
@@ -31,6 +31,7 @@ def init_db(db_path: Path = DB_PATH, embedding_dim: int = 384) -> sqlite3.Connec
     try:
         conn.enable_load_extension(True)
         import sqlite_vec
+
         sqlite_vec.load(conn)
         vec_loaded = True
         print("  ✅ sqlite-vec loaded successfully")
@@ -94,14 +95,16 @@ def init_db(db_path: Path = DB_PATH, embedding_dim: int = 384) -> sqlite3.Connec
     # Сохраняем флаг наличия sqlite-vec
     conn.execute("CREATE TABLE IF NOT EXISTS db_meta (key TEXT PRIMARY KEY, value TEXT)")
     conn.execute("INSERT OR REPLACE INTO db_meta VALUES ('vec_loaded', ?)", (str(vec_loaded),))
-    conn.execute("INSERT OR REPLACE INTO db_meta VALUES ('embedding_dim', ?)", (str(embedding_dim),))
+    conn.execute(
+        "INSERT OR REPLACE INTO db_meta VALUES ('embedding_dim', ?)", (str(embedding_dim),)
+    )
 
     conn.commit()
     print(f"  ✅ Database initialized at: {db_path}")
     return conn
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print("=" * 60)
     print("  RAG v1.1 — DB initialization")
     print("=" * 60)

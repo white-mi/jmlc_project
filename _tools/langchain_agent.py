@@ -30,15 +30,15 @@ import os
 import sys
 from pathlib import Path
 
-if hasattr(sys.stdout, 'reconfigure'):
-    sys.stdout.reconfigure(encoding='utf-8')
-if hasattr(sys.stderr, 'reconfigure'):
-    sys.stderr.reconfigure(encoding='utf-8')
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8")
 
 TOOLS_DIR = Path(__file__).parent
 sys.path.insert(0, str(TOOLS_DIR))
-sys.path.insert(0, str(TOOLS_DIR / 'agents'))
-sys.path.insert(0, str(TOOLS_DIR / 'agents' / 'rag'))
+sys.path.insert(0, str(TOOLS_DIR / "agents"))
+sys.path.insert(0, str(TOOLS_DIR / "agents" / "rag"))
 
 # ---- Пайплайн-слои (чистый Python, без LLM) ----
 import run_pipeline as rp
@@ -50,6 +50,7 @@ from segment_impact import predict_segment_impact, REGION_PROFILES
 # ---- LangChain (мягкий импорт — без него работает только non-tool часть) ----
 try:
     from langchain_core.tools import tool
+
     LANGCHAIN_AVAILABLE = True
 except Exception:  # pragma: no cover
     LANGCHAIN_AVAILABLE = False
@@ -57,6 +58,7 @@ except Exception:  # pragma: no cover
     def tool(fn=None, **_kw):  # no-op декоратор-заглушка
         def wrap(f):
             return f
+
         return wrap(fn) if fn else wrap
 
 
@@ -129,6 +131,7 @@ def _heuristic_classify(news_text: str) -> dict:
 # ТУЛЫ (LangChain)
 # ============================================================
 
+
 @tool
 def get_macro_state() -> dict:
     """Текущее макро-состояние РФ (слой L1): РФ-CAI и фаза цикла, индекс EPU
@@ -139,10 +142,13 @@ def get_macro_state() -> dict:
     key_rate = cai.components.get("key_rate", {}).get("current", 16.0)
     regime = rp.kc_regime_from_rate(key_rate)
     return {
-        "cai": cai.cai, "phase": cai.phase,
+        "cai": cai.cai,
+        "phase": cai.phase,
         "yield_curve_slope_pp": cai.yield_curve_slope_pp,
-        "key_rate": key_rate, "kc_regime": regime,
-        "epu": epu.epu_value, "epu_degraded": epu.epu_degraded,
+        "key_rate": key_rate,
+        "kc_regime": regime,
+        "epu": epu.epu_value,
+        "epu_degraded": epu.epu_degraded,
     }
 
 
@@ -174,8 +180,7 @@ def industry_spillover(industry: str, severity_score: float = 60.0) -> dict:
         return {"error": f"industry must be one of {VALID_INDUSTRIES}"}
     magnitude = severity_to_magnitude(severity_score)
     spill = propagate_shock(industry, magnitude_pp=magnitude)
-    return {"source": spill.source, "magnitude_pp": spill.magnitude_pp,
-            "ranked": spill.ranked}
+    return {"source": spill.source, "magnitude_pp": spill.magnitude_pp, "ranked": spill.ranked}
 
 
 @tool
@@ -184,13 +189,11 @@ def industry_spillover_credit_channel(severity_score: float = 55.0) -> dict:
     debt-чувствительных отраслей бьются одновременно. magnitude из severity_score."""
     magnitude = severity_to_magnitude(severity_score)
     spill = propagate_credit_channel(magnitude_pp=magnitude)
-    return {"source": spill.source, "magnitude_pp": spill.magnitude_pp,
-            "ranked": spill.ranked}
+    return {"source": spill.source, "magnitude_pp": spill.magnitude_pp, "ranked": spill.ranked}
 
 
 @tool
-def segment_impact(subcategory: str, kc_regime: str = "moderate_stress",
-                   region: str = "") -> dict:
+def segment_impact(subcategory: str, kc_regime: str = "moderate_stress", region: str = "") -> dict:
     """Client Segment Impact (L3): влияние шока на 18 клиентских сегментов банка —
     ΔPD (п.п.), Δdemand (%), Δchurn (п.п.) с раскладкой по 5 каналам.
     subcategory — подкатегория шока (1.1..5.4); kc_regime ∈
@@ -201,16 +204,22 @@ def segment_impact(subcategory: str, kc_regime: str = "moderate_stress",
     reg = region or None
     if reg and reg not in REGION_PROFILES:
         return {"error": f"region must be one of {list(REGION_PROFILES)} or empty"}
-    res = predict_segment_impact(subcategory, kc_regime, region=reg,
-                                 include_breakdown=False)
-    return {s: {"delta_pd": i.delta_pd, "delta_demand": i.delta_demand,
-                "delta_churn": i.delta_churn, "confidence": i.confidence}
-            for s, i in res.items()}
+    res = predict_segment_impact(subcategory, kc_regime, region=reg, include_breakdown=False)
+    return {
+        s: {
+            "delta_pd": i.delta_pd,
+            "delta_demand": i.delta_demand,
+            "delta_churn": i.delta_churn,
+            "confidence": i.confidence,
+        }
+        for s, i in res.items()
+    }
 
 
 @tool
-def run_credit_pipeline(news_text: str, subcategory: str = "",
-                        industry: str = "", severity_score: int = 60) -> dict:
+def run_credit_pipeline(
+    news_text: str, subcategory: str = "", industry: str = "", severity_score: int = 60
+) -> dict:
     """Сквозной анализ новости через все 4 слоя (L0→L1→L1.5→L2→L3). Если
     subcategory/industry не заданы — классифицирует эвристически. Возвращает
     компактную сводку: классификация, макро, топ-отрасль spillover, худший/лучший
@@ -220,20 +229,30 @@ def run_credit_pipeline(news_text: str, subcategory: str = "",
         subcategory = subcategory or c["subcategory"]
         industry = industry or c["primary_industry"]
         severity_score = c["severity_score"]
-    state = rp.run_full_pipeline(news_text=news_text, source="langchain-agent",
-                                 date="", smoke_shock=subcategory,
-                                 smoke_industry=industry, smoke_severity=severity_score)
+    state = rp.run_full_pipeline(
+        news_text=news_text,
+        source="langchain-agent",
+        date="",
+        smoke_shock=subcategory,
+        smoke_industry=industry,
+        smoke_severity=severity_score,
+    )
     l2 = state["L2_spillover"]
     l3 = state["L3_segments"]
     worst = max(l3.items(), key=lambda kv: kv[1]["delta_pd_pp"])
     best = min(l3.items(), key=lambda kv: kv[1]["delta_pd_pp"])
     return {
-        "subcategory": subcategory, "industry": industry,
+        "subcategory": subcategory,
+        "industry": industry,
         "severity_score": severity_score,
-        "macro": {"cai": state["L1_macro"]["cai"], "phase": state["L1_macro"]["phase"],
-                  "kc_regime": state["kc_regime"],
-                  "epu_degraded": state["L1_macro"].get("epu_degraded")},
-        "l2_source": l2["source"], "l2_top": l2["ranked"][0],
+        "macro": {
+            "cai": state["L1_macro"]["cai"],
+            "phase": state["L1_macro"]["phase"],
+            "kc_regime": state["kc_regime"],
+            "epu_degraded": state["L1_macro"].get("epu_degraded"),
+        },
+        "l2_source": l2["source"],
+        "l2_top": l2["ranked"][0],
         "worst_segment": [worst[0], round(worst[1]["delta_pd_pp"], 3)],
         "best_segment": [best[0], round(best[1]["delta_pd_pp"], 3)],
     }
@@ -245,6 +264,7 @@ def update_macro_state(live: bool = False) -> dict:
     (ничего не пишет, показывает доступные значения). live=True — тянет 4 живых
     фида (USD/RUB, Brent, ключевая ставка, инфляция) и перезаписывает current_state."""
     import fetch_macro_state as fms
+
     if not live:
         return {"mode": "dry-run", "note": "live=True тянет и пишет current_state"}
     values = fms.fetch_all()
@@ -258,19 +278,32 @@ def find_news_analogs(query: str, subcategory: str = "") -> list:
     эмбеддингам). query — текст/суть новости; subcategory (опц.) — фильтр."""
     try:
         from find_analogs import find_analogs as _find
+
         sub = subcategory.split(" ")[0] if subcategory else None
         res = _find(query_text=query[:500], subcategory=sub, top_k=5, threshold=0.0)
-        return [{"date": r.get("date"), "title": r.get("title"),
-                 "subcategory": r.get("subcategory"),
-                 "similarity": round(r.get("similarity", 0.0), 3)} for r in res]
+        return [
+            {
+                "date": r.get("date"),
+                "title": r.get("title"),
+                "subcategory": r.get("subcategory"),
+                "similarity": round(r.get("similarity", 0.0), 3),
+            }
+            for r in res
+        ]
     except Exception as e:
         return [{"error": f"RAG недоступен: {e}"}]
 
 
 TOOLS = [
-    get_macro_state, classify_news_shock, osl_forecast, industry_spillover,
-    industry_spillover_credit_channel, segment_impact, run_credit_pipeline,
-    update_macro_state, find_news_analogs,
+    get_macro_state,
+    classify_news_shock,
+    osl_forecast,
+    industry_spillover,
+    industry_spillover_credit_channel,
+    segment_impact,
+    run_credit_pipeline,
+    update_macro_state,
+    find_news_analogs,
 ]
 
 SYSTEM_PROMPT = (
@@ -288,20 +321,26 @@ SYSTEM_PROMPT = (
 # Сборка реального агента (нужен API-ключ)
 # ============================================================
 
+
 def build_agent(api_key: str = API_KEY, model: str = MODEL_ID):
     """Строит tool-calling агента через ChatAnthropic. api_key ПУСТОЙ по умолчанию —
     подставь реальный ключ позже. Без ключа возвращает None + печатает инструкцию."""
     if not LANGCHAIN_AVAILABLE:
-        print("  ⚠️ LangChain не установлен: pip install langchain langchain-anthropic",
-              file=sys.stderr)
+        print(
+            "  ⚠️ LangChain не установлен: pip install langchain langchain-anthropic",
+            file=sys.stderr,
+        )
         return None
     if not api_key:
-        print("  ⚠️ API-ключ пуст. Задай ANTHROPIC_API_KEY или build_agent(api_key=...) "
-              "для реального запуска. Тулы и симуляции работают без ключа.",
-              file=sys.stderr)
+        print(
+            "  ⚠️ API-ключ пуст. Задай ANTHROPIC_API_KEY или build_agent(api_key=...) "
+            "для реального запуска. Тулы и симуляции работают без ключа.",
+            file=sys.stderr,
+        )
         return None
     from langchain_anthropic import ChatAnthropic
     from langchain.agents import create_agent
+
     llm = ChatAnthropic(model=model, api_key=api_key, max_tokens=4000)
     return create_agent(model=llm, tools=TOOLS, system_prompt=SYSTEM_PROMPT)
 
@@ -372,8 +411,11 @@ def simulate_coverage() -> dict:
             run(segment_impact, {"subcategory": sub, "kc_regime": kc}, f"{sub}/{kc}")
     # 4b) с региональными профилями
     for reg in list(REGION_PROFILES):
-        run(segment_impact, {"subcategory": "1.2", "kc_regime": "moderate_stress",
-                             "region": reg}, reg)
+        run(
+            segment_impact,
+            {"subcategory": "1.2", "kc_regime": "moderate_stress", "region": reg},
+            reg,
+        )
 
     # 5) сквозной пайплайн на сэмплах
     for txt in SAMPLE_NEWS:
@@ -383,7 +425,8 @@ def simulate_coverage() -> dict:
     run(find_news_analogs, {"query": "санкции против металлургии", "subcategory": "1.4"}, "rag")
 
     report["all_tools_covered"] = set(report["tools_exercised"]) == {
-        getattr(t, "name", getattr(t, "__name__", "")) for t in TOOLS}
+        getattr(t, "name", getattr(t, "__name__", "")) for t in TOOLS
+    }
     report["subcategories_covered"] = len(ALL_SUBCATS)
     return report
 
@@ -400,24 +443,28 @@ def simulate_agent_loop() -> dict:
 
     news = "ЕС готовит новый пакет санкций против металлургии РФ"
     # (1) как если бы LLM решил вызвать тул:
-    ai = AIMessage(content="", tool_calls=[{
-        "name": "run_credit_pipeline", "args": {"news_text": news}, "id": "call_1"}])
+    ai = AIMessage(
+        content="",
+        tool_calls=[{"name": "run_credit_pipeline", "args": {"news_text": news}, "id": "call_1"}],
+    )
     # (2) диспатч тула из реестра (это и есть «исполнение» агентом):
     tool_map = {getattr(t, "name", None): t for t in TOOLS}
     tool_results = []
     for tc in ai.tool_calls:
         out = tool_map[tc["name"]].invoke(tc["args"])
-        tool_results.append(ToolMessage(
-            content=json.dumps(out, ensure_ascii=False, default=str),
-            tool_call_id=tc["id"]))
+        tool_results.append(
+            ToolMessage(
+                content=json.dumps(out, ensure_ascii=False, default=str), tool_call_id=tc["id"]
+            )
+        )
 
     # (3) проверка, что реальная проводка агента конструируется (без вызова сети):
     wiring_ok, wiring_err = False, None
     try:
         from langchain_anthropic import ChatAnthropic
         from langchain.agents import create_agent
-        llm = ChatAnthropic(model=MODEL_ID, api_key="placeholder-set-later",
-                            max_tokens=512)
+
+        llm = ChatAnthropic(model=MODEL_ID, api_key="placeholder-set-later", max_tokens=512)
         create_agent(model=llm, tools=TOOLS, system_prompt=SYSTEM_PROMPT)
         wiring_ok = True
     except Exception as e:
@@ -437,24 +484,33 @@ def simulate_agent_loop() -> dict:
 # CLI
 # ============================================================
 
+
 def main():
     parser = argparse.ArgumentParser(description="Макро-радар · LangChain-агент")
-    parser.add_argument("--simulate", action="store_true",
-                        help="Симуляция покрытия тулов без ключа")
-    parser.add_argument("--agent-demo", action="store_true",
-                        help="Демо агент-цикла на fake-LLM (без сети)")
+    parser.add_argument(
+        "--simulate", action="store_true", help="Симуляция покрытия тулов без ключа"
+    )
+    parser.add_argument(
+        "--agent-demo", action="store_true", help="Демо агент-цикла на fake-LLM (без сети)"
+    )
     parser.add_argument("--ask", help="Реальный запрос агенту (нужен ANTHROPIC_API_KEY)")
     args = parser.parse_args()
 
     if args.simulate:
         rep = simulate_coverage()
-        print(json.dumps({
-            "scenarios": rep["scenarios"],
-            "tools_exercised": rep["tools_exercised"],
-            "all_tools_covered": rep["all_tools_covered"],
-            "subcategories_covered": rep["subcategories_covered"],
-            "errors": rep["errors"],
-        }, ensure_ascii=False, indent=2))
+        print(
+            json.dumps(
+                {
+                    "scenarios": rep["scenarios"],
+                    "tools_exercised": rep["tools_exercised"],
+                    "all_tools_covered": rep["all_tools_covered"],
+                    "subcategories_covered": rep["subcategories_covered"],
+                    "errors": rep["errors"],
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
         return
 
     if args.agent_demo:

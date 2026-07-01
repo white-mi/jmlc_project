@@ -12,8 +12,8 @@ import os
 import sys
 import numpy as np
 
-if hasattr(sys.stdout, 'reconfigure'):
-    sys.stdout.reconfigure(encoding='utf-8')
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 EMBEDDING_DIM = 384
 
@@ -23,7 +23,7 @@ EMBEDDING_DIM = 384
 #   1) pip install sentence-transformers
 #   2) set RADAR_RAG_USE_ST=1
 #   3) переиндексировать БД: python index_news.py  (полный реиндекс)
-RAG_USE_ST = os.environ.get('RADAR_RAG_USE_ST', '0') == '1'
+RAG_USE_ST = os.environ.get("RADAR_RAG_USE_ST", "0") == "1"
 
 
 class TfidfEmbedder:
@@ -66,7 +66,7 @@ class TfidfEmbedder:
         # Паддинг до 384
         if len(embedding) < EMBEDDING_DIM:
             padded = np.zeros(EMBEDDING_DIM, dtype=np.float32)
-            padded[:len(embedding)] = embedding
+            padded[: len(embedding)] = embedding
             embedding = padded
         # Нормализация для cosine
         norm = np.linalg.norm(embedding)
@@ -83,6 +83,7 @@ class SentenceTransformerEmbedder:
         # multilingual-e5-large = 1024 dim (требует другую vec0 dim)
         try:
             from sentence_transformers import SentenceTransformer
+
             self.model = SentenceTransformer(model_name)
             self.available = True
             print(f"  ✅ SentenceTransformer loaded: {model_name}")
@@ -115,6 +116,7 @@ def get_embedder(prefer_st: bool = RAG_USE_ST):
     if prefer_st:
         try:
             import sentence_transformers  # noqa: F401  — проба доступности ST
+
             return SentenceTransformerEmbedder()
         except ImportError:
             pass
@@ -122,7 +124,7 @@ def get_embedder(prefer_st: bool = RAG_USE_ST):
     return TfidfEmbedder()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print("=" * 60)
     print("  RAG v1.1 — Embedding provider test")
     print("=" * 60)

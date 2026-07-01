@@ -29,14 +29,14 @@ from sklearn.linear_model import ElasticNetCV, RidgeCV
 from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.preprocessing import StandardScaler
 
-sys.path.insert(0, str(__import__('pathlib').Path(__file__).parent))
+sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))
 import osl_panel
 import osl_metallurgy as M
 import osl_chemistry as Ch
 import osl_energy as En
 
-if hasattr(sys.stdout, 'reconfigure'):
-    sys.stdout.reconfigure(encoding='utf-8')
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 # Опорное значение железной руды для масштабирования цены стали в StructuralOSL.
 # Фиксированная КОНСТАНТА (не из train/test → без leakage): iron_ore 2025 = 100.18,
@@ -47,24 +47,35 @@ IRON_ORE_REF_2025 = 100.18
 # Признаки learned-моделей ПО ОТРАСЛИ (ключи цен совпадают с приджойненными в row.prices;
 # объёмные колонки — из osl_panel.VOL_COLUMNS). Отрасль выводится из rows[0].industry.
 INDUSTRY_PRICE_FEATURES = {
-    'metallurgy': ['gold', 'copper', 'nickel', 'platinum', 'steel_proxy_iron_ore', 'usd_rub'],
-    'oilgas': ['urals', 'gas_eu', 'lng_jkm', 'usd_rub'],
-    'chemistry': ['dap', 'urea', 'phosphate_rock', 'crude_brent', 'usd_rub'],
-    'energy': ['electricity_rsv', 'capacity_kom', 'usd_rub'],
+    "metallurgy": ["gold", "copper", "nickel", "platinum", "steel_proxy_iron_ore", "usd_rub"],
+    "oilgas": ["urals", "gas_eu", "lng_jkm", "usd_rub"],
+    "chemistry": ["dap", "urea", "phosphate_rock", "crude_brent", "usd_rub"],
+    "energy": ["electricity_rsv", "capacity_kom", "usd_rub"],
 }
 INDUSTRY_VOL_FEATURES = {
-    'metallurgy': ['vol_copper_t', 'vol_nickel_t', 'vol_pd_oz', 'vol_pt_oz',
-                   'vol_gold_oz', 'vol_steel_t'],
-    'oilgas': ['vol_oil_t', 'vol_gas_mmcm', 'vol_refined_t', 'vol_lng_t', 'vol_condensate_t'],
-    'chemistry': ['vol_fertilizer_kt', 'vol_polymer_kt'],
-    'energy': ['vol_generation_twh', 'vol_capacity_gw'],
+    "metallurgy": [
+        "vol_copper_t",
+        "vol_nickel_t",
+        "vol_pd_oz",
+        "vol_pt_oz",
+        "vol_gold_oz",
+        "vol_steel_t",
+    ],
+    "oilgas": ["vol_oil_t", "vol_gas_mmcm", "vol_refined_t", "vol_lng_t", "vol_condensate_t"],
+    "chemistry": ["vol_fertilizer_kt", "vol_polymer_kt"],
+    "energy": ["vol_generation_twh", "vol_capacity_gw"],
 }
 # обратная совместимость (металлургия по умолчанию)
-PRICE_FEATURES = INDUSTRY_PRICE_FEATURES['metallurgy']
-VOL_FEATURES = INDUSTRY_VOL_FEATURES['metallurgy']
+PRICE_FEATURES = INDUSTRY_PRICE_FEATURES["metallurgy"]
+VOL_FEATURES = INDUSTRY_VOL_FEATURES["metallurgy"]
 # объёмная колонка → металл-ключ структурной модели (металлургия)
-VOL_TO_METAL = {'vol_copper_t': 'copper', 'vol_nickel_t': 'nickel', 'vol_pd_oz': 'palladium',
-                'vol_pt_oz': 'platinum', 'vol_gold_oz': 'gold'}
+VOL_TO_METAL = {
+    "vol_copper_t": "copper",
+    "vol_nickel_t": "nickel",
+    "vol_pd_oz": "palladium",
+    "vol_pt_oz": "platinum",
+    "vol_gold_oz": "gold",
+}
 
 # Структурная модель ХИМИИ (Фаза C). Цена_период = base × (биржевой_драйвер / реф_2025),
 # где base — 2025-калиброванная avg-цена-за-тонну из osl_chemistry (reuse доменного модуля),
@@ -74,10 +85,16 @@ VOL_TO_METAL = {'vol_copper_t': 'copper', 'vol_nickel_t': 'nickel', 'vol_pd_oz':
 # объёма → None (идёт по learned/persistence). reф_2025 = World Bank-значение серии за 2025FY.
 # issuer: (vol_col, price_series, ref_2025, osl_chemistry.PRICES-ключ base, other_income_pct)
 CHEM_DRIVERS = {
-    'ФосАгро':      ('vol_fertilizer_kt', 'dap',         660.0, 'avg_phosphate_company', 0.04),
-    'Акрон':        ('vol_fertilizer_kt', 'urea',        430.0, 'avg_nitrogen_company',  0.05),
-    'КуйбышевАзот': ('vol_fertilizer_kt', 'urea',        430.0, 'avg_nitrogen_company',  0.05),
-    'КОС':          ('vol_polymer_kt',    'crude_brent',  70.0, 'polymers_avg',          0.05),  # объём только 2024-25 → k на n=2, хрупко
+    "ФосАгро": ("vol_fertilizer_kt", "dap", 660.0, "avg_phosphate_company", 0.04),
+    "Акрон": ("vol_fertilizer_kt", "urea", 430.0, "avg_nitrogen_company", 0.05),
+    "КуйбышевАзот": ("vol_fertilizer_kt", "urea", 430.0, "avg_nitrogen_company", 0.05),
+    "КОС": (
+        "vol_polymer_kt",
+        "crude_brent",
+        70.0,
+        "polymers_avg",
+        0.05,
+    ),  # объём только 2024-25 → k на n=2, хрупко
 }
 
 # Структурная модель ЭНЕРГЕТИКИ (Фаза C). ЧИСТАЯ двухкомпонентная: генерация×РСВ + мощность×КОМ.
@@ -87,11 +104,11 @@ CHEM_DRIVERS = {
 # искусственно падал с 11.9% до 8.1%). Heat поглощается мультипликативным k — НЕИДЕАЛЬНО для
 # теплоёмких эмитентов (документированное ограничение, как байпродукты Норникеля). Честный
 # структурный фит — на чистой физике Q×P энергорынка. КОМ ₽/МВт·мес → ×12×1000 = ₽/ГВт·год.
-ENERGY_ISSUERS = frozenset({'РусГидро', 'Мосэнерго', 'ТГК-1', 'ОГК-2', 'Эл5-Энерго', 'Юнипро'})
+ENERGY_ISSUERS = frozenset({"РусГидро", "Мосэнерго", "ТГК-1", "ОГК-2", "Эл5-Энерго", "Юнипро"})
 
 
 def _industry_of(rows) -> str:
-    return rows[0].industry if rows else 'metallurgy'
+    return rows[0].industry if rows else "metallurgy"
 
 
 def _price_features(rows):
@@ -110,11 +127,12 @@ def _targets(rows) -> np.ndarray:
 # 1. StructuralOSL — структурный бейзлайн + скаляр-коррекция
 # ============================================================
 
+
 class StructuralOSL:
-    name = 'structural_osl'
+    name = "structural_osl"
 
     def __init__(self):
-        self.k_ = {}        # issuer → масштабный коэффициент (из train)
+        self.k_ = {}  # issuer → масштабный коэффициент (из train)
         self.k_global_ = 1.0
 
     def _raw(self, row) -> Optional[float]:
@@ -132,66 +150,72 @@ class StructuralOSL:
         Возвращает None (не падает), если нет ключевого объёма (напр. сталь 2025 — gap).
         Для химии/энергетики диспетчеризуется в _raw_chemistry/_raw_energy; нефтегаз (не в M.PROFILES)
         → None (Фаза C ждёт НДПИ)."""
-        if row.industry == 'chemistry':
+        if row.industry == "chemistry":
             return self._raw_chemistry(row)
-        if row.industry == 'energy':
+        if row.industry == "energy":
             return self._raw_energy(row)
         if row.issuer not in M.PROFILES:
             return None
         prof = M.PROFILES[row.issuer]
         # цены: module-default, переопределяем панельными где есть
         prices = dict(M.PRICES_12M_2025)
-        for metal in ('gold', 'copper', 'nickel', 'platinum'):
+        for metal in ("gold", "copper", "nickel", "platinum"):
             pv = row.prices.get(metal)
             if pv is not None:
                 base = prices[metal]
-                prices[metal] = M.CommodityPrice(metal, base.unit, pv, row.period, 'panel')
+                prices[metal] = M.CommodityPrice(metal, base.unit, pv, row.period, "panel")
         # цена стали — через iron-ore прокси (per-period вместо замороженной 510)
-        io = row.prices.get('steel_proxy_iron_ore')
+        io = row.prices.get("steel_proxy_iron_ore")
         if io:
-            sb = prices['steel_fob_chm']
-            prices['steel_fob_chm'] = M.CommodityPrice(
-                'steel_fob_chm', sb.unit, sb.avg_price_usd * io / IRON_ORE_REF_2025,
-                row.period, 'iron_ore_proxy')
-        fx = M.FXRate(avg_usd_rub=row.prices.get('usd_rub') or M.FX_12M_2025.avg_usd_rub,
-                      period=row.period)
-        if prof.revenue_model == 'global_commodity':
+            sb = prices["steel_fob_chm"]
+            prices["steel_fob_chm"] = M.CommodityPrice(
+                "steel_fob_chm",
+                sb.unit,
+                sb.avg_price_usd * io / IRON_ORE_REF_2025,
+                row.period,
+                "iron_ore_proxy",
+            )
+        fx = M.FXRate(
+            avg_usd_rub=row.prices.get("usd_rub") or M.FX_12M_2025.avg_usd_rub, period=row.period
+        )
+        if prof.revenue_model == "global_commodity":
             production = []
             for vcol, metal in VOL_TO_METAL.items():
                 v = row.volumes.get(vcol)
                 if v:
-                    unit = 'oz' if vcol.endswith('_oz') else 't'
+                    unit = "oz" if vcol.endswith("_oz") else "t"
                     production.append(M.ProductionData(row.issuer, metal, v, unit, row.period))
             if not production:
                 return None
             pred = M.predict_global_commodity(row.issuer, production, prices, prof, fx)
         else:  # hybrid (сталевары)
-            v = row.volumes.get('vol_steel_t')
+            v = row.volumes.get("vol_steel_t")
             if not v:
                 return None
-            production = [M.ProductionData(row.issuer, 'steel', v, 't', row.period)]
+            production = [M.ProductionData(row.issuer, "steel", v, "t", row.period)]
             pred = M.predict_hybrid(row.issuer, production, prices, prof, fx)
-        return pred.predicted_rub_bn if row.revenue_currency == 'RUB' else pred.predicted_usd_bn
+        return pred.predicted_rub_bn if row.revenue_currency == "RUB" else pred.predicted_usd_bn
 
     def _raw_chemistry(self, row) -> Optional[float]:
         """Структурный сырой прогноз химии (млрд ₽). Reuse из osl_chemistry — цена-константа
         (Ch.PRICES[base].avg) + форма выручки vol×$/т×FX×(1+other) (НЕ predict_fertilizer целиком:
         домест/экспорт-сплит не используется, его поглощает k). Цена_период = base × драйвер/реф_2025
         (биржевой драйвер: dap/urea — реализованная цена; crude_brent — прокси-фидсток полимеров КОС).
-        Возвращает None при отсутствии объёма (КуйбышевАзот — gap) или цены/FX → learned/persistence."""
+        Возвращает None при отсутствии объёма (КуйбышевАзот — gap) или цены/FX → learned/persistence.
+        """
         drv = CHEM_DRIVERS.get(row.issuer)
         if not drv:
             return None
         vcol, pkey, ref, base_key, other = drv
         vol = row.volumes.get(vcol)
         price = row.prices.get(pkey)
-        fx = row.prices.get('usd_rub')
+        fx = row.prices.get("usd_rub")
         if not (vol and price and fx):
             return None
-        base = Ch.PRICES[base_key].avg_price_usd_per_t          # 2025-калибровка osl_chemistry
-        price_t = base * price / ref                            # per-period вариация через драйвер
-        rev_usd = vol * 1000.0 * price_t * (1 + other)          # vol kt→т × $/т (формула osl_chemistry)
-        return rev_usd * fx / 1e9                               # → млрд ₽ (таргет химии — RUB)
+        base = Ch.PRICES[base_key].avg_price_usd_per_t  # 2025-калибровка osl_chemistry
+        price_t = base * price / ref  # per-period вариация через драйвер
+        rev_usd = vol * 1000.0 * price_t * (1 + other)  # vol kt→т × $/т (формула osl_chemistry)
+        return rev_usd * fx / 1e9  # → млрд ₽ (таргет химии — RUB)
 
     def _raw_energy(self, row) -> Optional[float]:
         """Структурный сырой прогноз энергетики (млрд ₽), reuse osl_energy.predict_generation.
@@ -200,16 +224,17 @@ class StructuralOSL:
         ×12×1000 = ₽/ГВт·год (что ждёт predict_generation). None при отсутствии объёма/цены."""
         if row.issuer not in ENERGY_ISSUERS:
             return None
-        gen_twh = row.volumes.get('vol_generation_twh')
-        cap_gw = row.volumes.get('vol_capacity_gw')
-        rsv = row.prices.get('electricity_rsv')                 # ₽/МВт·ч
-        kom = row.prices.get('capacity_kom')                    # ₽/МВт·мес
+        gen_twh = row.volumes.get("vol_generation_twh")
+        cap_gw = row.volumes.get("vol_capacity_gw")
+        rsv = row.prices.get("electricity_rsv")  # ₽/МВт·ч
+        kom = row.prices.get("capacity_kom")  # ₽/МВт·мес
         if not (gen_twh and cap_gw and rsv and kom):
             return None
         gen = En.GenerationData(row.issuer, gen_twh, cap_gw, row.period)
-        tar = En.TariffData(avg_tariff_rub_per_mwh=rsv,
-                            capacity_payment_per_gw_year=kom * 12 * 1000)  # ₽/МВт·мес → ₽/ГВт·год
-        prof = En.CompanyProfile(row.issuer, 'generation', other_revenue_abs_rub_bn=0.0)
+        tar = En.TariffData(
+            avg_tariff_rub_per_mwh=rsv, capacity_payment_per_gw_year=kom * 12 * 1000
+        )  # ₽/МВт·мес → ₽/ГВт·год
+        prof = En.CompanyProfile(row.issuer, "generation", other_revenue_abs_rub_bn=0.0)
         return En.predict_generation(row.issuer, gen, tar, prof).predicted_rub_bn
 
     def fit(self, rows):
@@ -240,11 +265,13 @@ class StructuralOSL:
 # Общий конструктор признаков для learned-моделей
 # ============================================================
 
+
 class _IssuerFE:
     """Panel fixed-effects «внутри-преобразованием»: вычитаем per-issuer среднее log-таргета
     (по TRAIN) → модель учит ЦЕНОВЫЕ отклонения, а не уровень. Это снимает межвалютный
     масштаб (USD Полюс vs RUB сталевары) БЕЗ штрафа на FE (в отличие от one-hot+регуляризация,
-    где уровень эмитента ошибочно сжимается к общему среднему). Anti-leakage: средние — только train."""
+    где уровень эмитента ошибочно сжимается к общему среднему). Anti-leakage: средние — только train.
+    """
 
     def fit(self, rows):
         by = {}
@@ -274,17 +301,21 @@ class _Design:
         feats = _price_features(rows)
         X = []
         for r in rows:
-            X.append([np.log(r.prices[m]) if r.prices.get(m) else np.nan
-                      for m in feats])
+            X.append([np.log(r.prices[m]) if r.prices.get(m) else np.nan for m in feats])
         return np.array(X, dtype=float)
 
     def transform(self, rows) -> np.ndarray:
         blocks = [self.scaler_.transform(self._log_prices(rows))]
         if self.use_volumes:
             vfeats = _vol_features(rows)
-            vol = np.array([[r.volumes.get(c) if r.volumes.get(c) is not None else np.nan
-                             for c in vfeats] for r in rows], dtype=float)
-            with np.errstate(invalid='ignore'):
+            vol = np.array(
+                [
+                    [r.volumes.get(c) if r.volumes.get(c) is not None else np.nan for c in vfeats]
+                    for r in rows
+                ],
+                dtype=float,
+            )
+            with np.errstate(invalid="ignore"):
                 vol = np.where(vol > 0, np.log(vol), np.nan)  # NaN остаётся (GBM нативно)
             blocks.append(vol)
         return np.hstack(blocks)
@@ -294,8 +325,9 @@ class _Design:
 # 2. LinearPanel — ElasticNet/Ridge + issuer FE
 # ============================================================
 
+
 class LinearPanel:
-    def __init__(self, kind: str = 'elasticnet'):
+    def __init__(self, kind: str = "elasticnet"):
         self.kind = kind
         self.name = kind
         self.design = _Design(use_volumes=False)  # цены NaN-free → линейная без объёмов
@@ -306,14 +338,15 @@ class LinearPanel:
         self.design.fit(rows)
         self.fe.fit(rows)
         X = self.design.transform(rows)
-        y = np.log(_targets(rows)) - self.fe.level(rows)   # within-FE: учим отклонения
+        y = np.log(_targets(rows)) - self.fe.level(rows)  # within-FE: учим отклонения
         n = len(rows)
         cv = max(2, min(4, n // 4))
-        if self.kind == 'ridge':
+        if self.kind == "ridge":
             self.model = RidgeCV(alphas=np.logspace(-3, 3, 25))
         else:
-            self.model = ElasticNetCV(l1_ratio=[0.2, 0.5, 0.8, 0.95],
-                                      alphas=np.logspace(-3, 1, 30), cv=cv, max_iter=20000)
+            self.model = ElasticNetCV(
+                l1_ratio=[0.2, 0.5, 0.8, 0.95], alphas=np.logspace(-3, 1, 30), cv=cv, max_iter=20000
+            )
         self.model.fit(X, y)
         return self
 
@@ -325,8 +358,9 @@ class LinearPanel:
 # 3. GBMPanel — HistGradientBoosting (нативный NaN), зажат под малый N
 # ============================================================
 
+
 class GBMPanel:
-    name = 'hist_gbm'
+    name = "hist_gbm"
 
     def __init__(self):
         self.design = _Design(use_volumes=True)
@@ -337,10 +371,15 @@ class GBMPanel:
         self.design.fit(rows)
         self.fe.fit(rows)
         X = self.design.transform(rows)
-        y = np.log(_targets(rows)) - self.fe.level(rows)   # within-FE
+        y = np.log(_targets(rows)) - self.fe.level(rows)  # within-FE
         self.model = HistGradientBoostingRegressor(
-            max_depth=2, max_iter=120, learning_rate=0.05,
-            min_samples_leaf=4, l2_regularization=1.0, random_state=0)
+            max_depth=2,
+            max_iter=120,
+            learning_rate=0.05,
+            min_samples_leaf=4,
+            l2_regularization=1.0,
+            random_state=0,
+        )
         self.model.fit(X, y)
         return self
 
@@ -351,7 +390,8 @@ class GBMPanel:
 class PersistenceBaseline:
     """Наивный floor: выручка года t = ПОСЛЕДНЯЯ наблюдённая выручка эмитента в train
     (в родной валюте). Эмитент не в train → медиана train. Всегда конечный прогноз."""
-    name = 'persistence'
+
+    name = "persistence"
 
     def fit(self, rows):
         self.last_ = {}
@@ -359,7 +399,7 @@ class PersistenceBaseline:
             if r.has_target:
                 self.last_[r.issuer] = r.target_bn
         tg = [r.target_bn for r in rows if r.has_target]
-        self.global_ = float(np.median(tg)) if tg else float('nan')
+        self.global_ = float(np.median(tg)) if tg else float("nan")
         return self
 
     def predict(self, rows) -> np.ndarray:
@@ -368,7 +408,8 @@ class PersistenceBaseline:
 
 class IssuerMeanBaseline:
     """Наивный floor: выручка = среднее выручек эмитента по train (в родной валюте)."""
-    name = 'issuer_mean'
+
+    name = "issuer_mean"
 
     def fit(self, rows):
         by = {}
@@ -377,39 +418,49 @@ class IssuerMeanBaseline:
                 by.setdefault(r.issuer, []).append(r.target_bn)
         self.mean_ = {k: float(np.mean(v)) for k, v in by.items()}
         tg = [r.target_bn for r in rows if r.has_target]
-        self.global_ = float(np.median(tg)) if tg else float('nan')
+        self.global_ = float(np.median(tg)) if tg else float("nan")
         return self
 
     def predict(self, rows) -> np.ndarray:
         return np.array([self.mean_.get(r.issuer, self.global_) for r in rows], dtype=float)
 
 
-MODELS = {'structural_osl': StructuralOSL, 'elasticnet': lambda: LinearPanel('elasticnet'),
-          'ridge': lambda: LinearPanel('ridge'), 'hist_gbm': GBMPanel,
-          'persistence': PersistenceBaseline, 'issuer_mean': IssuerMeanBaseline}
+MODELS = {
+    "structural_osl": StructuralOSL,
+    "elasticnet": lambda: LinearPanel("elasticnet"),
+    "ridge": lambda: LinearPanel("ridge"),
+    "hist_gbm": GBMPanel,
+    "persistence": PersistenceBaseline,
+    "issuer_mean": IssuerMeanBaseline,
+}
 
 
 def mape(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     m = (~np.isnan(y_pred)) & (y_true != 0)
-    return float(np.mean(np.abs((y_pred[m] - y_true[m]) / y_true[m])) * 100) if m.any() else float('nan')
+    return (
+        float(np.mean(np.abs((y_pred[m] - y_true[m]) / y_true[m])) * 100)
+        if m.any()
+        else float("nan")
+    )
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--industry', default='metallurgy')
+    ap.add_argument("--industry", default="metallurgy")
     args = ap.parse_args()
     rows = osl_panel.load_panel(industry=args.industry)
     if not rows:
-        print('Панель пуста.'); return
+        print("Панель пуста.")
+        return
     rows = [r for r in rows if r.has_target]
     y = _targets(rows)
 
-    print('=' * 64)
-    print('  IN-SAMPLE (sanity; НЕ метрика качества — настоящая оценка в Stage D)')
-    print('=' * 64)
+    print("=" * 64)
+    print("  IN-SAMPLE (sanity; НЕ метрика качества — настоящая оценка в Stage D)")
+    print("=" * 64)
     for name, ctor in MODELS.items():
         m = ctor().fit(rows)
-        print(f'  {name:16s} MAPE_in={mape(y, m.predict(rows)):6.2f}%')
+        print(f"  {name:16s} MAPE_in={mape(y, m.predict(rows)):6.2f}%")
 
     # leave-last-period-out превью (train ≤2024, test 2025) — намёк на Stage D.
     # ВАЖНЫЙ CAVEAT: встроенные параметры StructuralOSL (PROFILES, PRICES_12M_2025)
@@ -423,13 +474,13 @@ def main():
     test = [r for r in rows if r.period_end and r.period_end.year == 2025]
     if train and test:
         yt = _targets(test)
-        print('\n' + '=' * 64)
-        print(f'  LEAVE-LAST-OUT превью: train≤2024 ({len(train)}) → test 2025 ({len(test)})')
-        print('=' * 64)
+        print("\n" + "=" * 64)
+        print(f"  LEAVE-LAST-OUT превью: train≤2024 ({len(train)}) → test 2025 ({len(test)})")
+        print("=" * 64)
         for name, ctor in MODELS.items():
             m = ctor().fit(train)
-            print(f'  {name:16s} MAPE_oos={mape(yt, m.predict(test)):6.2f}%')
+            print(f"  {name:16s} MAPE_oos={mape(yt, m.predict(test)):6.2f}%")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

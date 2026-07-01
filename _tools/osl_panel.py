@@ -30,34 +30,45 @@ from datetime import date
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-if hasattr(sys.stdout, 'reconfigure'):
-    sys.stdout.reconfigure(encoding='utf-8')
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
-PANEL_DIR = Path(__file__).parent / 'data' / 'panel'
-REVENUE_CSV = PANEL_DIR / 'panel_revenue.csv'
-PRICES_CSV = PANEL_DIR / 'panel_prices.csv'
+PANEL_DIR = Path(__file__).parent / "data" / "panel"
+REVENUE_CSV = PANEL_DIR / "panel_revenue.csv"
+PRICES_CSV = PANEL_DIR / "panel_prices.csv"
 
 # series → metal-ключ в PROFILES/PRICES_12M_2025 (osl_metallurgy.py)
 SERIES_TO_METAL = {
-    'lme_copper': 'copper',
-    'lme_nickel': 'nickel',
-    'lbma_gold': 'gold',
-    'lbma_palladium': 'palladium',
-    'lbma_platinum': 'platinum',
-    'steel_fob_bsea': 'steel_fob_chm',
+    "lme_copper": "copper",
+    "lme_nickel": "nickel",
+    "lbma_gold": "gold",
+    "lbma_palladium": "palladium",
+    "lbma_platinum": "platinum",
+    "steel_fob_bsea": "steel_fob_chm",
 }
 
 # Объёмные колонки — ОБЪЕДИНЕНИЕ по всем отраслям (имена различимы; строки отрасли,
 # где колонка не применима, оставляют её пустой → None). Расширяется при добавлении отрасли.
 VOL_COLUMNS = (
     # металлургия
-    'vol_copper_t', 'vol_nickel_t', 'vol_pd_oz', 'vol_pt_oz', 'vol_gold_oz', 'vol_steel_t',
+    "vol_copper_t",
+    "vol_nickel_t",
+    "vol_pd_oz",
+    "vol_pt_oz",
+    "vol_gold_oz",
+    "vol_steel_t",
     # нефтегаз
-    'vol_oil_t', 'vol_gas_mmcm', 'vol_refined_t', 'vol_lng_t', 'vol_condensate_t',
+    "vol_oil_t",
+    "vol_gas_mmcm",
+    "vol_refined_t",
+    "vol_lng_t",
+    "vol_condensate_t",
     # химия
-    'vol_fertilizer_kt', 'vol_polymer_kt',
+    "vol_fertilizer_kt",
+    "vol_polymer_kt",
     # энергетика
-    'vol_generation_twh', 'vol_capacity_gw',
+    "vol_generation_twh",
+    "vol_capacity_gw",
 )
 
 
@@ -65,10 +76,11 @@ VOL_COLUMNS = (
 # ПАРСЕРЫ ЯЧЕЕК (пустая ячейка = легитимный NaN/None, не ошибка)
 # ============================================================
 
+
 def _f(val: str) -> Optional[float]:
     """Float или None для пустой ячейки."""
-    val = (val or '').strip()
-    if val == '' or val.lower() in ('na', 'nan', 'none', 'null'):
+    val = (val or "").strip()
+    if val == "" or val.lower() in ("na", "nan", "none", "null"):
         return None
     return float(val)
 
@@ -79,21 +91,22 @@ def _i(val: str) -> Optional[int]:
 
 
 def _b(val: str) -> bool:
-    return (val or '').strip().lower() in ('1', 'true', 'yes', 'да', 't')
+    return (val or "").strip().lower() in ("1", "true", "yes", "да", "t")
 
 
 def _d(val: str) -> Optional[date]:
     """ISO-дата YYYY-MM-DD или None."""
-    val = (val or '').strip()
+    val = (val or "").strip()
     if not val:
         return None
-    y, m, d = (int(x) for x in val.split('-'))
+    y, m, d = (int(x) for x in val.split("-"))
     return date(y, m, d)
 
 
 # ============================================================
 # СТРУКТУРЫ
 # ============================================================
+
 
 @dataclass
 class PricePoint:
@@ -105,9 +118,9 @@ class PricePoint:
     averaging: str
     window_start: Optional[date]
     window_end: Optional[date]
-    source_url: str = ''
-    source: str = ''
-    confidence: str = ''
+    source_url: str = ""
+    source: str = ""
+    confidence: str = ""
 
 
 @dataclass
@@ -125,9 +138,9 @@ class PanelRow:
     revenue_currency: str
     report_date: Optional[date]
     volumes: Dict[str, Optional[float]] = field(default_factory=dict)
-    source_url: str = ''
-    source_quote: str = ''
-    confidence: str = ''
+    source_url: str = ""
+    source_quote: str = ""
+    confidence: str = ""
     # приджойненные цены: metal-ключ → avg_value (USD); 'usd_rub' → FX
     prices: Dict[str, float] = field(default_factory=dict)
 
@@ -145,27 +158,30 @@ class PanelRow:
 # ЗАГРУЗКА
 # ============================================================
 
+
 def load_prices(path: Path = PRICES_CSV) -> List[PricePoint]:
     if not path.exists():
         return []
     out: List[PricePoint] = []
-    with path.open(encoding='utf-8-sig', newline='') as fh:
+    with path.open(encoding="utf-8-sig", newline="") as fh:
         for r in csv.DictReader(fh):
-            if not (r.get('series') or '').strip():
+            if not (r.get("series") or "").strip():
                 continue
-            out.append(PricePoint(
-                period=r['period'].strip(),
-                period_end=_d(r.get('period_end', '')),
-                series=r['series'].strip(),
-                avg_value=float(r['avg_value']),
-                unit=(r.get('unit') or '').strip(),
-                averaging=(r.get('averaging') or '').strip(),
-                window_start=_d(r.get('window_start', '')),
-                window_end=_d(r.get('window_end', '')),
-                source_url=(r.get('source_url') or '').strip(),
-                source=(r.get('source') or '').strip(),
-                confidence=(r.get('confidence') or '').strip(),
-            ))
+            out.append(
+                PricePoint(
+                    period=r["period"].strip(),
+                    period_end=_d(r.get("period_end", "")),
+                    series=r["series"].strip(),
+                    avg_value=float(r["avg_value"]),
+                    unit=(r.get("unit") or "").strip(),
+                    averaging=(r.get("averaging") or "").strip(),
+                    window_start=_d(r.get("window_start", "")),
+                    window_end=_d(r.get("window_end", "")),
+                    source_url=(r.get("source_url") or "").strip(),
+                    source=(r.get("source") or "").strip(),
+                    confidence=(r.get("confidence") or "").strip(),
+                )
+            )
     return out
 
 
@@ -183,38 +199,38 @@ def _prices_by_period(prices: List[PricePoint]) -> Dict[str, Dict[str, float]]:
     return by
 
 
-def load_panel(industry: Optional[str] = None,
-               revenue_path: Path = REVENUE_CSV,
-               prices_path: Path = PRICES_CSV) -> List[PanelRow]:
+def load_panel(
+    industry: Optional[str] = None, revenue_path: Path = REVENUE_CSV, prices_path: Path = PRICES_CSV
+) -> List[PanelRow]:
     """Читает panel_revenue.csv, приджойнивает цены по совпадению `period`."""
     if not revenue_path.exists():
         return []
     price_map = _prices_by_period(load_prices(prices_path))
     rows: List[PanelRow] = []
-    with revenue_path.open(encoding='utf-8-sig', newline='') as fh:
+    with revenue_path.open(encoding="utf-8-sig", newline="") as fh:
         for r in csv.DictReader(fh):
-            if not (r.get('issuer') or '').strip():
+            if not (r.get("issuer") or "").strip():
                 continue
-            if industry and (r.get('industry') or '').strip() != industry:
+            if industry and (r.get("industry") or "").strip() != industry:
                 continue
             row = PanelRow(
-                issuer=r['issuer'].strip(),
-                industry=(r.get('industry') or '').strip(),
-                period=(r.get('period') or '').strip(),
-                period_end=_d(r.get('period_end', '')),
-                period_start=_d(r.get('period_start', '')),
-                period_kind=(r.get('period_kind') or '').strip(),
-                is_cumulative=_b(r.get('is_cumulative', '')),
-                period_months=_i(r.get('period_months', '')),
-                revenue_rub_bn=_f(r.get('revenue_rub_bn', '')),
-                revenue_usd_bn=_f(r.get('revenue_usd_bn', '')),
-                revenue_currency=(r.get('revenue_currency') or '').strip(),
-                report_date=_d(r.get('report_date', '')),
-                volumes={c: _f(r.get(c, '')) for c in VOL_COLUMNS},
-                source_url=(r.get('source_url') or '').strip(),
-                source_quote=(r.get('source_quote') or '').strip(),
-                confidence=(r.get('confidence') or '').strip(),
-                prices=dict(price_map.get((r.get('period') or '').strip(), {})),
+                issuer=r["issuer"].strip(),
+                industry=(r.get("industry") or "").strip(),
+                period=(r.get("period") or "").strip(),
+                period_end=_d(r.get("period_end", "")),
+                period_start=_d(r.get("period_start", "")),
+                period_kind=(r.get("period_kind") or "").strip(),
+                is_cumulative=_b(r.get("is_cumulative", "")),
+                period_months=_i(r.get("period_months", "")),
+                revenue_rub_bn=_f(r.get("revenue_rub_bn", "")),
+                revenue_usd_bn=_f(r.get("revenue_usd_bn", "")),
+                revenue_currency=(r.get("revenue_currency") or "").strip(),
+                report_date=_d(r.get("report_date", "")),
+                volumes={c: _f(r.get(c, "")) for c in VOL_COLUMNS},
+                source_url=(r.get("source_url") or "").strip(),
+                source_quote=(r.get("source_quote") or "").strip(),
+                confidence=(r.get("confidence") or "").strip(),
+                prices=dict(price_map.get((r.get("period") or "").strip(), {})),
             )
             rows.append(row)
     return rows
@@ -224,6 +240,7 @@ def load_panel(industry: Optional[str] = None,
 # ХЕЛПЕРЫ ДЛЯ МОДЕЛЕЙ / ВАЛИДАЦИИ
 # ============================================================
 
+
 def period_order(rows: List[PanelRow]) -> List[str]:
     """Уникальные периоды, отсортированные по period_end (хронологически)."""
     seen: Dict[str, Optional[date]] = {}
@@ -232,22 +249,21 @@ def period_order(rows: List[PanelRow]) -> List[str]:
     return sorted(seen, key=lambda p: (seen[p] is None, seen[p] or date.min, p))
 
 
-def to_matrix(rows: List[PanelRow],
-              feature_cols: List[str]) -> Tuple[List[List[Optional[float]]],
-                                                List[Optional[float]],
-                                                List[dict]]:
+def to_matrix(
+    rows: List[PanelRow], feature_cols: List[str]
+) -> Tuple[List[List[Optional[float]]], List[Optional[float]], List[dict]]:
     """numpy-free матрица. feature_cols понимает:
-       - 'vol_*' (объёмы), 'price:<metal>' (приджойненная цена), 'usd_rub',
-         'period_months'. Возвращает (X, y=target_bn, meta-строки)."""
+    - 'vol_*' (объёмы), 'price:<metal>' (приджойненная цена), 'usd_rub',
+      'period_months'. Возвращает (X, y=target_bn, meta-строки)."""
     X, y, meta = [], [], []
     for r in rows:
         feats: List[Optional[float]] = []
         for c in feature_cols:
-            if c.startswith('price:'):
-                feats.append(r.prices.get(c.split(':', 1)[1]))
-            elif c == 'usd_rub':
-                feats.append(r.prices.get('usd_rub'))
-            elif c == 'period_months':
+            if c.startswith("price:"):
+                feats.append(r.prices.get(c.split(":", 1)[1]))
+            elif c == "usd_rub":
+                feats.append(r.prices.get("usd_rub"))
+            elif c == "period_months":
                 feats.append(float(r.period_months) if r.period_months else None)
             elif c in VOL_COLUMNS:
                 feats.append(r.volumes.get(c))
@@ -255,37 +271,47 @@ def to_matrix(rows: List[PanelRow],
                 feats.append(None)
         X.append(feats)
         y.append(r.target_bn)
-        meta.append({'issuer': r.issuer, 'period': r.period,
-                     'currency': r.revenue_currency, 'confidence': r.confidence})
+        meta.append(
+            {
+                "issuer": r.issuer,
+                "period": r.period,
+                "currency": r.revenue_currency,
+                "confidence": r.confidence,
+            }
+        )
     return X, y, meta
 
 
 def summary(rows: List[PanelRow]) -> str:
     if not rows:
-        return '  (панель пуста — заполни data/panel/panel_revenue.csv)'
+        return "  (панель пуста — заполни data/panel/panel_revenue.csv)"
     issuers = sorted({r.issuer for r in rows})
     periods = period_order(rows)
-    lines = [f'  Строк: {len(rows)} | эмитентов: {len(issuers)} | периодов: {len(periods)}',
-             f'  Периоды: {", ".join(periods)}', '']
+    lines = [
+        f"  Строк: {len(rows)} | эмитентов: {len(issuers)} | периодов: {len(periods)}",
+        f'  Периоды: {", ".join(periods)}',
+        "",
+    ]
     for iss in issuers:
         ir = [r for r in rows if r.issuer == iss]
         with_t = [r for r in ir if r.has_target]
         with_p = [r for r in ir if r.prices]
-        lines.append(f'  {iss:12s} — {len(ir)} строк, {len(with_t)} с таргетом, '
-                     f'{len(with_p)} с ценами')
-    return '\n'.join(lines)
+        lines.append(
+            f"  {iss:12s} — {len(ir)} строк, {len(with_t)} с таргетом, " f"{len(with_p)} с ценами"
+        )
+    return "\n".join(lines)
 
 
 def main():
-    ap = argparse.ArgumentParser(description='Сводка панели данных металлургии')
-    ap.add_argument('--industry', default=None)
+    ap = argparse.ArgumentParser(description="Сводка панели данных металлургии")
+    ap.add_argument("--industry", default=None)
     args = ap.parse_args()
     rows = load_panel(industry=args.industry)
-    print('=' * 64)
-    print('  ПАНЕЛЬ ДАННЫХ — Макро-радар DS-слой')
-    print('=' * 64)
+    print("=" * 64)
+    print("  ПАНЕЛЬ ДАННЫХ — Макро-радар DS-слой")
+    print("=" * 64)
     print(summary(rows))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

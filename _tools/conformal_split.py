@@ -29,11 +29,11 @@ import numpy as np
 TOOLS = Path(__file__).parent
 sys.path.insert(0, str(TOOLS))
 from conformal_prediction import PredictionInterval  # reuse
-import osl_panel        # noqa: E402
+import osl_panel  # noqa: E402
 import osl_models as Mo  # noqa: E402
 
-if hasattr(sys.stdout, 'reconfigure'):
-    sys.stdout.reconfigure(encoding='utf-8')
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 
 def relative_residuals(model, calib_rows) -> np.ndarray:
@@ -60,8 +60,8 @@ def conformal_quantile(residuals: np.ndarray, alpha: float = 0.10):
         return None
     level = np.ceil((n + 1) * (1 - alpha)) / n
     if level >= 1.0:
-        return float(np.max(residuals))   # уровень >1 на малом n → самый широкий остаток
-    return float(np.quantile(residuals, level, method='higher'))
+        return float(np.max(residuals))  # уровень >1 на малом n → самый широкий остаток
+    return float(np.quantile(residuals, level, method="higher"))
 
 
 def split_conformal(model_ctor, proper_train, calib, test, alpha: float = 0.10):
@@ -84,17 +84,30 @@ def split_conformal(model_ctor, proper_train, calib, test, alpha: float = 0.10):
             inside += int(cov)
         metric = None
         if cov is not None:
-            metric = 'INSIDE' if cov else ('BELOW' if r.target_bn < low else 'ABOVE')
-        intervals.append(PredictionInterval(
-            f'{r.issuer} {r.period}', float(p), float(low), float(high),
-            q * 200.0, r.target_bn, cov, metric))
-    return {'q': q, 'intervals': intervals,
-            'coverage_rate': (inside / total if total else None),
-            'n_calib': int(len(resid)), 'n_test': int(total), 'inside': int(inside)}
+            metric = "INSIDE" if cov else ("BELOW" if r.target_bn < low else "ABOVE")
+        intervals.append(
+            PredictionInterval(
+                f"{r.issuer} {r.period}",
+                float(p),
+                float(low),
+                float(high),
+                q * 200.0,
+                r.target_bn,
+                cov,
+                metric,
+            )
+        )
+    return {
+        "q": q,
+        "intervals": intervals,
+        "coverage_rate": (inside / total if total else None),
+        "n_calib": int(len(resid)),
+        "n_test": int(total),
+        "inside": int(inside),
+    }
 
 
-def temporal_holdout(rows, model_ctor, alpha=0.10,
-                     train_max=2022, calib_year=2023):
+def temporal_holdout(rows, model_ctor, alpha=0.10, train_max=2022, calib_year=2023):
     """Удобная обёртка: proper-train ≤ train_max, calib = calib_year, test = годы > calib_year."""
     rows = [r for r in rows if r.has_target and r.period_end]
     proper = [r for r in rows if r.period_end.year <= train_max]
@@ -105,31 +118,33 @@ def temporal_holdout(rows, model_ctor, alpha=0.10,
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--industry', default='metallurgy')
-    ap.add_argument('--alpha', type=float, default=0.10)
-    ap.add_argument('--model', default='structural_osl', choices=list(Mo.MODELS))
+    ap.add_argument("--industry", default="metallurgy")
+    ap.add_argument("--alpha", type=float, default=0.10)
+    ap.add_argument("--model", default="structural_osl", choices=list(Mo.MODELS))
     args = ap.parse_args()
     rows = osl_panel.load_panel(industry=args.industry)
     res = temporal_holdout(rows, Mo.MODELS[args.model], alpha=args.alpha)
-    print('=' * 64)
-    print(f'  SPLIT-CONFORMAL (out-of-sample) — {args.industry} / {args.model}')
-    print('=' * 64)
-    print(f'  α={args.alpha} → цель покрытия {100*(1-args.alpha):.0f}%')
+    print("=" * 64)
+    print(f"  SPLIT-CONFORMAL (out-of-sample) — {args.industry} / {args.model}")
+    print("=" * 64)
+    print(f"  α={args.alpha} → цель покрытия {100*(1-args.alpha):.0f}%")
     print(f'  proper-train ≤2022 | calib 2023 (n={res["n_calib"]}) | test >2023')
-    q_str = f'{res["q"]:.3f}' if res['q'] is not None else '—'
-    print(f'  q (относит. полуширина) = {q_str}')
-    if res['coverage_rate'] is not None:
+    q_str = f'{res["q"]:.3f}' if res["q"] is not None else "—"
+    print(f"  q (относит. полуширина) = {q_str}")
+    if res["coverage_rate"] is not None:
         print(f'  Покрытие OOS: {res["inside"]}/{res["n_test"]} = {100*res["coverage_rate"]:.0f}%')
     else:
-        print('  нет test-строк')
+        print("  нет test-строк")
     print()
-    for iv in res['intervals']:
+    for iv in res["intervals"]:
         if iv is None:
             continue
-        mark = {'INSIDE': '✓', 'BELOW': '↓', 'ABOVE': '↑'}.get(iv.coverage_metric, '?')
-        print(f'  {mark} {iv.company:18s} ŷ={iv.predicted_base:8.1f} '
-              f'[{iv.predicted_low:7.1f}; {iv.predicted_high:7.1f}] факт={iv.actual}')
+        mark = {"INSIDE": "✓", "BELOW": "↓", "ABOVE": "↑"}.get(iv.coverage_metric, "?")
+        print(
+            f"  {mark} {iv.company:18s} ŷ={iv.predicted_base:8.1f} "
+            f"[{iv.predicted_low:7.1f}; {iv.predicted_high:7.1f}] факт={iv.actual}"
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

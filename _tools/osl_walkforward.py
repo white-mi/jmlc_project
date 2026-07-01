@@ -27,18 +27,19 @@ from scipy import stats
 
 TOOLS = Path(__file__).parent
 sys.path.insert(0, str(TOOLS))
-import osl_panel       # noqa: E402
+import osl_panel  # noqa: E402
 import osl_models as Mo  # noqa: E402
 
-if hasattr(sys.stdout, 'reconfigure'):
-    sys.stdout.reconfigure(encoding='utf-8')
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
-OUT = TOOLS / 'output' / 'osl_metrics'
+OUT = TOOLS / "output" / "osl_metrics"
 
 
 # ============================================================
 # Walk-forward
 # ============================================================
+
 
 def walk_forward(rows, model_ctors):
     """Возвращает dict: model_name → list[(issuer, period, year, actual, pred)] по всем фолдам.
@@ -47,14 +48,14 @@ def walk_forward(rows, model_ctors):
     years = sorted({r.period_end.year for r in rows})
     preds = {name: [] for name in model_ctors}
     fold_log = []
-    for t in years[1:]:                       # с 2-го периода (нужен хотя бы 1 train-год)
+    for t in years[1:]:  # с 2-го периода (нужен хотя бы 1 train-год)
         train = [r for r in rows if r.period_end.year < t]
         test = [r for r in rows if r.period_end.year == t]
         if not train or not test:
             continue
         # ЛИК-ГАРД: ни одна train-строка не из будущего теста
         assert all(r.period_end.year < t for r in train)
-        fold_log.append({'test_year': t, 'n_train': len(train), 'n_test': len(test)})
+        fold_log.append({"test_year": t, "n_train": len(train), "n_test": len(test)})
         for name, ctor in model_ctors.items():
             model = ctor().fit(train)
             yhat = model.predict(test)
@@ -67,6 +68,7 @@ def walk_forward(rows, model_ctors):
 # Метрики
 # ============================================================
 
+
 def _err_arrays(records):
     """(actual, pred) → только строки с конечным прогнозом."""
     a = np.array([x[3] for x in records], dtype=float)
@@ -78,12 +80,14 @@ def _err_arrays(records):
 def metrics_for(records):
     a, p, _ = _err_arrays(records)
     if len(a) == 0:
-        return {'n': 0, 'mae': None, 'mape': None, 'rmse': None}
+        return {"n": 0, "mae": None, "mape": None, "rmse": None}
     err = p - a
-    return {'n': int(len(a)),
-            'mae': float(np.mean(np.abs(err))),
-            'mape': float(np.mean(np.abs(err / a)) * 100),
-            'rmse': float(np.sqrt(np.mean(err ** 2)))}
+    return {
+        "n": int(len(a)),
+        "mae": float(np.mean(np.abs(err))),
+        "mape": float(np.mean(np.abs(err / a)) * 100),
+        "rmse": float(np.sqrt(np.mean(err**2))),
+    }
 
 
 def _common_keys(preds):
@@ -98,19 +102,22 @@ def _common_keys(preds):
     return set.intersection(*keysets) if keysets else set()
 
 
-def _pick_base(preds, base='structural_osl'):
+def _pick_base(preds, base="structural_osl"):
     """Референс для skill/DM. Если базовая модель не дала НИ ОДНОГО прогноза (structural
     отключён для нефтегаза — нет per-year НДПИ) → наивный persistence как честный нулевой
     уровень. Для металлургии structural предсказывает → база не меняется."""
     if base in preds and any(np.isfinite(p) for (*_x, p) in preds[base]):
         return base
-    return 'persistence' if 'persistence' in preds else base
+    return "persistence" if "persistence" in preds else base
 
 
 def _abs_err_on_keys(records, keys):
     """|ошибка %| по ключам в фикс. порядке (для DM)."""
-    d = {(i, per): abs((p - a) / a) for (i, per, _t, a, p) in records
-         if np.isfinite(p) and np.isfinite(a) and a != 0}
+    d = {
+        (i, per): abs((p - a) / a)
+        for (i, per, _t, a, p) in records
+        if np.isfinite(p) and np.isfinite(a) and a != 0
+    }
     ordered = sorted(keys)
     return np.array([d[k] for k in ordered if k in d], dtype=float)
 
@@ -144,14 +151,22 @@ def evaluate(preds):
         m = metrics_for(recs)
         ae = _abs_err_on_keys(recs, common)
         mape_common = float(np.mean(ae) * 100) if len(ae) else None
-        skill = (1 - mape_common / base_mape_common
-                 if (mape_common is not None and base_mape_common) else None)
+        skill = (
+            1 - mape_common / base_mape_common
+            if (mape_common is not None and base_mape_common)
+            else None
+        )
         if name == base or len(ae) == 0 or len(base_ae) == 0:
             dm_stat, dm_p = (None, None)
         else:
             dm_stat, dm_p = diebold_mariano(base_ae, ae)  # >0 ⇒ base хуже (больше ошибка)
-        summary[name] = {**m, 'mape_common': mape_common, 'skill_vs_struct': skill,
-                         'dm_stat_vs_struct': dm_stat, 'dm_p_vs_struct': dm_p}
+        summary[name] = {
+            **m,
+            "mape_common": mape_common,
+            "skill_vs_struct": skill,
+            "dm_stat_vs_struct": dm_stat,
+            "dm_p_vs_struct": dm_p,
+        }
     return summary, sorted(common)
 
 
@@ -159,72 +174,97 @@ def evaluate(preds):
 # Отчёт
 # ============================================================
 
-def _fmt(v, f='.2f'):
-    return '—' if v is None else format(v, f)
+
+def _fmt(v, f=".2f"):
+    return "—" if v is None else format(v, f)
 
 
-def render_report(industry, summary, fold_log, common, n_total, base='structural_osl'):
-    bl = 'struct' if base == 'structural_osl' else base
-    struct_absent = summary.get('structural_osl', {}).get('n', 0) == 0
-    lines = [f'# Walk-forward валидация OSL — {industry}', '',
-             '> Expanding-window: train = все годы < t, test = год t. Сплит по времени, '
-             'группировка по периоду. Out-of-sample.', '',
-             '**Фолды:** ' + '; '.join(f"test {f['test_year']} "
-                                        f"(train {f['n_train']} → test {f['n_test']})"
-                                        for f in fold_log),
-             f'**Общий набор для skill/DM (все модели дали прогноз):** {len(common)} строк '
-             f'из {n_total} тест-строк.', '',
-             f'| model | n | MAE | MAPE % | RMSE | MAPE_common % | skill_vs_{bl} | DM p (vs {bl}) |',
-             '|---|---|---|---|---|---|---|---|']
-    order = ['structural_osl', 'ridge', 'elasticnet', 'hist_gbm']
+def render_report(industry, summary, fold_log, common, n_total, base="structural_osl"):
+    bl = "struct" if base == "structural_osl" else base
+    struct_absent = summary.get("structural_osl", {}).get("n", 0) == 0
+    lines = [
+        f"# Walk-forward валидация OSL — {industry}",
+        "",
+        "> Expanding-window: train = все годы < t, test = год t. Сплит по времени, "
+        "группировка по периоду. Out-of-sample.",
+        "",
+        "**Фолды:** "
+        + "; ".join(
+            f"test {f['test_year']} " f"(train {f['n_train']} → test {f['n_test']})"
+            for f in fold_log
+        ),
+        f"**Общий набор для skill/DM (все модели дали прогноз):** {len(common)} строк "
+        f"из {n_total} тест-строк.",
+        "",
+        f"| model | n | MAE | MAPE % | RMSE | MAPE_common % | skill_vs_{bl} | DM p (vs {bl}) |",
+        "|---|---|---|---|---|---|---|---|",
+    ]
+    order = ["structural_osl", "ridge", "elasticnet", "hist_gbm"]
     for name in [n for n in order if n in summary] + [n for n in summary if n not in order]:
         s = summary[name]
-        lines.append(f"| {name} | {s['n']} | {_fmt(s['mae'])} | {_fmt(s['mape'])} | "
-                     f"{_fmt(s['rmse'])} | {_fmt(s['mape_common'])} | "
-                     f"{_fmt(s['skill_vs_struct'], '+.3f')} | {_fmt(s['dm_p_vs_struct'], '.3f')} |")
-    lines += ['',
-              f'- **Базовая модель сравнения:** `{base}`. '
-              + ('StructuralOSL отключён для нефтегаза (нет годовых НДПИ/демпфера — Фаза C) → '
-                 'референс = наивный `persistence`; skill>0 ⇒ модель точнее наивного floor.'
-                 if struct_absent else
-                 'StructuralOSL — интерпретируемый структурный бейзлайн.'),
-              f'- **skill_vs_{bl}** = 1 − MAPE_model/MAPE_{bl} на общем наборе ({len(common)} строк, '
-              'где все предсказывающие модели дали прогноз); >0 ⇒ точнее базовой.',
-              '- **DM p** — Diebold–Mariano (двусторонний, t, df=n−1) по |ошибкам%| база vs модель; '
-              'p<0.05 ⇒ различие точности значимо (на N столь малом — ориентир, не доказательство).',
-              '- Модель, давшая NaN на gap-строке (нет объёма), не штрафуется: её n меньше, '
-              'сравнение skill/DM — по общему набору (MAPE_common).']
-    return '\n'.join(lines)
+        lines.append(
+            f"| {name} | {s['n']} | {_fmt(s['mae'])} | {_fmt(s['mape'])} | "
+            f"{_fmt(s['rmse'])} | {_fmt(s['mape_common'])} | "
+            f"{_fmt(s['skill_vs_struct'], '+.3f')} | {_fmt(s['dm_p_vs_struct'], '.3f')} |"
+        )
+    lines += [
+        "",
+        f"- **Базовая модель сравнения:** `{base}`. "
+        + (
+            "StructuralOSL отключён для нефтегаза (нет годовых НДПИ/демпфера — Фаза C) → "
+            "референс = наивный `persistence`; skill>0 ⇒ модель точнее наивного floor."
+            if struct_absent
+            else "StructuralOSL — интерпретируемый структурный бейзлайн."
+        ),
+        f"- **skill_vs_{bl}** = 1 − MAPE_model/MAPE_{bl} на общем наборе ({len(common)} строк, "
+        "где все предсказывающие модели дали прогноз); >0 ⇒ точнее базовой.",
+        "- **DM p** — Diebold–Mariano (двусторонний, t, df=n−1) по |ошибкам%| база vs модель; "
+        "p<0.05 ⇒ различие точности значимо (на N столь малом — ориентир, не доказательство).",
+        "- Модель, давшая NaN на gap-строке (нет объёма), не штрафуется: её n меньше, "
+        "сравнение skill/DM — по общему набору (MAPE_common).",
+    ]
+    return "\n".join(lines)
 
 
-def run(industry='metallurgy'):
+def run(industry="metallurgy"):
     rows = osl_panel.load_panel(industry=industry)
     rows = [r for r in rows if r.has_target and r.period_end]
     if len(rows) < 8:
-        print('Панель мала — walk-forward пропущен.'); return None
+        print("Панель мала — walk-forward пропущен.")
+        return None
     preds, fold_log = walk_forward(rows, Mo.MODELS)
     summary, common = evaluate(preds)
     base = _pick_base(preds)
     n_total = max(len(v) for v in preds.values())
     OUT.mkdir(parents=True, exist_ok=True)
     md = render_report(industry, summary, fold_log, common, n_total, base)
-    (OUT / f'{industry}.md').write_text(md, encoding='utf-8')
-    (OUT / f'{industry}_metrics.json').write_text(
-        json.dumps({'summary': summary, 'folds': fold_log, 'base': base,
-                    'n_common': len(common), 'n_total': n_total}, ensure_ascii=False, indent=2),
-        encoding='utf-8')
+    (OUT / f"{industry}.md").write_text(md, encoding="utf-8")
+    (OUT / f"{industry}_metrics.json").write_text(
+        json.dumps(
+            {
+                "summary": summary,
+                "folds": fold_log,
+                "base": base,
+                "n_common": len(common),
+                "n_total": n_total,
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
     return summary, md
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--industry', default='metallurgy')
+    ap.add_argument("--industry", default="metallurgy")
     args = ap.parse_args()
     res = run(args.industry)
     if res:
         print(res[1])
-        print(f'\n→ output/osl_metrics/{args.industry}.md + _metrics.json')
+        print(f"\n→ output/osl_metrics/{args.industry}.md + _metrics.json")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

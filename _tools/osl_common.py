@@ -14,8 +14,9 @@ from typing import Dict, Optional
 @dataclass
 class FXRate:
     """Средний курс USD/RUB за период (для конверсии выручки)."""
+
     avg_usd_rub: float
-    period: str = ''
+    period: str = ""
 
 
 @dataclass
@@ -26,8 +27,9 @@ class RevenuePredict:
     рублёвые (розница, энергетика, фарма, ОИВ) — rub/breakdown_rub. Незаполненные
     поля остаются None.
     """
+
     company: str
-    period: str = ''
+    period: str = ""
     predicted_usd_bn: Optional[float] = None
     predicted_rub_bn: Optional[float] = None
     breakdown_usd_bn: Optional[Dict[str, float]] = None

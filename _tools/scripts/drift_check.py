@@ -20,10 +20,10 @@ from pathlib import Path
 TOOLS_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(TOOLS_DIR))
 
-if hasattr(sys.stdout, 'reconfigure'):
-    sys.stdout.reconfigure(encoding='utf-8')
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
-LOG_PATH = TOOLS_DIR / 'calibration' / 'drift_log.md'
+LOG_PATH = TOOLS_DIR / "calibration" / "drift_log.md"
 
 
 def main():
@@ -32,46 +32,53 @@ def main():
     # Применяем сохранённые калибровки перед сравнением
     apply_all_calibrations()
 
-    modules = ['osl_metallurgy', 'osl_oilgas', 'osl_chemistry',
-                'osl_pharma', 'osl_retail', 'osl_energy', 'osl_oiv']
+    modules = [
+        "osl_metallurgy",
+        "osl_oilgas",
+        "osl_chemistry",
+        "osl_pharma",
+        "osl_retail",
+        "osl_energy",
+        "osl_oiv",
+    ]
 
-    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M')
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
     flags = []
-    output_lines = [f'\n## {timestamp}\n']
+    output_lines = [f"\n## {timestamp}\n"]
 
     for module in modules:
         result = drift_check(module)
-        if 'error' in result:
+        if "error" in result:
             output_lines.append(f'- ⚠️ {module}: {result["error"]}')
             continue
         for company, info in result.items():
-            flag = info.get('flag', 'OK')
-            drift_pct = info.get('drift_pct', 0)
-            current = info.get('current_mae', 0)
-            mark = '✅' if flag == 'OK' else '🔴'
+            flag = info.get("flag", "OK")
+            drift_pct = info.get("drift_pct", 0)
+            current = info.get("current_mae", 0)
+            mark = "✅" if flag == "OK" else "🔴"
             output_lines.append(
-                f'- {mark} {module}.{company}: '
-                f'current_mae={current:.1f}%, drift={drift_pct:+.1f}% [{flag}]'
+                f"- {mark} {module}.{company}: "
+                f"current_mae={current:.1f}%, drift={drift_pct:+.1f}% [{flag}]"
             )
-            if flag != 'OK':
-                flags.append(f'{module}.{company}')
+            if flag != "OK":
+                flags.append(f"{module}.{company}")
 
-    text = '\n'.join(output_lines) + '\n'
+    text = "\n".join(output_lines) + "\n"
 
     # Append to log
     if LOG_PATH.exists():
-        existing = LOG_PATH.read_text(encoding='utf-8')
+        existing = LOG_PATH.read_text(encoding="utf-8")
     else:
-        existing = '# OSL Drift Log\n\nЕженедельный мониторинг качества калибровки. Запускается через cron / Task Scheduler.\n'
-    LOG_PATH.write_text(existing + text, encoding='utf-8')
+        existing = "# OSL Drift Log\n\nЕженедельный мониторинг качества калибровки. Запускается через cron / Task Scheduler.\n"
+    LOG_PATH.write_text(existing + text, encoding="utf-8")
 
     # Console output
     print(text)
     if flags:
         print(f'\n🔴 NEEDS_RECALIBRATION: {", ".join(flags)}')
         sys.exit(1)
-    print('\n✅ All drift checks passed')
+    print("\n✅ All drift checks passed")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -29,8 +29,8 @@ from dataclasses import dataclass
 
 from osl_common import RevenuePredict  # S3.1: общая структура
 
-if hasattr(sys.stdout, 'reconfigure'):
-    sys.stdout.reconfigure(encoding='utf-8')
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 
 @dataclass
@@ -39,14 +39,14 @@ class GenerationData:
     generation_twh: float
     capacity_gw: float
     period: str
-    note: str = ''
+    note: str = ""
 
 
 @dataclass
 class TariffData:
     avg_tariff_rub_per_mwh: float
     capacity_payment_per_gw_year: float = 0
-    period: str = '12M2025'
+    period: str = "12M2025"
 
 
 @dataclass
@@ -55,7 +55,7 @@ class CompanyProfile:
     business_model: str
     tariff_multiplier: float = 1.0
     other_revenue_abs_rub_bn: float = 0.0
-    notes: str = ''
+    notes: str = ""
 
 
 # RevenuePredict — из osl_common (S3.1)
@@ -74,20 +74,41 @@ TARIFFS_2025 = TariffData(
     capacity_payment_per_gw_year=1_800_000_000,
 )
 
-INTER_RAO = GenerationData('Интер РАО', generation_twh=130, capacity_gw=33, period='12M2025',
-                            note='Гос.генерация + экспорт-импорт + сбытовой блок')
+INTER_RAO = GenerationData(
+    "Интер РАО",
+    generation_twh=130,
+    capacity_gw=33,
+    period="12M2025",
+    note="Гос.генерация + экспорт-импорт + сбытовой блок",
+)
 
-RUSHYDRO = GenerationData('РусГидро', generation_twh=140, capacity_gw=38, period='12M2025',
-                            note='ГЭС + ДВ генерация (тепло+эл)')
+RUSHYDRO = GenerationData(
+    "РусГидро",
+    generation_twh=140,
+    capacity_gw=38,
+    period="12M2025",
+    note="ГЭС + ДВ генерация (тепло+эл)",
+)
 
-UNIPRO = GenerationData('Юнипро', generation_twh=53, capacity_gw=11, period='12M2025',
-                          note='Тепловая генерация')
+UNIPRO = GenerationData(
+    "Юнипро", generation_twh=53, capacity_gw=11, period="12M2025", note="Тепловая генерация"
+)
 
-T_PLUS = GenerationData('Т Плюс', generation_twh=62, capacity_gw=15.5, period='12M2025',
-                          note='Тепло + электр.; Уралтэк-цикл')
+T_PLUS = GenerationData(
+    "Т Плюс",
+    generation_twh=62,
+    capacity_gw=15.5,
+    period="12M2025",
+    note="Тепло + электр.; Уралтэк-цикл",
+)
 
-ROSATOM_NUCLEAR = GenerationData('Росатом-Энергоатом', generation_twh=210, capacity_gw=29, period='12M2025',
-                                    note='АЭС, низкая себестоимость')
+ROSATOM_NUCLEAR = GenerationData(
+    "Росатом-Энергоатом",
+    generation_twh=210,
+    capacity_gw=29,
+    period="12M2025",
+    note="АЭС, низкая себестоимость",
+)
 
 
 # other_revenue_abs_rub_bn — известная из IR структура revenue, не покрытая generation × tariff:
@@ -98,44 +119,49 @@ ROSATOM_NUCLEAR = GenerationData('Росатом-Энергоатом', generati
 #   - Росатом: АЭС с низким margin; других сегментов мало
 
 PROFILES = {
-    'Интер РАО': CompanyProfile(
-        name='Интер РАО', business_model='integrated',
+    "Интер РАО": CompanyProfile(
+        name="Интер РАО",
+        business_model="integrated",
         tariff_multiplier=1.0,
         other_revenue_abs_rub_bn=1200.0,
-        notes='Сбыт ≈50% выручки, экспорт-импорт; ЧД/EBITDA -2.48× нетто-кэш'
+        notes="Сбыт ≈50% выручки, экспорт-импорт; ЧД/EBITDA -2.48× нетто-кэш",
     ),
-    'РусГидро': CompanyProfile(
-        name='РусГидро', business_model='generation',
+    "РусГидро": CompanyProfile(
+        name="РусГидро",
+        business_model="generation",
         tariff_multiplier=1.0,
         other_revenue_abs_rub_bn=200.0,
-        notes='ДВ-тепло + субсидии; тарифы ДВ либерализуются 2026-2030'
+        notes="ДВ-тепло + субсидии; тарифы ДВ либерализуются 2026-2030",
     ),
-    'Юнипро': CompanyProfile(
-        name='Юнипро', business_model='generation',
+    "Юнипро": CompanyProfile(
+        name="Юнипро",
+        business_model="generation",
         tariff_multiplier=1.0,
         other_revenue_abs_rub_bn=0.0,
-        notes='Чистая ТЭС-генерация, без сбытового бизнеса'
+        notes="Чистая ТЭС-генерация, без сбытового бизнеса",
     ),
-    'Т Плюс': CompanyProfile(
-        name='Т Плюс', business_model='integrated',
+    "Т Плюс": CompanyProfile(
+        name="Т Плюс",
+        business_model="integrated",
         tariff_multiplier=1.0,
         other_revenue_abs_rub_bn=300.0,
-        notes='Высокая доля тепла; ЧД ~313 млрд руб'
+        notes="Высокая доля тепла; ЧД ~313 млрд руб",
     ),
-    'Росатом-Энергоатом': CompanyProfile(
-        name='Росатом-Энергоатом', business_model='generation',
+    "Росатом-Энергоатом": CompanyProfile(
+        name="Росатом-Энергоатом",
+        business_model="generation",
         tariff_multiplier=1.0,
         other_revenue_abs_rub_bn=0.0,
-        notes='АЭС; квазисуверен; low-margin generation'
+        notes="АЭС; квазисуверен; low-margin generation",
     ),
 }
 
 ACTUAL_REVENUE_2025 = {
-    'Интер РАО': {'rub_bn': 1_540, 'source': 'IR estimate'},
-    'РусГидро': {'rub_bn': 580, 'source': 'IR estimate'},
-    'Юнипро': {'rub_bn': 130, 'source': 'IR estimate'},
-    'Т Плюс': {'rub_bn': 470, 'source': 'IR estimate'},
-    'Росатом-Энергоатом': {'rub_bn': 480, 'source': 'оценка'},
+    "Интер РАО": {"rub_bn": 1_540, "source": "IR estimate"},
+    "РусГидро": {"rub_bn": 580, "source": "IR estimate"},
+    "Юнипро": {"rub_bn": 130, "source": "IR estimate"},
+    "Т Плюс": {"rub_bn": 470, "source": "IR estimate"},
+    "Росатом-Энергоатом": {"rub_bn": 480, "source": "оценка"},
 }
 
 
@@ -143,8 +169,10 @@ ACTUAL_REVENUE_2025 = {
 # CORE
 # ============================================================
 
-def predict_generation(company: str, gen: GenerationData,
-                         tariffs: TariffData, profile: CompanyProfile) -> RevenuePredict:
+
+def predict_generation(
+    company: str, gen: GenerationData, tariffs: TariffData, profile: CompanyProfile
+) -> RevenuePredict:
     """
     Сумма абсолютных сегментов:
       generation = Q_TWh × 1e6 × tariff × tariff_multiplier  (₽)
@@ -155,18 +183,19 @@ def predict_generation(company: str, gen: GenerationData,
 
     effective_tariff = tariffs.avg_tariff_rub_per_mwh * profile.tariff_multiplier
     rev_gen = gen.generation_twh * 1e6 * effective_tariff
-    breakdown['generation'] = rev_gen / 1e9
+    breakdown["generation"] = rev_gen / 1e9
 
     rev_cap = gen.capacity_gw * tariffs.capacity_payment_per_gw_year
-    breakdown['capacity (КОМ)'] = rev_cap / 1e9
+    breakdown["capacity (КОМ)"] = rev_cap / 1e9
 
     rev_other = profile.other_revenue_abs_rub_bn * 1e9
-    breakdown['other (sales/heat/services)'] = rev_other / 1e9
+    breakdown["other (sales/heat/services)"] = rev_other / 1e9
 
     total = rev_gen + rev_cap + rev_other
 
     return RevenuePredict(
-        company=company, period='12M2025',
+        company=company,
+        period="12M2025",
         predicted_rub_bn=total / 1e9,
         breakdown_rub_bn=breakdown,
     )
@@ -174,11 +203,11 @@ def predict_generation(company: str, gen: GenerationData,
 
 def predict_revenue(company: str) -> RevenuePredict:
     gen_map = {
-        'Интер РАО': INTER_RAO,
-        'РусГидро': RUSHYDRO,
-        'Юнипро': UNIPRO,
-        'Т Плюс': T_PLUS,
-        'Росатом-Энергоатом': ROSATOM_NUCLEAR,
+        "Интер РАО": INTER_RAO,
+        "РусГидро": RUSHYDRO,
+        "Юнипро": UNIPRO,
+        "Т Плюс": T_PLUS,
+        "Росатом-Энергоатом": ROSATOM_NUCLEAR,
     }
     return predict_generation(company, gen_map[company], TARIFFS_2025, PROFILES[company])
 
@@ -187,25 +216,24 @@ def backtest_one(predict: RevenuePredict) -> RevenuePredict:
     actual = ACTUAL_REVENUE_2025.get(predict.company)
     if not actual:
         return predict
-    actual_rub = actual['rub_bn']
+    actual_rub = actual["rub_bn"]
     predict.actual_rub_bn = actual_rub
     predict.mae_pct = abs(predict.predicted_rub_bn - actual_rub) / actual_rub * 100
     return predict
 
 
 def main():
-    parser = argparse.ArgumentParser(description='OSL — Энергетика v0.7')
-    parser.add_argument('--company',
-                        choices=list(PROFILES.keys()) + ['all'], default='all')
+    parser = argparse.ArgumentParser(description="OSL — Энергетика v0.7")
+    parser.add_argument("--company", choices=list(PROFILES.keys()) + ["all"], default="all")
     args = parser.parse_args()
 
-    targets = list(PROFILES.keys()) if args.company == 'all' else [args.company]
+    targets = list(PROFILES.keys()) if args.company == "all" else [args.company]
 
-    print('=' * 70)
-    print('  OSL Backtest — Энергетика 12М 2025 (v0.7 abs-sum formula)')
-    print(f'  Tariff: ₽{TARIFFS_2025.avg_tariff_rub_per_mwh}/МВт·ч')
-    print(f'  КОМ: ₽{TARIFFS_2025.capacity_payment_per_gw_year/1e9:.2f} млрд/ГВт/год')
-    print('=' * 70)
+    print("=" * 70)
+    print("  OSL Backtest — Энергетика 12М 2025 (v0.7 abs-sum formula)")
+    print(f"  Tariff: ₽{TARIFFS_2025.avg_tariff_rub_per_mwh}/МВт·ч")
+    print(f"  КОМ: ₽{TARIFFS_2025.capacity_payment_per_gw_year/1e9:.2f} млрд/ГВт/год")
+    print("=" * 70)
 
     results = []
     for company in targets:
@@ -213,28 +241,28 @@ def main():
         result = backtest_one(pred)
         results.append(result)
 
-        print('─' * 70)
-        print(f'  {company} ({PROFILES[company].business_model})')
-        print('─' * 70)
-        print(f'  Прогноз: {result.predicted_rub_bn:,.0f} млрд ₽')
+        print("─" * 70)
+        print(f"  {company} ({PROFILES[company].business_model})")
+        print("─" * 70)
+        print(f"  Прогноз: {result.predicted_rub_bn:,.0f} млрд ₽")
         if result.actual_rub_bn:
-            print(f'  Факт:    {result.actual_rub_bn:,.0f} млрд ₽')
+            print(f"  Факт:    {result.actual_rub_bn:,.0f} млрд ₽")
         if result.mae_pct is not None:
-            mark = '✅' if result.mae_pct <= 5 else ('⚠️' if result.mae_pct <= 10 else '❌')
-            print(f'  MAE: {result.mae_pct:.1f}% {mark}')
-        print(f'  tariff_multiplier: {PROFILES[company].tariff_multiplier:.3f}')
-        print('  Breakdown:')
+            mark = "✅" if result.mae_pct <= 5 else ("⚠️" if result.mae_pct <= 10 else "❌")
+            print(f"  MAE: {result.mae_pct:.1f}% {mark}")
+        print(f"  tariff_multiplier: {PROFILES[company].tariff_multiplier:.3f}")
+        print("  Breakdown:")
         for k, v in result.breakdown_rub_bn.items():
-            print(f'    {k}: {v:.0f} млрд ₽')
+            print(f"    {k}: {v:.0f} млрд ₽")
 
     print(f'\n{"=" * 70}')
     success = [r for r in results if r.mae_pct is not None and r.mae_pct <= 5]
     accept = [r for r in results if r.mae_pct is not None and 5 < r.mae_pct <= 10]
     fail = [r for r in results if r.mae_pct is not None and r.mae_pct > 10]
-    print(f'  ✅ MAE ≤ 5%: {len(success)} — {[r.company for r in success]}')
-    print(f'  ⚠️ MAE 5-10%: {len(accept)} — {[r.company for r in accept]}')
-    print(f'  ❌ MAE > 10%: {len(fail)} — {[r.company for r in fail]}')
+    print(f"  ✅ MAE ≤ 5%: {len(success)} — {[r.company for r in success]}")
+    print(f"  ⚠️ MAE 5-10%: {len(accept)} — {[r.company for r in accept]}")
+    print(f"  ❌ MAE > 10%: {len(fail)} — {[r.company for r in fail]}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

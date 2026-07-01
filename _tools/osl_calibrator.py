@@ -27,8 +27,8 @@ from pathlib import Path
 from typing import Callable, Dict
 import importlib
 
-if hasattr(sys.stdout, 'reconfigure'):
-    sys.stdout.reconfigure(encoding='utf-8')
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 CALIBRATION_DIR = Path(__file__).parent / "calibration"
 CALIBRATION_DIR.mkdir(exist_ok=True)
@@ -48,7 +48,7 @@ def tune_param(
     # Grid search
     step = (param_max - param_min) / n_steps
     best_param = param_min
-    best_err = float('inf')
+    best_err = float("inf")
     for i in range(n_steps + 1):
         p = param_min + i * step
         try:
@@ -101,11 +101,12 @@ def tune_multi_period(
 
     Возвращает (best_param, metrics_dict с MAE по каждому периоду + средний MAE).
     """
+
     def aggregate_loss(p):
         try:
             pred_12m = predict_fn(p)
             if pred_12m is None or pred_12m <= 0:
-                return float('inf')
+                return float("inf")
             total_loss = 0.0
             count = 0
             for period, target in targets.items():
@@ -114,13 +115,13 @@ def tune_multi_period(
                 err = abs(pred_for_period - target) / target
                 total_loss += err
                 count += 1
-            return total_loss / count if count > 0 else float('inf')
+            return total_loss / count if count > 0 else float("inf")
         except Exception:
-            return float('inf')
+            return float("inf")
 
     step = (param_max - param_min) / n_steps
     best_param = param_min
-    best_err = float('inf')
+    best_err = float("inf")
     for i in range(n_steps + 1):
         p = param_min + i * step
         err = aggregate_loss(p)
@@ -137,11 +138,11 @@ def tune_multi_period(
 
     # Считаем MAE по каждому периоду отдельно для отчёта
     pred_12m = predict_fn(best_param)
-    metrics = {'best_avg_mae_pct': round(best_err * 100, 2)}
+    metrics = {"best_avg_mae_pct": round(best_err * 100, 2)}
     for period, target in targets.items():
         share = period_shares.get(period, 1.0)
         pred_for_period = pred_12m * share
-        metrics[f'mae_{period}_pct'] = round(abs(pred_for_period - target) / target * 100, 2)
+        metrics[f"mae_{period}_pct"] = round(abs(pred_for_period - target) / target * 100, 2)
 
     return best_param, metrics
 
@@ -184,8 +185,13 @@ def tune_multi_param(
             return 1.0
 
     result = differential_evolution(
-        loss, bounds, seed=seed, tol=1e-6, maxiter=maxiter,
-        polish=True, init='sobol',
+        loss,
+        bounds,
+        seed=seed,
+        tol=1e-6,
+        maxiter=maxiter,
+        polish=True,
+        init="sobol",
     )
     return tuple(result.x), result.fun * 100
 
@@ -221,7 +227,7 @@ def apply_calibration(module_name: str, verbose: bool = False) -> int:
         return 0
 
     module = importlib.import_module(module_name)
-    profiles = getattr(module, 'PROFILES', {})
+    profiles = getattr(module, "PROFILES", {})
 
     applied = 0
     for company, params in cal.items():
@@ -229,7 +235,7 @@ def apply_calibration(module_name: str, verbose: bool = False) -> int:
             continue
         profile = profiles[company]
         for param_name, param_val in params.items():
-            if param_name in ('mae_pct', 'actual_rub_bn'):
+            if param_name in ("mae_pct", "actual_rub_bn"):
                 continue
             if hasattr(profile, param_name):
                 setattr(profile, param_name, param_val)
@@ -241,8 +247,15 @@ def apply_calibration(module_name: str, verbose: bool = False) -> int:
 
 def apply_all_calibrations(verbose: bool = False) -> dict:
     """Применить калибровки ко всем 7 OSL-модулям."""
-    modules = ['osl_metallurgy', 'osl_oilgas', 'osl_chemistry',
-                'osl_pharma', 'osl_retail', 'osl_energy', 'osl_oiv']
+    modules = [
+        "osl_metallurgy",
+        "osl_oilgas",
+        "osl_chemistry",
+        "osl_pharma",
+        "osl_retail",
+        "osl_energy",
+        "osl_oiv",
+    ]
     summary = {}
     for m in modules:
         try:
@@ -270,34 +283,36 @@ def drift_check(module_name: str, threshold_pct: float = 5.0) -> dict:
     """
     baseline = load_calibration(module_name)
     if not baseline:
-        return {'error': f'No baseline calibration for {module_name}'}
+        return {"error": f"No baseline calibration for {module_name}"}
 
     module = importlib.import_module(module_name)
-    actual_dict = (getattr(module, 'ACTUAL_REVENUE_2025', None) or
-                    getattr(module, 'ACTUAL_REVENUE_12M_2025', None) or
-                    getattr(module, 'ACTUAL_BUDGET_2025', None))
+    actual_dict = (
+        getattr(module, "ACTUAL_REVENUE_2025", None)
+        or getattr(module, "ACTUAL_REVENUE_12M_2025", None)
+        or getattr(module, "ACTUAL_BUDGET_2025", None)
+    )
     if not actual_dict:
-        return {'error': f'No actuals in {module_name}'}
+        return {"error": f"No actuals in {module_name}"}
 
     drift = {}
     for company, data in actual_dict.items():
-        actual = data.get('rub_bn')
+        actual = data.get("rub_bn")
         if not actual:
             continue
         try:
             pred = module.predict_revenue(company).predicted_rub_bn
             current_mae = abs(pred - actual) / actual * 100
-            baseline_mae = baseline.get(company, {}).get('mae_pct', current_mae)
+            baseline_mae = baseline.get(company, {}).get("mae_pct", current_mae)
             d = current_mae - baseline_mae
-            flag = 'OK' if d <= threshold_pct else 'NEEDS_RECALIBRATION'
+            flag = "OK" if d <= threshold_pct else "NEEDS_RECALIBRATION"
             drift[company] = {
-                'baseline_mae': baseline_mae,
-                'current_mae': current_mae,
-                'drift_pct': d,
-                'flag': flag,
+                "baseline_mae": baseline_mae,
+                "current_mae": current_mae,
+                "drift_pct": d,
+                "flag": flag,
             }
         except Exception as e:
-            drift[company] = {'error': str(e)}
+            drift[company] = {"error": str(e)}
     return drift
 
 
@@ -306,9 +321,10 @@ def calibrate_energy() -> dict:
     Other_revenue_abs (тепло/сбыт/прочее) задано в PROFILES из IR.
     Tariff_multiplier учитывает региональную/сегментную премию или дисконт."""
     import osl_energy as m
+
     results = {}
-    for company in ['Интер РАО', 'РусГидро', 'Юнипро', 'Т Плюс', 'Росатом-Энергоатом']:
-        actual = m.ACTUAL_REVENUE_2025.get(company, {}).get('rub_bn')
+    for company in ["Интер РАО", "РусГидро", "Юнипро", "Т Плюс", "Росатом-Энергоатом"]:
+        actual = m.ACTUAL_REVENUE_2025.get(company, {}).get("rub_bn")
         if not actual:
             continue
         profile = m.PROFILES[company]
@@ -320,20 +336,21 @@ def calibrate_energy() -> dict:
         best_mult, best_mae = tune_param(predict_with_mult, actual, 0.5, 2.0)
         profile.tariff_multiplier = best_mult
         results[company] = {
-            'tariff_multiplier': round(best_mult, 4),
-            'mae_pct': round(best_mae, 2),
-            'actual_rub_bn': actual,
+            "tariff_multiplier": round(best_mult, 4),
+            "mae_pct": round(best_mae, 2),
+            "actual_rub_bn": actual,
         }
-    save_calibration('osl_energy', results)
+    save_calibration("osl_energy", results)
     return results
 
 
 def calibrate_oilgas() -> dict:
     """Калибровка нефтегаза: tune profile.other_share."""
     import osl_oilgas as m
+
     results = {}
-    for company in ['Роснефть', 'ЛУКОЙЛ', 'Газпром', 'Новатэк']:
-        actual = m.ACTUAL_REVENUE_12M_2025.get(company, {}).get('rub_bn')
+    for company in ["Роснефть", "ЛУКОЙЛ", "Газпром", "Новатэк"]:
+        actual = m.ACTUAL_REVENUE_12M_2025.get(company, {}).get("rub_bn")
         if not actual:
             continue
         profile = m.PROFILES[company]
@@ -345,20 +362,21 @@ def calibrate_oilgas() -> dict:
         best_other, best_mae = tune_param(predict_with_other, actual, 0.0, 0.50)
         profile.other_share = best_other
         results[company] = {
-            'other_share': round(best_other, 4),
-            'mae_pct': round(best_mae, 2),
-            'actual_rub_bn': actual,
+            "other_share": round(best_other, 4),
+            "mae_pct": round(best_mae, 2),
+            "actual_rub_bn": actual,
         }
-    save_calibration('osl_oilgas', results)
+    save_calibration("osl_oilgas", results)
     return results
 
 
 def calibrate_chemistry() -> dict:
     """Калибровка химии: tune profile.other_income_pct."""
     import osl_chemistry as m
+
     results = {}
-    for company in ['ФосАгро', 'Акрон', 'СИБУР']:
-        actual = m.ACTUAL_REVENUE_2025.get(company, {}).get('rub_bn')
+    for company in ["ФосАгро", "Акрон", "СИБУР"]:
+        actual = m.ACTUAL_REVENUE_2025.get(company, {}).get("rub_bn")
         if not actual:
             continue
         profile = m.PROFILES[company]
@@ -369,19 +387,22 @@ def calibrate_chemistry() -> dict:
 
         best, best_mae = tune_param(predict_with, actual, 0.0, 0.40)
         profile.other_income_pct = best
-        results[company] = {'other_income_pct': round(best, 4),
-                            'mae_pct': round(best_mae, 2),
-                            'actual_rub_bn': actual}
-    save_calibration('osl_chemistry', results)
+        results[company] = {
+            "other_income_pct": round(best, 4),
+            "mae_pct": round(best_mae, 2),
+            "actual_rub_bn": actual,
+        }
+    save_calibration("osl_chemistry", results)
     return results
 
 
 def calibrate_pharma() -> dict:
     """Калибровка фармы: tune profile.market_share_retail для дистрибуторов."""
     import osl_pharma as m
+
     results = {}
-    for company in ['Пульс', 'Протек', 'Катрен']:
-        actual = m.ACTUAL_REVENUE_2025.get(company, {}).get('rub_bn')
+    for company in ["Пульс", "Протек", "Катрен"]:
+        actual = m.ACTUAL_REVENUE_2025.get(company, {}).get("rub_bn")
         if not actual:
             continue
         profile = m.PROFILES[company]
@@ -392,19 +413,22 @@ def calibrate_pharma() -> dict:
 
         best, best_mae = tune_param(predict_with, actual, 0.10, 0.30)
         profile.market_share_retail = best
-        results[company] = {'market_share_retail': round(best, 4),
-                            'mae_pct': round(best_mae, 2),
-                            'actual_rub_bn': actual}
-    save_calibration('osl_pharma', results)
+        results[company] = {
+            "market_share_retail": round(best, 4),
+            "mae_pct": round(best_mae, 2),
+            "actual_rub_bn": actual,
+        }
+    save_calibration("osl_pharma", results)
     return results
 
 
 def calibrate_retail() -> dict:
     """Калибровка розницы: tune take_rate для маркетплейсов."""
     import osl_retail as m
+
     results = {}
-    for company in ['Wildberries', 'Ozon']:
-        actual = m.ACTUAL_REVENUE_2025.get(company, {}).get('rub_bn')
+    for company in ["Wildberries", "Ozon"]:
+        actual = m.ACTUAL_REVENUE_2025.get(company, {}).get("rub_bn")
         if not actual:
             continue
         profile = m.PROFILES[company]
@@ -415,10 +439,12 @@ def calibrate_retail() -> dict:
 
         best, best_mae = tune_param(predict_with, actual, 0.05, 0.50)
         profile.take_rate = best
-        results[company] = {'take_rate': round(best, 4),
-                            'mae_pct': round(best_mae, 2),
-                            'actual_rub_bn': actual}
-    save_calibration('osl_retail', results)
+        results[company] = {
+            "take_rate": round(best, 4),
+            "mae_pct": round(best_mae, 2),
+            "actual_rub_bn": actual,
+        }
+    save_calibration("osl_retail", results)
     return results
 
 
@@ -427,9 +453,10 @@ def calibrate_oiv() -> dict:
     Главная структурная проблема: predicted считал full budget, actual = СД.
     Решение через калибровочный коэффициент scale_to_actual."""
     import osl_oiv as m
+
     results = {}
-    for region in ['ХМАО-Югра', 'Тюменская обл.', 'ЯНАО', 'Татарстан', 'Сахалинская обл.']:
-        actual = m.ACTUAL_BUDGET_2025.get(region, {}).get('rub_bn')
+    for region in ["ХМАО-Югра", "Тюменская обл.", "ЯНАО", "Татарстан", "Сахалинская обл."]:
+        actual = m.ACTUAL_BUDGET_2025.get(region, {}).get("rub_bn")
         if not actual:
             continue
         profile = m.PROFILES[region]
@@ -446,10 +473,12 @@ def calibrate_oiv() -> dict:
 
         best, best_mae = tune_param(predict_with, actual, 0, orig_oil * 3)
         profile.oil_production_mt = best
-        results[region] = {'oil_production_mt': round(best, 1),
-                            'mae_pct': round(best_mae, 2),
-                            'actual_rub_bn': actual}
-    save_calibration('osl_oiv', results)
+        results[region] = {
+            "oil_production_mt": round(best, 1),
+            "mae_pct": round(best_mae, 2),
+            "actual_rub_bn": actual,
+        }
+    save_calibration("osl_oiv", results)
     return results
 
 
@@ -458,11 +487,11 @@ def calibrate_metallurgy() -> dict:
     import osl_metallurgy as m
 
     results = {}
-    for company in ['Норникель', 'Северсталь', 'ММК', 'НЛМК', 'Полюс']:
+    for company in ["Норникель", "Северсталь", "ММК", "НЛМК", "Полюс"]:
         actual_data = m.ACTUAL_REVENUE_12M_2025.get(company, {})
-        actual = actual_data.get('rub_bn')
-        if not actual and actual_data.get('usd_bn'):
-            actual = actual_data['usd_bn'] * m.FX_12M_2025.avg_usd_rub
+        actual = actual_data.get("rub_bn")
+        if not actual and actual_data.get("usd_bn"):
+            actual = actual_data["usd_bn"] * m.FX_12M_2025.avg_usd_rub
         if not actual:
             continue
 
@@ -477,12 +506,12 @@ def calibrate_metallurgy() -> dict:
         profile.other_income_pct = best_other
 
         results[company] = {
-            'other_income_pct': round(best_other, 4),
-            'mae_pct': round(best_mae, 2),
-            'actual_rub_bn': actual,
+            "other_income_pct": round(best_other, 4),
+            "mae_pct": round(best_mae, 2),
+            "actual_rub_bn": actual,
         }
 
-    save_calibration('osl_metallurgy', results)
+    save_calibration("osl_metallurgy", results)
     return results
 
 
@@ -491,14 +520,15 @@ def calibrate_metallurgy_multi_param() -> dict:
     Tune (other_income_pct, domestic_share, domestic_premium_pct) одновременно
     через scipy.differential_evolution. Применяется только для hybrid model."""
     import osl_metallurgy as m
+
     results = {}
-    hybrid_companies = ['Северсталь', 'ММК', 'НЛМК']
+    hybrid_companies = ["Северсталь", "ММК", "НЛМК"]
 
     for company in hybrid_companies:
         actual_data = m.ACTUAL_REVENUE_12M_2025.get(company, {})
-        actual = actual_data.get('rub_bn')
-        if not actual and actual_data.get('usd_bn'):
-            actual = actual_data['usd_bn'] * m.FX_12M_2025.avg_usd_rub
+        actual = actual_data.get("rub_bn")
+        if not actual and actual_data.get("usd_bn"):
+            actual = actual_data["usd_bn"] * m.FX_12M_2025.avg_usd_rub
         if not actual:
             continue
 
@@ -520,13 +550,13 @@ def calibrate_metallurgy_multi_param() -> dict:
         profile.domestic_premium_pct = best_params[2]
 
         results[company] = {
-            'other_income_pct': round(best_params[0], 4),
-            'domestic_share': round(best_params[1], 4),
-            'domestic_premium_pct': round(best_params[2], 4),
-            'mae_pct': round(best_mae, 2),
-            'actual_rub_bn': actual,
+            "other_income_pct": round(best_params[0], 4),
+            "domestic_share": round(best_params[1], 4),
+            "domestic_premium_pct": round(best_params[2], 4),
+            "mae_pct": round(best_mae, 2),
+            "actual_rub_bn": actual,
         }
-    save_calibration('osl_metallurgy_multi_param', results)
+    save_calibration("osl_metallurgy_multi_param", results)
     return results
 
 
@@ -534,66 +564,68 @@ def calibrate_metallurgy_multi_period() -> dict:
     """A2 пилот: калибровка металлургии с одновременной валидацией на 12M + 9M.
     Минимизирует среднюю MAE по обоим периодам. Защита от overfitting."""
     import osl_metallurgy as m
-    if not hasattr(m, 'ACTUAL_REVENUE_9M_2025'):
-        return {'error': 'No 9M actuals available'}
+
+    if not hasattr(m, "ACTUAL_REVENUE_9M_2025"):
+        return {"error": "No 9M actuals available"}
     results = {}
-    for company in ['Норникель', 'Северсталь', 'ММК', 'НЛМК', 'Полюс']:
+    for company in ["Норникель", "Северсталь", "ММК", "НЛМК", "Полюс"]:
         a12 = m.ACTUAL_REVENUE_12M_2025.get(company, {})
         a9 = m.ACTUAL_REVENUE_9M_2025.get(company, {})
         if not a12 or not a9:
             continue
 
         # Выбираем валюту: предпочитаем USD если есть в 12M
-        if a12.get('usd_bn'):
-            target_12 = a12['usd_bn']
-            target_9 = a9.get('usd_bn')
+        if a12.get("usd_bn"):
+            target_12 = a12["usd_bn"]
+            target_9 = a9.get("usd_bn")
             if not target_9:
                 continue
-            unit = 'usd_bn'
+            unit = "usd_bn"
         else:
-            target_12 = a12['rub_bn']
-            target_9 = a9.get('rub_bn')
+            target_12 = a12["rub_bn"]
+            target_9 = a9.get("rub_bn")
             if not target_9:
                 continue
-            unit = 'rub_bn'
+            unit = "rub_bn"
 
-        targets = {'12M': target_12, '9M': target_9}
-        period_shares = {'12M': 1.0, '9M': a9.get('period_share', 0.75)}
+        targets = {"12M": target_12, "9M": target_9}
+        period_shares = {"12M": 1.0, "9M": a9.get("period_share", 0.75)}
 
         profile = m.PROFILES[company]
 
         def predict_with(p):
             profile.other_income_pct = max(0, min(0.30, p))
             pred = m.predict_revenue(company)
-            return pred.predicted_usd_bn if unit == 'usd_bn' else pred.predicted_rub_bn
+            return pred.predicted_usd_bn if unit == "usd_bn" else pred.predicted_rub_bn
 
         best, metrics = tune_multi_period(predict_with, targets, period_shares, 0.0, 0.30)
         profile.other_income_pct = best
         results[company] = {
-            'other_income_pct': round(best, 4),
-            'unit': unit,
-            'targets': targets,
+            "other_income_pct": round(best, 4),
+            "unit": unit,
+            "targets": targets,
             **metrics,
         }
-    save_calibration('osl_metallurgy_multi_period', results)
+    save_calibration("osl_metallurgy_multi_period", results)
     return results
 
 
 def calibrate_oilgas_multi_period() -> dict:
     """A2 пилот: калибровка нефтегаза на 12M + 9M."""
     import osl_oilgas as m
-    if not hasattr(m, 'ACTUAL_REVENUE_9M_2025'):
-        return {'error': 'No 9M actuals available'}
+
+    if not hasattr(m, "ACTUAL_REVENUE_9M_2025"):
+        return {"error": "No 9M actuals available"}
     results = {}
-    for company in ['Роснефть', 'ЛУКОЙЛ', 'Газпром', 'Новатэк']:
-        a12 = m.ACTUAL_REVENUE_12M_2025.get(company, {}).get('rub_bn')
+    for company in ["Роснефть", "ЛУКОЙЛ", "Газпром", "Новатэк"]:
+        a12 = m.ACTUAL_REVENUE_12M_2025.get(company, {}).get("rub_bn")
         a9_data = m.ACTUAL_REVENUE_9M_2025.get(company, {})
-        a9 = a9_data.get('rub_bn')
+        a9 = a9_data.get("rub_bn")
         if not a12 or not a9:
             continue
 
-        targets = {'12M': a12, '9M': a9}
-        period_shares = {'12M': 1.0, '9M': a9_data.get('period_share', 0.75)}
+        targets = {"12M": a12, "9M": a9}
+        period_shares = {"12M": 1.0, "9M": a9_data.get("period_share", 0.75)}
 
         profile = m.PROFILES[company]
 
@@ -604,21 +636,36 @@ def calibrate_oilgas_multi_period() -> dict:
         best, metrics = tune_multi_period(predict_with, targets, period_shares, 0.0, 0.50)
         profile.other_share = best
         results[company] = {
-            'other_share': round(best, 4),
-            'targets': targets,
+            "other_share": round(best, 4),
+            "targets": targets,
             **metrics,
         }
-    save_calibration('osl_oilgas_multi_period', results)
+    save_calibration("osl_oilgas_multi_period", results)
     return results
 
 
 def main():
     import argparse
+
     parser = argparse.ArgumentParser()
-    parser.add_argument('--module', default='all',
-                          choices=['metallurgy', 'oilgas', 'chemistry', 'pharma',
-                                   'retail', 'energy', 'oiv', 'all', 'drift',
-                                   'metallurgy_mp', 'oilgas_mp', 'metallurgy_multiparam'])
+    parser.add_argument(
+        "--module",
+        default="all",
+        choices=[
+            "metallurgy",
+            "oilgas",
+            "chemistry",
+            "pharma",
+            "retail",
+            "energy",
+            "oiv",
+            "all",
+            "drift",
+            "metallurgy_mp",
+            "oilgas_mp",
+            "metallurgy_multiparam",
+        ],
+    )
     args = parser.parse_args()
 
     print("=" * 70)
@@ -626,78 +673,90 @@ def main():
     print("=" * 70)
 
     calibrators = {
-        'metallurgy': ('other_income_pct', calibrate_metallurgy),
-        'oilgas': ('other_share', calibrate_oilgas),
-        'chemistry': ('other_income_pct', calibrate_chemistry),
-        'pharma': ('market_share_retail', calibrate_pharma),
-        'retail': ('take_rate', calibrate_retail),
-        'energy': ('tariff_multiplier', calibrate_energy),
-        'oiv': ('oil_production_mt', calibrate_oiv),
+        "metallurgy": ("other_income_pct", calibrate_metallurgy),
+        "oilgas": ("other_share", calibrate_oilgas),
+        "chemistry": ("other_income_pct", calibrate_chemistry),
+        "pharma": ("market_share_retail", calibrate_pharma),
+        "retail": ("take_rate", calibrate_retail),
+        "energy": ("tariff_multiplier", calibrate_energy),
+        "oiv": ("oil_production_mt", calibrate_oiv),
     }
 
-    targets = list(calibrators.keys()) if args.module == 'all' else [args.module] if args.module in calibrators else []
+    targets = (
+        list(calibrators.keys())
+        if args.module == "all"
+        else [args.module] if args.module in calibrators else []
+    )
 
     for ind in targets:
         param_name, fn = calibrators[ind]
         print(f"\nКалибровка {ind} (tune {param_name})...")
         res = fn()
         for c, r in res.items():
-            val = r.get(param_name, '?')
+            val = r.get(param_name, "?")
             print(f"  {c}: {param_name}={val}, MAE={r['mae_pct']:.1f}%")
         print("  ✅ Saved")
 
-    if args.module == 'metallurgy_multiparam':
+    if args.module == "metallurgy_multiparam":
         print("\nMulti-parameter калибровка металлургии (scipy.differential_evolution)...")
         res = calibrate_metallurgy_multi_param()
         for c, r in res.items():
             if isinstance(r, dict):
-                print(f"  {c}: other_inc={r['other_income_pct']}, "
-                      f"dom_share={r['domestic_share']}, "
-                      f"dom_prem={r['domestic_premium_pct']}, MAE={r['mae_pct']:.2f}%")
+                print(
+                    f"  {c}: other_inc={r['other_income_pct']}, "
+                    f"dom_share={r['domestic_share']}, "
+                    f"dom_prem={r['domestic_premium_pct']}, MAE={r['mae_pct']:.2f}%"
+                )
         print("  ✅ Saved → osl_metallurgy_multi_param_calibrated.json")
         return
 
-    if args.module == 'metallurgy_mp':
+    if args.module == "metallurgy_mp":
         print("\nMulti-period калибровка металлургии (12M + 9M)...")
         res = calibrate_metallurgy_multi_period()
         for c, r in res.items():
             if isinstance(r, dict):
-                print(f"  {c}: other_income_pct={r.get('other_income_pct', '?')}, "
-                      f"avg_MAE={r.get('best_avg_mae_pct', 0):.2f}%, "
-                      f"MAE_12M={r.get('mae_12M_pct', 0):.2f}%, "
-                      f"MAE_9M={r.get('mae_9M_pct', 0):.2f}%")
+                print(
+                    f"  {c}: other_income_pct={r.get('other_income_pct', '?')}, "
+                    f"avg_MAE={r.get('best_avg_mae_pct', 0):.2f}%, "
+                    f"MAE_12M={r.get('mae_12M_pct', 0):.2f}%, "
+                    f"MAE_9M={r.get('mae_9M_pct', 0):.2f}%"
+                )
         print("  ✅ Saved → osl_metallurgy_multi_period_calibrated.json")
         return
 
-    if args.module == 'oilgas_mp':
+    if args.module == "oilgas_mp":
         print("\nMulti-period калибровка нефтегаза (12M + 9M)...")
         res = calibrate_oilgas_multi_period()
         for c, r in res.items():
             if isinstance(r, dict):
-                print(f"  {c}: other_share={r.get('other_share', '?')}, "
-                      f"avg_MAE={r.get('best_avg_mae_pct', 0):.2f}%, "
-                      f"MAE_12M={r.get('mae_12M_pct', 0):.2f}%, "
-                      f"MAE_9M={r.get('mae_9M_pct', 0):.2f}%")
+                print(
+                    f"  {c}: other_share={r.get('other_share', '?')}, "
+                    f"avg_MAE={r.get('best_avg_mae_pct', 0):.2f}%, "
+                    f"MAE_12M={r.get('mae_12M_pct', 0):.2f}%, "
+                    f"MAE_9M={r.get('mae_9M_pct', 0):.2f}%"
+                )
         print("  ✅ Saved → osl_oilgas_multi_period_calibrated.json")
         return
 
-    if args.module == 'drift':
+    if args.module == "drift":
         print("\nDrift check...")
-        for mod in ['osl_metallurgy', 'osl_oilgas', 'osl_chemistry']:
+        for mod in ["osl_metallurgy", "osl_oilgas", "osl_chemistry"]:
             try:
                 d = drift_check(mod)
-                if 'error' in d:
+                if "error" in d:
                     print(f"  {mod}: {d['error']}")
                     continue
                 print(f"\n  {mod}:")
                 for company, info in d.items():
-                    flag_mark = '✅' if info.get('flag') == 'OK' else '⚠️'
-                    print(f"    {company}: baseline={info.get('baseline_mae', 0):.1f}%, "
-                          f"current={info.get('current_mae', 0):.1f}%, "
-                          f"drift={info.get('drift_pct', 0):+.1f}% {flag_mark}")
+                    flag_mark = "✅" if info.get("flag") == "OK" else "⚠️"
+                    print(
+                        f"    {company}: baseline={info.get('baseline_mae', 0):.1f}%, "
+                        f"current={info.get('current_mae', 0):.1f}%, "
+                        f"drift={info.get('drift_pct', 0):+.1f}% {flag_mark}"
+                    )
             except Exception as e:
                 print(f"  {mod}: error {e}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

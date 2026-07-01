@@ -11,8 +11,8 @@ import argparse
 import yaml
 from pathlib import Path
 
-if hasattr(sys.stdout, 'reconfigure'):
-    sys.stdout.reconfigure(encoding='utf-8')
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 ANALYSES_DIR = Path(__file__).parent.parent.parent.parent / "_Анализы"
 DB_PATH = Path(__file__).parent / "radar_rag.db"
@@ -33,7 +33,7 @@ def parse_markdown_analysis(file_path: Path) -> dict:
                 fm = yaml.safe_load(text[3:fm_end]) or {}
             except yaml.YAMLError:
                 fm = {}
-            text = text[fm_end + 5:]
+            text = text[fm_end + 5 :]
 
     # Заголовок (первый # )
     title_match = re.search(r"^# (.+?)$", text, re.MULTILINE)
@@ -49,11 +49,26 @@ def parse_markdown_analysis(file_path: Path) -> dict:
     # Извлекаем регион из заголовка / тегов
     macro_region = ""
     micro_region = ""
-    for r in ["MSK_SPB", "DONOR", "INDUSTRIAL", "SOUTH_CAUCASUS", "FAR_EAST", "SIBERIA", "CENTRAL", "RURAL"]:
+    for r in [
+        "MSK_SPB",
+        "DONOR",
+        "INDUSTRIAL",
+        "SOUTH_CAUCASUS",
+        "FAR_EAST",
+        "SIBERIA",
+        "CENTRAL",
+        "RURAL",
+    ]:
         if r in text:
             macro_region = r
             break
-    for r in ["TOURIST_RESORT", "URBAN_INDUSTRIAL", "MONOTOWN", "AGRICULTURAL_RURAL", "CAPITAL_DIVERSIFIED"]:
+    for r in [
+        "TOURIST_RESORT",
+        "URBAN_INDUSTRIAL",
+        "MONOTOWN",
+        "AGRICULTURAL_RURAL",
+        "CAPITAL_DIVERSIFIED",
+    ]:
         if r in text:
             micro_region = r
             break
@@ -74,7 +89,11 @@ def parse_markdown_analysis(file_path: Path) -> dict:
 
     return {
         "file_path": str(file_path),
-        "date": str(fm.get("дата_новости", file_path.stem.split(" — ")[0] if " — " in file_path.stem else "")),
+        "date": str(
+            fm.get(
+                "дата_новости", file_path.stem.split(" — ")[0] if " — " in file_path.stem else ""
+            )
+        ),
         "title": title,
         "main_category": main_cat,
         "subcategory": shock_cat,
@@ -98,6 +117,7 @@ def _connect(db_path: Path):
     conn.enable_load_extension(True)
     try:
         import sqlite_vec
+
         sqlite_vec.load(conn)
         vec_loaded = True
     except Exception:
@@ -119,28 +139,42 @@ def _write_row(conn, embedder, data: dict, vec_loaded: bool) -> None:
             conn.execute("DELETE FROM news_embeddings WHERE news_id = ?", (old["id"],))
         conn.execute("DELETE FROM news_analyses WHERE id = ?", (old["id"],))
 
-    cursor = conn.execute("""
+    cursor = conn.execute(
+        """
         INSERT INTO news_analyses
         (file_path, date, title, main_category, subcategory, severity_score,
          severity_level, impact_horizon, macro_region, micro_region,
          industries, shock_summary, actual_outcome_summary)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        data["file_path"], data["date"], data["title"],
-        data["main_category"], data["subcategory"], data["severity_score"],
-        data["severity_level"], data["impact_horizon"],
-        data["macro_region"], data["micro_region"],
-        data["industries"], data["shock_summary"], data["actual_outcome_summary"]
-    ))
+    """,
+        (
+            data["file_path"],
+            data["date"],
+            data["title"],
+            data["main_category"],
+            data["subcategory"],
+            data["severity_score"],
+            data["severity_level"],
+            data["impact_horizon"],
+            data["macro_region"],
+            data["micro_region"],
+            data["industries"],
+            data["shock_summary"],
+            data["actual_outcome_summary"],
+        ),
+    )
     news_id = cursor.lastrowid
 
     if vec_loaded:
         title_emb = embedder.encode(data["title"])
         what_emb = embedder.encode(data["what_text"])
-        conn.execute("""
+        conn.execute(
+            """
             INSERT INTO news_embeddings (news_id, title_embedding, what_embedding)
             VALUES (?, ?, ?)
-        """, (news_id, title_emb.tobytes(), what_emb.tobytes()))
+        """,
+            (news_id, title_emb.tobytes(), what_emb.tobytes()),
+        )
 
 
 def _load_corpus_texts(conn) -> list[str]:
@@ -154,8 +188,7 @@ def _load_corpus_texts(conn) -> list[str]:
     return texts
 
 
-def index_single(file_path, db_path: Path = DB_PATH,
-                 use_st: bool | None = None) -> bool:
+def index_single(file_path, db_path: Path = DB_PATH, use_st: bool | None = None) -> bool:
     """Инкрементально индексирует ОДИН файл анализа (S1.2): UPSERT без стирания БД.
 
     Embedder обучается на полном корпусе (существующий + новый док), затем
@@ -171,6 +204,7 @@ def index_single(file_path, db_path: Path = DB_PATH,
         return False
 
     from embeddings import RAG_USE_ST
+
     if use_st is None:
         use_st = RAG_USE_ST
 
@@ -189,10 +223,12 @@ def index_single(file_path, db_path: Path = DB_PATH,
     return True
 
 
-def index_all(db_path: Path = DB_PATH, analyses_dir: Path = ANALYSES_DIR,
-                use_st: bool | None = None) -> int:
+def index_all(
+    db_path: Path = DB_PATH, analyses_dir: Path = ANALYSES_DIR, use_st: bool | None = None
+) -> int:
     """Полный реиндекс всех .md в _Анализы/ (с очисткой БД). Возвращает количество."""
     from embeddings import get_embedder, RAG_USE_ST
+
     if use_st is None:
         use_st = RAG_USE_ST
 
@@ -239,12 +275,19 @@ def index_all(db_path: Path = DB_PATH, analyses_dir: Path = ANALYSES_DIR,
     return indexed
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="RAG — индексация анализов")
-    parser.add_argument("--file", help="Инкрементально индексировать один файл (UPSERT, без стирания БД)")
-    parser.add_argument("--use-st", action="store_const", const=True, default=None,
-                        help="Использовать sentence-transformers вместо TF-IDF "
-                             "(по умолчанию — из env RADAR_RAG_USE_ST)")
+    parser.add_argument(
+        "--file", help="Инкрементально индексировать один файл (UPSERT, без стирания БД)"
+    )
+    parser.add_argument(
+        "--use-st",
+        action="store_const",
+        const=True,
+        default=None,
+        help="Использовать sentence-transformers вместо TF-IDF "
+        "(по умолчанию — из env RADAR_RAG_USE_ST)",
+    )
     args = parser.parse_args()
 
     print("=" * 70)

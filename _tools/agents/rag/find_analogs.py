@@ -10,8 +10,8 @@ import argparse
 import numpy as np
 from pathlib import Path
 
-if hasattr(sys.stdout, 'reconfigure'):
-    sys.stdout.reconfigure(encoding='utf-8')
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 DB_PATH = Path(__file__).parent / "radar_rag.db"
 
@@ -76,6 +76,7 @@ def find_analogs(
     conn.enable_load_extension(True)
     try:
         import sqlite_vec
+
         sqlite_vec.load(conn)
         vec_loaded = True
     except Exception:
@@ -101,7 +102,8 @@ def find_analogs(
 
     if vec_loaded:
         # Не используем vec_distance в WHERE из-за фильтров — делаем просто SELECT всех + cosine в Python
-        cursor = conn.execute(f"""
+        cursor = conn.execute(
+            f"""
             SELECT n.id, n.file_path, n.date, n.title, n.subcategory,
                    n.severity_score, n.severity_level, n.macro_region, n.micro_region,
                    n.shock_summary,
@@ -109,7 +111,9 @@ def find_analogs(
             FROM news_analyses n
             JOIN news_embeddings e ON n.id = e.news_id
             {where_sql}
-        """, params)
+        """,
+            params,
+        )
 
         results = []
         for row in cursor:
@@ -119,26 +123,31 @@ def find_analogs(
             sim_title = cosine_similarity(query_emb, title_emb)
             sim = max(sim_what, sim_title)
             if sim >= threshold:
-                results.append({
-                    "file_path": row["file_path"],
-                    "date": row["date"],
-                    "title": row["title"],
-                    "subcategory": row["subcategory"],
-                    "severity_score": row["severity_score"],
-                    "severity_level": row["severity_level"],
-                    "macro_region": row["macro_region"],
-                    "micro_region": row["micro_region"],
-                    "shock_summary": row["shock_summary"],
-                    "similarity": sim,
-                    "similarity_what": sim_what,
-                    "similarity_title": sim_title,
-                })
+                results.append(
+                    {
+                        "file_path": row["file_path"],
+                        "date": row["date"],
+                        "title": row["title"],
+                        "subcategory": row["subcategory"],
+                        "severity_score": row["severity_score"],
+                        "severity_level": row["severity_level"],
+                        "macro_region": row["macro_region"],
+                        "micro_region": row["micro_region"],
+                        "shock_summary": row["shock_summary"],
+                        "similarity": sim,
+                        "similarity_what": sim_what,
+                        "similarity_title": sim_title,
+                    }
+                )
     else:
-        cursor = conn.execute(f"""
+        cursor = conn.execute(
+            f"""
             SELECT id, file_path, date, title, subcategory, severity_score,
                    severity_level, macro_region, micro_region, shock_summary
             FROM news_analyses {where_sql}
-        """, params)
+        """,
+            params,
+        )
         results = []
         for row in cursor:
             results.append({**dict(row), "similarity": 0.0})
@@ -158,11 +167,13 @@ def format_analogs(analogs: list[dict]) -> str:
     for i, a in enumerate(analogs, 1):
         lines.append(f"  [{i}] {a['date']} | sim={a['similarity']:.3f}")
         lines.append(f"      {a['title'][:90]}")
-        lines.append(f"      Категория: {a.get('subcategory') or 'н/д'} | "
-                       f"Сила: {a.get('severity_score') or '?'}/{a.get('severity_level') or '?'}")
-        if a.get('macro_region'):
+        lines.append(
+            f"      Категория: {a.get('subcategory') or 'н/д'} | "
+            f"Сила: {a.get('severity_score') or '?'}/{a.get('severity_level') or '?'}"
+        )
+        if a.get("macro_region"):
             lines.append(f"      Регион: {a['macro_region']}/{a.get('micro_region') or '—'}")
-        if a.get('shock_summary'):
+        if a.get("shock_summary"):
             lines.append(f"      WHAT: {a['shock_summary'][:120]}...")
         lines.append("")
     return "\n".join(lines)
@@ -183,7 +194,9 @@ def main():
     print("  RAG v1.1 — Search for Analogs")
     print("=" * 70)
     print(f"  Query: {args.query[:80]}")
-    print(f"  Filters: subcat={args.subcategory}, region={args.region}, sev=[{args.severity_min},{args.severity_max}]")
+    print(
+        f"  Filters: subcat={args.subcategory}, region={args.region}, sev=[{args.severity_min},{args.severity_max}]"
+    )
     print(f"  Top-K={args.top_k}, threshold={args.threshold}")
     print()
 
@@ -200,5 +213,5 @@ def main():
     print(format_analogs(results))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

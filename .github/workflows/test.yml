@@ -44,10 +44,10 @@ jobs:
           pip install -r ../requirements.lock pytest pytest-cov ruff black
       - name: Lint (ruff) — gate
         run: ruff check .
-      - name: Format check (black) — non-blocking
-        run: black --check . || true
-      - name: Tests + coverage
-        run: pytest tests/ -q --cov=. --cov-report=term-missing
+      - name: Format check (black) — gate
+        run: black --check .
+      - name: Tests + coverage (gate ≥65%)
+        run: pytest tests/ -q --cov=. --cov-report=term-missing --cov-fail-under=65
 
   smoke:
     name: e2e smoke (pipeline → valid JSON, L0→L3)

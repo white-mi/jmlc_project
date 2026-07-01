@@ -120,9 +120,7 @@ def render_summary(summary, items=None):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument(
-        "--emit", action="store_true", help="записать output/backtest/feedback.md"
-    )
+    ap.add_argument("--emit", action="store_true", help="записать output/backtest/feedback.md")
     args = ap.parse_args(argv)
 
     items = load_corpus()

@@ -37,10 +37,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
-if hasattr(sys.stdout, 'reconfigure'):
-    sys.stdout.reconfigure(encoding='utf-8')
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
-DATA_PATH = Path(__file__).parent / 'data' / 'macro_state.json'
+DATA_PATH = Path(__file__).parent / "data" / "macro_state.json"
 
 
 @dataclass
@@ -62,17 +62,17 @@ def _classify_phase(cai: float, yield_slope: Optional[float]) -> str:
     """Классификатор фазы цикла. Пороги откалиброваны на 4 ретроспективных
     точках (COVID, санкции-02.2022, ставочный-12.2024, норма-2018)."""
     if cai > 0.4:
-        phase = 'expansion'
+        phase = "expansion"
     elif cai > 0:
-        phase = 'late-cycle'
+        phase = "late-cycle"
     elif cai > -0.7:
-        phase = 'recovery'
+        phase = "recovery"
     else:
-        phase = 'contraction'
+        phase = "contraction"
 
     # Yield curve correction: сильная инверсия → понизить только если уже не contraction
-    if yield_slope is not None and yield_slope < -2.0 and phase == 'expansion':
-        phase = 'late-cycle'
+    if yield_slope is not None and yield_slope < -2.0 and phase == "expansion":
+        phase = "late-cycle"
 
     return phase
 
@@ -87,22 +87,21 @@ def compute_cai(snapshot: dict, indicators: dict) -> CAIResult:
         current = snapshot.get(key)
         if current is None:
             continue
-        z = _z_score(current, ind['baseline_mean'], ind['baseline_std'])
-        contribution = z * ind['direction'] * ind['weight']
+        z = _z_score(current, ind["baseline_mean"], ind["baseline_std"])
+        contribution = z * ind["direction"] * ind["weight"]
         weighted_sum += contribution
-        total_weight += ind['weight']
+        total_weight += ind["weight"]
         components[key] = {
-            'current': current,
-            'z_score': round(z, 3),
-            'direction': ind['direction'],
-            'weight': ind['weight'],
-            'contribution': round(contribution, 3),
+            "current": current,
+            "z_score": round(z, 3),
+            "direction": ind["direction"],
+            "weight": ind["weight"],
+            "contribution": round(contribution, 3),
         }
 
     cai = weighted_sum / total_weight if total_weight > 0 else 0.0
 
-    yield_slope = (snapshot.get('yield_curve_slope_pp') or
-                   snapshot.get('_yield_curve_slope_pp'))
+    yield_slope = snapshot.get("yield_curve_slope_pp") or snapshot.get("_yield_curve_slope_pp")
     phase = _classify_phase(cai, yield_slope)
 
     return CAIResult(
@@ -110,80 +109,86 @@ def compute_cai(snapshot: dict, indicators: dict) -> CAIResult:
         phase=phase,
         components=components,
         yield_curve_slope_pp=yield_slope,
-        period=snapshot.get('_period') or snapshot.get('period', 'unknown'),
+        period=snapshot.get("_period") or snapshot.get("period", "unknown"),
     )
 
 
 def load_state(path: Path = DATA_PATH) -> dict:
-    return json.loads(path.read_text(encoding='utf-8'))
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def get_current_cai() -> CAIResult:
     """Возвращает CAI для текущего состояния (используется pipeline'ом)."""
     state = load_state()
-    return compute_cai(state['current_state'], state['indicators'])
+    return compute_cai(state["current_state"], state["indicators"])
 
 
-def _print_result(result: CAIResult, label: str = ''):
-    print('=' * 70)
+def _print_result(result: CAIResult, label: str = ""):
+    print("=" * 70)
     print(f'  CAI · period={result.period}{("  ·  " + label) if label else ""}')
-    print('=' * 70)
-    print(f'  CAI = {result.cai:+.3f}')
-    print(f'  Phase: {result.phase}')
+    print("=" * 70)
+    print(f"  CAI = {result.cai:+.3f}")
+    print(f"  Phase: {result.phase}")
     if result.yield_curve_slope_pp is not None:
-        print(f'  Yield curve slope: {result.yield_curve_slope_pp:+.2f} п.п.')
-    print('  Components:')
+        print(f"  Yield curve slope: {result.yield_curve_slope_pp:+.2f} п.п.")
+    print("  Components:")
     for k, c in result.components.items():
-        print(f'    {k:25s}: cur={c["current"]:>7.2f} → z={c["z_score"]:+.2f}  '
-              f'(× dir={c["direction"]:+d} × w={c["weight"]:.1f}) = {c["contribution"]:+.3f}')
+        print(
+            f'    {k:25s}: cur={c["current"]:>7.2f} → z={c["z_score"]:+.2f}  '
+            f'(× dir={c["direction"]:+d} × w={c["weight"]:.1f}) = {c["contribution"]:+.3f}'
+        )
 
 
 def main():
-    parser = argparse.ArgumentParser(description='РФ-CAI v0.7 (lite)')
-    parser.add_argument('--backtest', action='store_true',
-                        help='Прогнать на всех исторических снапшотах')
-    parser.add_argument('--json', action='store_true',
-                        help='Вывод в JSON для pipeline-интеграции')
+    parser = argparse.ArgumentParser(description="РФ-CAI v0.7 (lite)")
+    parser.add_argument(
+        "--backtest", action="store_true", help="Прогнать на всех исторических снапшотах"
+    )
+    parser.add_argument("--json", action="store_true", help="Вывод в JSON для pipeline-интеграции")
     args = parser.parse_args()
 
     state = load_state()
-    indicators = state['indicators']
+    indicators = state["indicators"]
 
     if args.json:
-        result = compute_cai(state['current_state'], indicators)
+        result = compute_cai(state["current_state"], indicators)
         out = {
-            'period': result.period,
-            'cai': result.cai,
-            'phase': result.phase,
-            'yield_curve_slope_pp': result.yield_curve_slope_pp,
-            'components': result.components,
+            "period": result.period,
+            "cai": result.cai,
+            "phase": result.phase,
+            "yield_curve_slope_pp": result.yield_curve_slope_pp,
+            "components": result.components,
         }
         print(json.dumps(out, ensure_ascii=False, indent=2))
         return
 
-    current = compute_cai(state['current_state'], indicators)
-    _print_result(current, 'TEKUWEE')
+    current = compute_cai(state["current_state"], indicators)
+    _print_result(current, "TEKUWEE")
 
     if args.backtest:
-        print('\n' + '=' * 70)
-        print('  БЭК-ТЕСТ на исторических снапшотах')
-        print('=' * 70)
+        print("\n" + "=" * 70)
+        print("  БЭК-ТЕСТ на исторических снапшотах")
+        print("=" * 70)
         passed = 0
         failed = 0
-        for snap in state.get('historical_snapshots', []):
-            label = snap.get('label', '?')
-            expected = snap.get('expected_phase', '?')
+        for snap in state.get("historical_snapshots", []):
+            label = snap.get("label", "?")
+            expected = snap.get("expected_phase", "?")
             r = compute_cai(snap, indicators)
-            mark = '✅' if r.phase == expected else '⚠️'
-            print(f'  {mark} {label:<28} CAI={r.cai:+.2f}  '
-                  f'phase={r.phase:<12} (expected={expected})')
+            mark = "✅" if r.phase == expected else "⚠️"
+            print(
+                f"  {mark} {label:<28} CAI={r.cai:+.2f}  "
+                f"phase={r.phase:<12} (expected={expected})"
+            )
             if r.phase == expected:
                 passed += 1
             else:
                 failed += 1
-        print(f'\n  Точность: {passed}/{passed + failed} = '
-              f'{100 * passed / max(1, passed + failed):.0f}%')
+        print(
+            f"\n  Точность: {passed}/{passed + failed} = "
+            f"{100 * passed / max(1, passed + failed):.0f}%"
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
