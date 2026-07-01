@@ -16,6 +16,7 @@ tags: [макро-радар, docs, индекс]
 | 📗 [2_Tech_Knowledge_for_IT](2_Tech_Knowledge_for_IT.md) | IT-специалист, готовый разрабатывать — стек, паттерны, алгоритмы, тестирование |
 | 📕 [3_User_Guide_Analyst](3_User_Guide_Analyst.md) | Кредитный аналитик / риск-менеджер — что Радар умеет и как формулировать запросы |
 | 📙 [4_Tech_Architecture](4_Tech_Architecture.md) | Tech lead / архитектор / новый разработчик — модули, API, схемы данных, deployment |
+| 🤖 [AI_WORKFLOW](AI_WORKFLOW.md) | Как ИИ-инструменты и агенты применялись в постройке и валидации — паттерны, реальные примеры пойманных дефектов, guardrails |
 
 ---
 

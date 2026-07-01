@@ -188,8 +188,9 @@ The whole pipeline is a Python package in `_tools/` with a thin, deterministic c
   scikit-learn 1.8.0) drives both Docker and CI so numeric results are deterministic; a
   `Makefile` exposes `test / lint / smoke / docker-build`.
 - **AI-assisted development**, and built *on* AI: L0 is itself a five-agent LLM pipeline with
-  retrieval (see `docs/L0_EVAL.md` for a live classifier eval). The contributor guide for the
-  AI assistant is `CLAUDE.md`.
+  retrieval (see `docs/L0_EVAL.md` for a live classifier eval, and `docs/AI_WORKFLOW.md` for how
+  AI agents were used across data collection, verification, review and testing). The contributor
+  guide for the AI assistant is `CLAUDE.md`.
 
 A first end-to-end result is one command away:
 
