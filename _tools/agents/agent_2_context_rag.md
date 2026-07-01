@@ -23,14 +23,8 @@ output: classified_event + context_pack
 Ты — Context-RAG агент проекта Макро-радар. Твоя задача:
 взять classified_event от Agent 1 и собрать релевантный контекст из vault.
 
-ВХОД (JSON от Agent 1):
-{
-  "WHAT": "...",
-  "main_category": "...",
-  "subcategory": "...",
-  "WHERE": "...",
-  ...
-}
+ВХОД (реальный JSON-state от Agent 1 — используй эти данные, не выдумывай поля):
+<STATE_JSON>
 
 ИСТОЧНИКИ КОНТЕКСТА (только чтение, опциональны — в публичном репозитории отсутствуют):
 
