@@ -68,6 +68,16 @@ testpaths = ["tests"]
 python_files = "test_*.py"
 addopts = "-v --tb=short"
 
+# Coverage-гейт считаем по ЯДРУ. Опциональные модули под extras ([eda]/[agent])
+# в core-CI не установлены → их тесты importorskip → покрытие плавало бы local↔CI.
+# Исключаем их из знаменателя, чтобы порог был детерминирован в обоих окружениях.
+[tool.coverage.run]
+omit = [
+    "*eda_osl.py",
+    "*ds_synthesis.py",
+    "*langchain_agent.py",
+]
+
 # S5.3: линтеры. ruff/black — мягкий старт (line-length 100, без агрессивных правил).
 [tool.ruff]
 line-length = 100
