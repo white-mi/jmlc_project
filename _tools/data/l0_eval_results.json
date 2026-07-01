@@ -1,0 +1,47 @@
+{
+  "_comment": "Закоммиченная витрина результатов L0-eval (Agent 1, Classifier). Собрана из сырых прогонов output/l0_eval/<model>_results.json (output/ в .gitignore). Это ЧЕСТНЫЙ SANITY-CHECK на N=15 синтетических ПУБЛИЧНЫХ новостях, НЕ статистически значимый бенчмарк. Воспроизведение: cd _tools && python eval_l0_classifier.py --model haiku|sonnet (нужен ANTHROPIC_API_KEY). Подробности и оговорки — docs/L0_EVAL.md.",
+  "eval": "L0 Agent-1 (Classifier) — точность классификации шоков",
+  "run_date": "2026-06-27",
+  "gold_set": "_tools/data/l0_gold_set.json",
+  "gold_set_n": 15,
+  "taxonomy_version": "1.0 (5 категорий, 27 подкатегорий)",
+  "prompt_source": "orchestrator.extract_prompt(agents/agent_1_classifier.md) — тот же промпт, что в проде",
+  "boundary_items": ["g14 (5.2 ожидаемое/в ценах)", "g15 (5.4 календарный артефакт)"],
+  "models": [
+    {
+      "model": "claude-haiku-4-5-20251001",
+      "alias": "haiku",
+      "n": 15,
+      "main_category_accuracy": 0.9333,
+      "main_category_correct": "14/15",
+      "subcategory_accuracy": 1.0,
+      "subcategory_correct": "15/15",
+      "subcategory_accuracy_excl_boundary": 1.0,
+      "tokens_in": 25471,
+      "tokens_out": 5835,
+      "cost_usd": 0.054646,
+      "note": "Единственный промах — g14 (boundary): подкатегорию 5.2 определил ВЕРНО, но main_category отнёс к 4 (ставка), а не 5 (шум). Тонкий, интерпретируемый near-miss на намеренно пограничном кейсе, не ошибка сортировки."
+    },
+    {
+      "model": "claude-sonnet-4-6",
+      "alias": "sonnet",
+      "n": 15,
+      "main_category_accuracy": 1.0,
+      "main_category_correct": "15/15",
+      "subcategory_accuracy": 1.0,
+      "subcategory_correct": "15/15",
+      "subcategory_accuracy_excl_boundary": 1.0,
+      "tokens_in": 25471,
+      "tokens_out": 7759,
+      "cost_usd": 0.192798,
+      "note": "Полное совпадение по всем 15 пунктам, включая оба boundary-кейса (g14, g15)."
+    }
+  ],
+  "total_cost_usd_reported_runs": 0.247444,
+  "bug_found": {
+    "what": "Плейсхолдеры промпта Agent 1 (<текст>/<URL/издание>/<YYYY-MM-DD>) не совпадали с ключами подстановки orchestrator (НОВОСТЬ/ИСТОЧНИК/ДАТА) → текст новости не инжектился в реальном LLM-режиме.",
+    "symptom": "Первый прогон дал 0% (pred=None везде); модель отвечала «готов, присылайте данные».",
+    "why_hidden": "dry-run-заглушка (_stub_response) не вызывает fill_prompt, поэтому баг был невидим офлайн-тестам.",
+    "fix": "Синхронизированы плейсхолдеры Agent 1 (+таксономия 18→27); аналогичные state-injection пропуски закрыты в Agent 2-5; regression-тест tests/test_l0_prompt_contract.py."
+  }
+}
