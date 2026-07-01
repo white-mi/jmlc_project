@@ -7,7 +7,7 @@ Russian macro state, cross-industry spillover, and into bank client-segment cred
 turning *"what just happened"* into ΔPD / Δdemand / Δchurn estimates **2–3 months before the
 effect reaches financial statements**. It is built around one discipline: every number is
 attributable to a transmission channel and a public source, and every claim is either
-validated out-of-sample or marked as illustrative. This document is the five-page tour; the
+validated out-of-sample or marked as illustrative. This document is a concise overview; the
 companion write-ups are [`DS_REPORT.md`](DS_REPORT.md) (data science, with the
 cross-industry [`DS_REPORT_SYNTHESIS.md`](DS_REPORT_SYNTHESIS.md) over all four industries),
 [`PRODUCT_REPORT.md`](PRODUCT_REPORT.md) (product), and
@@ -175,7 +175,7 @@ figure are marked **illustrative / not calibrated on Russian data**.
 The whole pipeline is a Python package in `_tools/` with a thin, deterministic core
 (numpy / scipy / scikit-learn / pyyaml) and heavy ML dependencies kept behind optional extras.
 
-- **254 tests, 0 skipped** (`pytest tests/ -q`), including leakage guards (train < test;
+- **269 tests, 0 skipped** (`pytest tests/ -q`), including leakage guards (train < test;
   scaler / fixed-effects / calibration fit on train only), metric/DM/conformal-coverage tests,
   and a contract test that `run_pipeline.py --json` keeps stdout pure JSON (import-time prints
   go to stderr).
@@ -187,15 +187,16 @@ The whole pipeline is a Python package in `_tools/` with a thin, deterministic c
 - **Reproducibility:** a pinned `requirements.lock` (numpy 2.4.2 / scipy 1.17.1 /
   scikit-learn 1.8.0) drives both Docker and CI so numeric results are deterministic; a
   `Makefile` exposes `test / lint / smoke / docker-build`.
-- **Built with Claude Code**, and built *on* AI: L0 is itself a five-agent LLM pipeline with
-  retrieval. The contributor guide for the AI assistant is `CLAUDE.md`.
+- **AI-assisted development**, and built *on* AI: L0 is itself a five-agent LLM pipeline with
+  retrieval (see `docs/L0_EVAL.md` for a live classifier eval). The contributor guide for the
+  AI assistant is `CLAUDE.md`.
 
 A first end-to-end result is one command away:
 
 ```bash
 cd _tools
 pip install -r ../requirements.txt pytest
-python -m pytest tests/ -q                                   # 254 passed, 0 skipped
+python -m pytest tests/ -q                                   # 269 passed, 0 skipped
 python run_pipeline.py --smoke-shock 4.2 --smoke-industry oilgas   # numbers at every layer, no LLM
 ```
 
@@ -212,9 +213,11 @@ These are design facts, stated up front, not discovered bugs:
 - **The ×1.30 spillover amplifier is a Fialkowski heuristic**, the lower bound of the European
   range, **not yet calibrated on Russian shocks** (the plan: COVID-2020 / sanctions-2022 /
   rate-2024).
-- **The DS layer is deep on one industry** (metallurgy, N=24); the other six rely on in-sample
-  actuals. The infrastructure is industry-agnostic — extending the panel is a matter of adding
-  CSV rows — but the out-of-sample claim is, for now, scoped to metallurgy.
+- **The DS layer is deep on four industries** (metallurgy N=24, energy N=30, chemistry N=18,
+  oilgas N=18 with structural OSL deferred); the other three (pharma / retail / oiv) are
+  illustrative — see [`COVERAGE_TIERS.md`](COVERAGE_TIERS.md). The infrastructure is
+  industry-agnostic (extending the panel is a matter of adding CSV rows); the out-of-sample
+  walk-forward claim is scoped to those four.
 
 The project's strongest signal is precisely this discipline: the forecast core (H1–H3) is
 proven out-of-sample, the overlays are implemented and tested but openly marked uncalibrated,

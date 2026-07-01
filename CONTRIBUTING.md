@@ -21,11 +21,11 @@ Run the same gates CI runs (from `_tools/`):
 
 ```bash
 ruff check .                  # lint — a hard gate in CI
-pytest tests/ -q              # 254 passed, 0 skipped (deterministic on a clean clone)
+pytest tests/ -q              # 269 passed, 0 skipped (deterministic on a clean clone)
 python run_pipeline.py --smoke-shock 4.2 --smoke-industry oilgas --json | python -m json.tool
 ```
 
-`black .` is run as a (currently non-blocking) format check — please keep new code formatted.
+`black --check .` is a hard CI gate — run `black .` (or `make fmt`) to format before pushing.
 
 ## Project layout & conventions
 

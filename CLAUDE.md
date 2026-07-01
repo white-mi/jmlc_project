@@ -25,7 +25,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 cd _tools
 
-# Тесты (202 собирается, 0 skipped)
+# Тесты (269 собирается, 0 skipped)
 python -m pytest tests/ -v
 python -m pytest tests/test_v09.py -v                          # один файл
 python -m pytest tests/test_l1_l2_l3.py::test_churn_always_positive -v   # один тест
@@ -60,9 +60,11 @@ echo "<текст новости>" | python agents/orchestrator.py --source "Т�
 python agents/orchestrator.py --news-file news.txt --source "..." --date 2026-06-24 --llm-mode dry-run --no-save
 ```
 
-CI: `../.github/workflows/test.yml` (на уровне хранилища, не внутри проекта). Триггер
-на `Макро-радар/_tools/**`; гоняет pytest+ruff+black с `RADAR_RAG_USE_ST=0` (TF-IDF,
-без сети и тяжёлых моделей).
+CI: `.github/workflows/test.yml` (в корне репозитория). Триггер на `_tools/**`
+(+ `requirements.lock`, `Dockerfile`, сам workflow). 4 job с `RADAR_RAG_USE_ST=0`
+(TF-IDF, без сети и тяжёлых моделей): **tests** (матрица py3.11/3.12 — ruff-гейт +
+black-гейт + `pytest --cov` с порогом ≥65%), **smoke** (e2e L0→L3), **docker**
+(clean-clone build), **security** (gitleaks secret-scan + pip-audit).
 
 ---
 

@@ -4,9 +4,9 @@
 help:
 	@echo "install      — рантайм-зависимости (requirements.txt)"
 	@echo "install-dev  — + pytest/ruff/black (editable из _tools)"
-	@echo "test         — pytest (202 теста, TF-IDF режим)"
-	@echo "lint         — ruff check"
-	@echo "fmt          — black ."
+	@echo "test         — pytest (269 тестов, TF-IDF режим)"
+	@echo "lint         — ruff check (гейт CI)"
+	@echo "fmt          — black . (black --check — гейт CI)"
 	@echo "smoke        — сквозной smoke-прогон пайплайна (без LLM)"
 	@echo "docker-build — собрать образ (прогон тестов внутри сборки)"
 	@echo "docker-test  — собрать и запустить тесты в контейнере"
