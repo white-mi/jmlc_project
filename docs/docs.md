@@ -22,9 +22,9 @@ tags: [макро-радар, docs, индекс]
 
 ## Досье для Junior ML Contest
 
-Контест-facing документы под критерии эксперта (DS + продуктовое мышление):
+Контест-facing документы (DS + продуктовый слой):
 
-| Документ | Критерий JMLC |
+| Документ | Назначение |
 |---|---|
 | 🔬 [DS_REPORT](DS_REPORT.md) | **Data Science (металлургия)** — панель, EDA, модели, walk-forward, conformal (out-of-sample) |
 | 🛢️ [DS_REPORT_OILGAS](DS_REPORT_OILGAS.md) | **Data Science (нефтегаз)** — 2-я отрасль: панель FY2021–2025 (выручка через `/doublecheck`+`/fact-check`), walk-forward, conformal |
