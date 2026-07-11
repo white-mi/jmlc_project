@@ -195,7 +195,7 @@ A first end-to-end result is one command away:
 
 ```bash
 cd _tools
-pip install -r ../requirements.txt pytest
+pip install -r ../requirements.lock pytest
 python -m pytest tests/ -q                                   # 279 passed, 0 skipped
 python run_pipeline.py --smoke-shock 4.2 --smoke-industry oilgas   # numbers at every layer, no LLM
 ```

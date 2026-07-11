@@ -80,7 +80,7 @@ black-гейт + `pytest --cov` с порогом ≥60%), **smoke** (e2e L0→L
 | **L1** Макро-состояние | `calc_rf_cai.py`, `calc_rf_epu.py`, `fetch_macro_state.py` | РФ-CAI (z-score 6 показателей), EPU (Baker-Bloom-Davis по корпусу), режим КС | `data/macro_state.json` |
 | **L1.5** Опер-сигнал (OSL) | `osl_*.py` (7), `osl_common.py`, `conformal_prediction.py`, `osl_calibrator.py` | Прогноз годовой выручки эмитентов из физданных×цены; опережает МСФО на 2–3 мес.; conformal-интервалы | `calibration/*_calibrated.json` |
 | **L2** Spillover | `spillover.py` | Распространение шока по матрице отраслей 7×7 (Fialkowski); credit-channel для шоков ЦБ | `data/spillover_matrix.json` |
-| **L3** Сегменты | `segment_impact.py` | ΔPD/Δdemand/Δchurn по 10 сегментам через **5 каналов** (consumer/oil_revenue/fiscal/fx/supply_chain) × КС-amplifier; региональные профили | `data/segment_impact_table_v0_8.json` |
+| **L3** Сегменты | `segment_impact.py` | ΔPD/Δdemand/Δchurn по 10 базовым (→18 активным) сегментам через **5 каналов** (consumer/oil_revenue/fiscal/fx/supply_chain) × КС-amplifier; региональные профили | `data/segment_impact_table_v0_8.json` |
 
 `langchain_agent.py` — альтернативная обёртка тех же слоёв в LangChain-тулы (опц.,
 extra `agent`); работает без ключа в `--simulate`/`--agent-demo`.
