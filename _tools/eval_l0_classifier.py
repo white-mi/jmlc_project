@@ -29,6 +29,7 @@ Anthropic API, сравнивает предсказанные main_category / s
 
 import argparse
 import json
+import math
 import re
 import sys
 from pathlib import Path
@@ -48,6 +49,19 @@ MODEL_IDS = {
     "sonnet": "claude-sonnet-4-6",
     "opus": "claude-opus-4-8",
 }
+
+
+def wilson_ci(k, n, z=1.96):
+    """95% доверительный интервал Уилсона для доли k/n (stdlib; корректен на малом N).
+    N=15: 14/15 → ~[0.70, 0.99]; 15/15 → ~[0.80, 1.00] — честная ширина «100%»."""
+    if n == 0:
+        return [0.0, 0.0]
+    phat = k / n
+    denom = 1.0 + z * z / n
+    center = (phat + z * z / (2 * n)) / denom
+    half = z * math.sqrt(phat * (1 - phat) / n + z * z / (4 * n * n)) / denom
+    return [round(max(0.0, center - half), 4), round(min(1.0, center + half), 4)]
+
 
 # Цены $/MTok (input, output) — для оценки стоимости прогона. Опубликованные тарифы.
 PRICES = {
@@ -165,16 +179,22 @@ def run(model_alias, limit=None):
 
     cost = tin / 1e6 * pi + tout / 1e6 * po
     n = len(rows)
-    main_acc = sum(r["main_ok"] for r in rows) / n
-    sub_acc = sum(r["sub_ok"] for r in rows) / n
+    main_k = sum(r["main_ok"] for r in rows)
+    sub_k = sum(r["sub_ok"] for r in rows)
+    main_acc = main_k / n
+    sub_acc = sub_k / n
     nb = [r for r in rows if not r["boundary"]]
-    sub_acc_nb = sum(r["sub_ok"] for r in nb) / len(nb) if nb else 0.0
+    sub_nb_k = sum(r["sub_ok"] for r in nb)
+    sub_acc_nb = sub_nb_k / len(nb) if nb else 0.0
     summary = {
         "model": model,
         "n": n,
         "main_category_accuracy": round(main_acc, 4),
+        "main_category_accuracy_ci95": wilson_ci(main_k, n),
         "subcategory_accuracy": round(sub_acc, 4),
+        "subcategory_accuracy_ci95": wilson_ci(sub_k, n),
         "subcategory_accuracy_excl_boundary": round(sub_acc_nb, 4),
+        "subcategory_accuracy_excl_boundary_ci95": wilson_ci(sub_nb_k, len(nb)),
         "tokens_in": tin,
         "tokens_out": tout,
         "cost_usd": round(cost, 6),
@@ -189,15 +209,18 @@ def run(model_alias, limit=None):
     print("\n" + "=" * 60, file=sys.stderr)
     print(f"model={model}  N={n}", file=sys.stderr)
     print(
-        f"  main-category accuracy : {main_acc:.0%} ({sum(r['main_ok'] for r in rows)}/{n})",
+        f"  main-category accuracy : {main_acc:.0%} ({main_k}/{n})  "
+        f"95% CI {summary['main_category_accuracy_ci95']}",
         file=sys.stderr,
     )
     print(
-        f"  subcategory accuracy   : {sub_acc:.0%} ({sum(r['sub_ok'] for r in rows)}/{n})",
+        f"  subcategory accuracy   : {sub_acc:.0%} ({sub_k}/{n})  "
+        f"95% CI {summary['subcategory_accuracy_ci95']}",
         file=sys.stderr,
     )
     print(
-        f"  subcat excl. boundary  : {sub_acc_nb:.0%} ({sum(r['sub_ok'] for r in nb)}/{len(nb)})",
+        f"  subcat excl. boundary  : {sub_acc_nb:.0%} ({sub_nb_k}/{len(nb)})  "
+        f"95% CI {summary['subcategory_accuracy_excl_boundary_ci95']}",
         file=sys.stderr,
     )
     print(f"  tokens: {tin} in / {tout} out   cost: ${cost:.4f}", file=sys.stderr)
