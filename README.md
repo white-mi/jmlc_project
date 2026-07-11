@@ -103,8 +103,8 @@ clearly overfit. We *show* this rather than overclaim. The OSL's value is the op
 point-accuracy on a 24-row panel. Split-conformal coverage is reported as a small-N artifact, not a
 calibrated 90 %. Full write-up: [`docs/DS_REPORT.md`](docs/DS_REPORT.md).
 
-A **second industry — oil & gas** (4 issuers × FY2021–2025, revenue verified via a two-pass
-`/doublecheck` + `/fact-check` audit that caught 6 corrupted aggregator cells) is now validated the
+A **second industry — oil & gas** (4 issuers × FY2021–2025, revenue verified against IFRS/IR
+releases) is now validated the
 same way. Here the finding *flips*: on volatile oil-&-gas revenue the price/volume models **beat
 naive persistence** — `hist_gbm` 19.0 % vs. persistence 21.8 % MAPE, skill +13 %, DM p = 0.053 —
 because naive "last-year = this-year" fails harder on geopolitical swings. The structural model is

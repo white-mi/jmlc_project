@@ -66,11 +66,6 @@ tags: [макро-радар, docs, architecture, для-IT]
 
 ```
 Макро-радар/
-├── Макро-радар — Хаб.md                  (entry point)
-├── Архитектура — План v1.md              (design doc)
-├── Промпт — Анализ новости.md            (user-facing prompt)
-├── CHANGELOG.md                           (version history)
-├── Свежие модели — 12 кандидатов v1.md   (research)
 ├── docs/                                  (4 documentation files)
 ├── _Справочники/
 │   ├── Таксономия шоков.md
@@ -477,7 +472,7 @@ python osl_oilgas.py --company ЛУКОЙЛ
 ## 13. Контакты и ответственные
 
 - **Owner:** Кредитный департамент Т-Банка
-- **Tech lead:** см. CHANGELOG.md
+- **Tech lead:** см. `DS_REPORT_SYNTHESIS.md`
 - **Bug reports:** через Issues или прямой канал
 - **Pull requests:** в личной ветке + ревью перед merge
 

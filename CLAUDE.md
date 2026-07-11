@@ -136,7 +136,6 @@ extra `agent`); работает без ключа в `--simulate`/`--agent-demo
 
 - `_tools/README.md` — source of truth по модулям/командам/статусу (держать в синхроне).
 - `_tools/CALIBRATION_GUIDE.md` — регламент калибровки OSL.
-- `CHANGELOG.md` — версии промпта и кода (v1.0→v0.9); читать перед изменением логики слоя.
 - `docs/4_Tech_Architecture.md` — детальная архитектура; `docs/3_User_Guide_Analyst.md` — для аналитика.
 - `Макро-радар — Хаб.md` — навигатор проекта и статус фаз.
 

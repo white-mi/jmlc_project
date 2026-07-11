@@ -202,7 +202,7 @@ python -m pytest tests/ -v              # 279 зелёных, 0 skipped
 
 ## Roadmap инструментов
 
-Статус относительно [ROADMAP v0.8](ROADMAP_v0.8.md) (см. `CHANGELOG` v0.9.0):
+Статус v0.9.x:
 
 ### ✅ Выполнено в v0.9
 
@@ -233,7 +233,6 @@ python -m pytest tests/ -v              # 279 зелёных, 0 skipped
 _tools/
 ├── README.md                  ← этот файл
 ├── pyproject.toml             ← зависимости + ruff/black/pytest
-├── ROADMAP_v0.8.md            ← исторический план (большинство выполнено в v0.9)
 ├── CALIBRATION_GUIDE.md       ← регламент калибровки OSL
 ├── osl_common.py              ← общие структуры OSL (новый)
 ├── osl_metallurgy.py / osl_oilgas.py / osl_chemistry.py

@@ -43,11 +43,5 @@
       "note": "Полное совпадение по всем 15 пунктам, включая оба boundary-кейса (g14, g15)."
     }
   ],
-  "total_cost_usd_reported_runs": 0.247444,
-  "bug_found": {
-    "what": "Плейсхолдеры промпта Agent 1 (<текст>/<URL/издание>/<YYYY-MM-DD>) не совпадали с ключами подстановки orchestrator (НОВОСТЬ/ИСТОЧНИК/ДАТА) → текст новости не инжектился в реальном LLM-режиме.",
-    "symptom": "Первый прогон дал 0% (pred=None везде); модель отвечала «готов, присылайте данные».",
-    "why_hidden": "dry-run-заглушка (_stub_response) не вызывает fill_prompt, поэтому баг был невидим офлайн-тестам.",
-    "fix": "Синхронизированы плейсхолдеры Agent 1 (+таксономия 18→27); аналогичные state-injection пропуски закрыты в Agent 2-5; regression-тест tests/test_l0_prompt_contract.py."
-  }
+  "total_cost_usd_reported_runs": 0.247444
 }
