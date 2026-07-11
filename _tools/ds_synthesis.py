@@ -37,12 +37,13 @@ import osl_panel  # noqa: E402
 METRICS_DIR = TOOLS / "output" / "osl_metrics"
 OUT = TOOLS.parent / "docs" / "figures" / "synthesis"
 
-INDUSTRIES = ["metallurgy", "oilgas", "chemistry", "energy"]
+INDUSTRIES = ["metallurgy", "oilgas", "chemistry", "energy", "oiv"]
 RU = {
     "metallurgy": "Металлургия",
     "oilgas": "Нефтегаз",
     "chemistry": "Химия",
     "energy": "Энергетика",
+    "oiv": "ОИВ",
 }
 LEARNED = ("elasticnet", "ridge", "hist_gbm")
 
@@ -84,6 +85,15 @@ CONFORMAL = {
         "n_calib": 6,
         "note": "контемпоральные физданные покрывают тренд; stale 2/12=17%",
         "src": "DS_REPORT_ENERGY.md",
+    },
+    "oiv": {
+        "model": "ridge",
+        "coverage": "1/2",
+        "pct": 50,
+        "width": "±28%",
+        "n_calib": 3,
+        "note": "структурная отложена; test n=2 (2024 бюджеты выросли быстрее нефтесигнала)",
+        "src": "DS_REPORT_OIV.md",
     },
 }
 # Энергетика — единственный случай, где все три числа на одном номинале и N=30: чистое сравнение

@@ -74,3 +74,13 @@
 2023FY,2023-12-31,capacity_kom,266700,rub_per_mw_month,simple_annual_mean,2023-01-01,2023-12-31,https://peretok.ru/news/generation/20956/,Совет рынка (КОМ 1 ЦЗ),high
 2024FY,2024-12-31,capacity_kom,278000,rub_per_mw_month,simple_annual_mean,2024-01-01,2024-12-31,https://peretok.ru/news/generation/20956/,Совет рынка (КОМ 1 ЦЗ),high
 2025FY,2025-12-31,capacity_kom,295000,rub_per_mw_month,simple_annual_mean,2025-01-01,2025-12-31,https://peretok.ru/news/generation/20956/,Совет рынка (КОМ 1 ЦЗ),med
+2016FY,2016-12-31,urals,41.9,usd_per_bbl,simple_annual_mean,2016-01-01,2016-12-31,https://minfin.gov.ru/ru/press-center?id_4=38470-o_srednei_tsene_na_neft_marki_urals,Минфин РФ (ср. Urals),high
+2017FY,2017-12-31,urals,53.03,usd_per_bbl,simple_annual_mean,2017-01-01,2017-12-31,https://minfin.gov.ru/ru/press-center?id_4=38470-o_srednei_tsene_na_neft_marki_urals,Минфин РФ (ср. Urals),high
+2018FY,2018-12-31,urals,70.01,usd_per_bbl,simple_annual_mean,2018-01-01,2018-12-31,https://minfin.gov.ru/ru/press-center?id_4=38470-o_srednei_tsene_na_neft_marki_urals,Минфин РФ (ср. Urals),high
+2019FY,2019-12-31,urals,63.59,usd_per_bbl,simple_annual_mean,2019-01-01,2019-12-31,https://minfin.gov.ru/ru/press-center?id_4=38470-o_srednei_tsene_na_neft_marki_urals,Минфин РФ (ср. Urals),high
+2020FY,2020-12-31,urals,41.73,usd_per_bbl,simple_annual_mean,2020-01-01,2020-12-31,https://minfin.gov.ru/ru/press-center?id_4=38470-o_srednei_tsene_na_neft_marki_urals,Минфин РФ (ср. Urals),high
+2016FY,2016-12-31,usd_rub,66.998,rub_per_usd,simple_annual_mean,2016-01-01,2016-12-31,https://www.exchange-rates.org/exchange-rate-history/usd-rub-2016,exchange-rates.org (annual avg),med
+2017FY,2017-12-31,usd_rub,58.325,rub_per_usd,simple_annual_mean,2017-01-01,2017-12-31,https://www.exchange-rates.org/exchange-rate-history/usd-rub-2017,exchange-rates.org (annual avg),med
+2018FY,2018-12-31,usd_rub,63.037,rub_per_usd,simple_annual_mean,2018-01-01,2018-12-31,https://www.exchange-rates.org/exchange-rate-history/usd-rub-2018,exchange-rates.org (annual avg),med
+2019FY,2019-12-31,usd_rub,64.689,rub_per_usd,simple_annual_mean,2019-01-01,2019-12-31,https://www.exchange-rates.org/exchange-rate-history/usd-rub-2019,exchange-rates.org (annual avg),med
+2020FY,2020-12-31,usd_rub,72.024,rub_per_usd,simple_annual_mean,2020-01-01,2020-12-31,https://www.exchange-rates.org/exchange-rate-history/usd-rub-2020,exchange-rates.org (annual avg),med

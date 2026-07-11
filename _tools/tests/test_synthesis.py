@@ -57,11 +57,12 @@ def test_conformal_transcription_is_honest():
     """CONFORMAL — транскрипция из DS-отчётов: у каждой записи есть источник, и зафиксирована
     ключевая честность (энергетика 100% vs stale 17%; химия структурный conformal слабый)."""
     c = ds_synthesis.CONFORMAL
-    assert set(c) == {"metallurgy", "oilgas", "chemistry", "energy"}
+    assert set(c) == {"metallurgy", "oilgas", "chemistry", "energy", "oiv"}
     assert all("src" in v and v["src"].endswith(".md") for v in c.values())
     assert ds_synthesis.ENERGY_CONFORMAL["structural_osl"] == 100
     assert ds_synthesis.ENERGY_CONFORMAL["persistence"] == 17
     assert "17%" in c["chemistry"]["note"]  # химия: структурный conformal слабый — показан
+    assert "n=2" in c["oiv"]["note"]  # ОИВ: крошечный calib-хвост показан честно, не замолчан
 
 
 def test_load_metrics_missing_dir_graceful(tmp_path):

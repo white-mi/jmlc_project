@@ -51,6 +51,11 @@ INDUSTRY_PRICE_FEATURES = {
     "oilgas": ["urals", "gas_eu", "lng_jkm", "usd_rub"],
     "chemistry": ["dap", "urea", "phosphate_rock", "crude_brent", "usd_rub"],
     "energy": ["electricity_rsv", "capacity_kom", "usd_rub"],
+    # ОИВ (регионы): бюджет субъекта учится на нефтяном фискальном сигнале urals×FX.
+    # Газовую цену (TTF) НЕ берём — для рег. бюджетов это шумный/оторванный драйвер
+    # (домест. регулируемые цены; экспорт после 2022 обвалился). Газовые регионы несут
+    # сигнал через region-FE (уровень) + объёмы добычи (vol_gas_mmcm в VOL_FEATURES).
+    "oiv": ["urals", "usd_rub"],
 }
 INDUSTRY_VOL_FEATURES = {
     "metallurgy": [
@@ -64,6 +69,7 @@ INDUSTRY_VOL_FEATURES = {
     "oilgas": ["vol_oil_t", "vol_gas_mmcm", "vol_refined_t", "vol_lng_t", "vol_condensate_t"],
     "chemistry": ["vol_fertilizer_kt", "vol_polymer_kt"],
     "energy": ["vol_generation_twh", "vol_capacity_gw"],
+    "oiv": ["vol_oil_t", "vol_gas_mmcm"],  # добыча региона (где раскрыта) — GBM держит NaN нативно
 }
 # обратная совместимость (металлургия по умолчанию)
 PRICE_FEATURES = INDUSTRY_PRICE_FEATURES["metallurgy"]

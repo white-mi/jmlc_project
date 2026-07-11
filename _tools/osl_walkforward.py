@@ -220,7 +220,8 @@ def render_report(industry, summary, fold_log, common, n_total, base="structural
         "",
         f"- **Базовая модель сравнения:** `{base}`. "
         + (
-            "StructuralOSL отключён для нефтегаза (нет годовых НДПИ/демпфера — Фаза C) → "
+            "StructuralOSL не даёт прогноза для этой отрасли (нет годового структурного "
+            "драйвера — напр. годовые НДПИ/демпфер у нефтегаза, чистая фискальная Q×P у ОИВ) → "
             "референс = наивный `persistence`; skill>0 ⇒ модель точнее наивного floor."
             if struct_absent
             else "StructuralOSL — интерпретируемый структурный бейзлайн."
