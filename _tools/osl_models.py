@@ -362,7 +362,23 @@ class LinearPanel:
 class GBMPanel:
     name = "hist_gbm"
 
-    def __init__(self):
+    def __init__(
+        self,
+        max_depth=2,
+        max_iter=120,
+        learning_rate=0.05,
+        min_samples_leaf=4,
+        l2_regularization=1.0,
+        random_state=0,
+    ):
+        # Дефолты = прод-конфиг (зажат под малый N). GBMPanel() байт-идентичен прежнему.
+        # Параметры открыты для ablation-свипа (osl_ablation.py), прод их не меняет.
+        self.max_depth = max_depth
+        self.max_iter = max_iter
+        self.learning_rate = learning_rate
+        self.min_samples_leaf = min_samples_leaf
+        self.l2_regularization = l2_regularization
+        self.random_state = random_state
         self.design = _Design(use_volumes=True)
         self.fe = _IssuerFE()
         self.model = None
@@ -373,12 +389,12 @@ class GBMPanel:
         X = self.design.transform(rows)
         y = np.log(_targets(rows)) - self.fe.level(rows)  # within-FE
         self.model = HistGradientBoostingRegressor(
-            max_depth=2,
-            max_iter=120,
-            learning_rate=0.05,
-            min_samples_leaf=4,
-            l2_regularization=1.0,
-            random_state=0,
+            max_depth=self.max_depth,
+            max_iter=self.max_iter,
+            learning_rate=self.learning_rate,
+            min_samples_leaf=self.min_samples_leaf,
+            l2_regularization=self.l2_regularization,
+            random_state=self.random_state,
         )
         self.model.fit(X, y)
         return self

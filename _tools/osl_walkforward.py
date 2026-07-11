@@ -90,6 +90,15 @@ def metrics_for(records):
     }
 
 
+def metrics_by_year(records):
+    """MAPE/MAE/RMSE, разбитые по тестовому году (год = элемент records[i][2]).
+    Для per-year диагностики (напр. оценка 2025-tuning-bias структурной модели)."""
+    by_year = {}
+    for x in records:
+        by_year.setdefault(x[2], []).append(x)
+    return {int(year): metrics_for(recs) for year, recs in sorted(by_year.items())}
+
+
 def _common_keys(preds):
     """Ключи (issuer,period), где ВСЕ предсказывающие модели дали конечный прогноз — для честного
     skill/DM. Модель без единого прогноза (напр. StructuralOSL, отключённый для нефтегаза) НЕ
@@ -247,6 +256,7 @@ def run(industry="metallurgy"):
                 "base": base,
                 "n_common": len(common),
                 "n_total": n_total,
+                "structural_per_year": metrics_by_year(preds.get("structural_osl", [])),
             },
             ensure_ascii=False,
             indent=2,
