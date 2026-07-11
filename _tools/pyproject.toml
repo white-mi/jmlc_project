@@ -20,6 +20,8 @@ dev = [
     "pytest-cov>=4.1",
     "ruff>=0.5",
     "black>=24.0",
+    "mypy>=1.8",
+    "types-PyYAML",
 ]
 # LangChain-агент (langchain_agent.py). Тулы/симуляция работают без ключа;
 # реальный агент — ChatAnthropic с ANTHROPIC_API_KEY.
@@ -61,6 +63,10 @@ py-modules = [
     "ds_synthesis",
     # Продуктовый слой: сводка корпуса _Анализы/ (proxy-feedback)
     "backtest_analyses",
+    # Продуктовый слой: прокси-измерение H6 (лид над рейтинговыми действиями)
+    "measure_h6_leadtime",
+    # DS-диагностика: ablation hist_gbm (сетка max_depth×l2) + coef/permutation-importance
+    "osl_ablation",
 ]
 
 [tool.pytest.ini_options]
@@ -91,3 +97,13 @@ lint.ignore = ["E501", "E741", "W605", "E402", "E702"]
 [tool.black]
 line-length = 100
 target-version = ["py310"]
+
+# Мягкая статическая типизация. НЕ блокирующий гейт (CI job `typecheck` — continue-on-error):
+# код типизирован частично, строгий mypy зашумел бы. Ловит явные несоответствия типов.
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+check_untyped_defs = false
+warn_unused_ignores = false
+warn_return_any = false
+exclude = "tests/"

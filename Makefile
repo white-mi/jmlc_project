@@ -1,12 +1,14 @@
 # Макро-радар — оркестратор разработки. Запуск из корня репозитория.
-.PHONY: help install install-dev test lint fmt smoke docker-build docker-test clean
+.PHONY: help install install-dev test lint fmt typecheck precommit smoke docker-build docker-test clean
 
 help:
 	@echo "install      — рантайм-зависимости (requirements.txt)"
 	@echo "install-dev  — + pytest/ruff/black (editable из _tools)"
-	@echo "test         — pytest (269 тестов, TF-IDF режим)"
+	@echo "test         — pytest (279 тестов, TF-IDF режим)"
 	@echo "lint         — ruff check (гейт CI)"
 	@echo "fmt          — black . (black --check — гейт CI)"
+	@echo "typecheck    — mypy . (мягкий, non-blocking CI job)"
+	@echo "precommit    — pre-commit run --all-files (ruff/black/mypy)"
 	@echo "smoke        — сквозной smoke-прогон пайплайна (без LLM)"
 	@echo "docker-build — собрать образ (прогон тестов внутри сборки)"
 	@echo "docker-test  — собрать и запустить тесты в контейнере"
@@ -26,6 +28,12 @@ lint:
 
 fmt:
 	cd _tools && black .
+
+typecheck:
+	cd _tools && mypy .
+
+precommit:
+	pre-commit run --all-files
 
 smoke:
 	cd _tools && python run_pipeline.py --smoke-shock 4.2 --smoke-industry oilgas

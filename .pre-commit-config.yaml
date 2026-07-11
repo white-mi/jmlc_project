@@ -1,0 +1,23 @@
+# Локальные pre-commit хуки — зеркалят гейты CI (ruff/black) + мягкий mypy.
+# Установка:  pip install pre-commit && pre-commit install
+# Прогон вручную:  pre-commit run --all-files
+# Пины ruff/black совпадают с .github/workflows/test.yml (детерминизм гейтов).
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.19
+    hooks:
+      - id: ruff
+        args: [--fix]
+        files: ^_tools/.*\.py$
+  - repo: https://github.com/psf/black
+    rev: 26.5.1
+    hooks:
+      - id: black
+        files: ^_tools/.*\.py$
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+        files: ^_tools/.*\.py$
+        args: ["--config-file=_tools/pyproject.toml"]
+        additional_dependencies: ["types-PyYAML"]
