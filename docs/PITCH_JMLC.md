@@ -64,7 +64,7 @@ style: |
 <div class="stats">
 <div class="stat"><b>5 слоёв</b><span>L0 → L3, один прогон</span></div>
 <div class="stat"><b>34 модуля · ≈11k строк</b><span>Python</span></div>
-<div class="stat"><b>269 тестов · CI</b><span>0 skipped</span></div>
+<div class="stat"><b>279 тестов · CI</b><span>0 skipped</span></div>
 <div class="stat"><b>4 отрасли</b><span>walk-forward + conformal</span></div>
 </div>
 
@@ -296,7 +296,7 @@ gbm лучше лишь на 1.6 п.п., но DM $p=0.66$ (внутри шума
 <div>
 
 **Инженерия**
-- **34 модуля · ≈11k строк** · **269 тестов**, 0 skipped
+- **34 модуля · ≈11k строк** · **279 тестов**, 0 skipped
 - CI 4 джоба: matrix 3.11/3.12 · e2e smoke L0→L3 · Docker clean-clone · security
 - `ruff` + `black` + coverage — жёсткие гейты
 - `requirements.lock` → CI и Docker детерминированы
@@ -316,7 +316,7 @@ gbm лучше лишь на 1.6 п.п., но DM $p=0.66$ (внутри шума
 **Дальше:** **ОИВ large-N** (регионы × годы → 150–425 строк) — пробить статзначимость · калибровка на шоках РФ 2014 / 2020 / 2022 · L2 — графовые методы LPCMCI + DebtRank
 
 <!--
-(35 сек): Инженерно — 34 модуля, 11 тысяч строк, 269 тестов, CI из четырёх джобов с Docker
+(35 сек): Инженерно — 34 модуля, 11 тысяч строк, 279 тестов, CI из четырёх джобов с Docker
 clean-clone, всё запинено и детерминировано. Применение ИИ — L0 не просто промпт, а измеренный
 слой: живой прогон, Haiku и Sonnet под 100%, и eval нашёл реальный баг, который я закрыл тестом.
 Дальше — региональные бюджеты дают большой N и статзначимость.
@@ -356,7 +356,7 @@ clean-clone, всё запинено и детерминировано. Прим
 
 `Classifier → Context-RAG → Backtest-Analog → Impact → Summary`
 
-RAG: SQLite + `sqlite-vec` по корпусу `_Анализы/` (58 разборов); эмбеддер — флаг TF-IDF / e5.
+RAG: SQLite + `sqlite-vec` по корпусу `_Анализы/` (58 индексируемых: 18 кураторских разборов + 40 батч-прогонов); эмбеддер — флаг TF-IDF / e5.
 
 | Модель | main | subcat (27) | $ |
 |---|--:|--:|--:|
@@ -462,7 +462,7 @@ $$\text{structural } 26.8\% \;>\; \text{persistence } 19.1\%$$
 **Модули** (≈11k строк): `run_pipeline` 651 · `orchestrator` 525 · `osl_models` 486 ·
 `segment_impact` 359 · `osl_walkforward` 270 · `spillover` 213.
 
-**Тесты** 269 (0 skipped): anti-leakage guards, bifurcation, conformal-split, JSON-контракт
+**Тесты** 279 (0 skipped): anti-leakage guards, bifurcation, conformal-split, JSON-контракт
 stdout, prompt-контракт L0.
 
 </div>

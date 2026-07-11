@@ -135,8 +135,8 @@ def test_structural_k_computed_from_passed_rows_only():
 
 
 def test_structural_steel_price_varies_by_period():
-    """После wiring iron-ore прокси цена стали (а значит raw сталевара) РАЗНАЯ по годам
-    (раньше была заморожена → одинаковый raw на 2023/2024)."""
+    """Цена стали (iron-ore прокси) и raw сталевара РАЗНЫЕ по годам —
+    steel-прокси зависит от периода, а не заморожен."""
     rows = _rows()
     _need(rows)
     s = osl_models.StructuralOSL()

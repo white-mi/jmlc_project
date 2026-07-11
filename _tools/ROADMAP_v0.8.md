@@ -9,7 +9,7 @@ tags: [макро-радар, roadmap, v0.8]
 > **← Хаб** · [← CHANGELOG v0.7](../CHANGELOG.md)
 
 > [!done] СТАТУС на v0.9.2 (июнь 2026): большинство пунктов этого плана ВЫПОЛНЕНО — см. CHANGELOG v0.9.0. Документ сохранён как исторический план.
-> Выполнено: **A1** (`fetch_macro_state.py`), **A3** (FRED fallback), **B1** (маршрутизация подкатегорий), **B2** (multi-source spillover), **D1** (CI), **D2** (ruff/black). pytest расширен до **127 зелёных (1 skipped)**.
+> Выполнено: **A1** (`fetch_macro_state.py`), **A3** (FRED fallback), **B1** (маршрутизация подкатегорий), **B2** (multi-source spillover), **D1** (CI), **D2** (ruff/black). pytest расширен до **279 зелёных, 0 skipped** (актуально на v0.9.2).
 
 ## Контекст
 

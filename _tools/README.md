@@ -12,7 +12,7 @@ Python-пакет для расчёта индикаторов и моделей
 
 **Состояние v0.9.2 (июнь 2026):**
 - `pyproject` version = **0.9.0**, `pipeline_version='0.9'`.
-- **269 pytest зелёных, 0 skipped** (+10 DS-нефтегаз; +9 DS-химия; +EDA-параметризация и DS-синтез).
+- **279 pytest зелёных, 0 skipped** (+10 DS-нефтегаз; +9 DS-химия; +EDA-параметризация и DS-синтез).
 - Архитектурная оценка независимым ревьюером — **9.2/10**.
 - OSL покрывает **7 отраслей тирами по доступности данных**: **4 валидированы** (walk-forward +
   conformal + DS-отчёт), **3 иллюстративны** (нет публичного Q×P) — см. [`COVERAGE_TIERS`](../docs/COVERAGE_TIERS.md).
@@ -105,7 +105,7 @@ N=18; структурная подключена) и энергетика ([о�
 |---|---|
 | `.github/workflows/test.yml` | CI: pytest + ruff + black (TF-IDF режим без сети) |
 | `pyproject.toml` | Зависимости + конфигурация ruff/black/pytest |
-| `tests/` | 269 тестов (0 skipped) |
+| `tests/` | 279 тестов (0 skipped) |
 
 ---
 
@@ -155,7 +155,7 @@ python batch_run.py                     # пакетный прогон неск
 
 ```bash
 cd _tools
-python -m pytest tests/ -v              # 269 зелёных, 0 skipped
+python -m pytest tests/ -v              # 279 зелёных, 0 skipped
 ```
 
 ---
@@ -163,8 +163,8 @@ python -m pytest tests/ -v              # 269 зелёных, 0 skipped
 ## Статус OSL (v0.9.2)
 
 - **7 отраслей в продакшене:** металлургия, нефтегаз, химия, энергетика, фарма, розница, ОИВ.
-- **Conformal-интервалы работают.** Perturbation-интервалы (`conformal_prediction.py`) помечены как **IN-SAMPLE**. Честная **out-of-sample** валидация РЕАЛИЗОВАНА в DS-доработке: `conformal_split.py` (split-conformal на независимой панели FY2021–2025), тест `test_holdout_coverage_metallurgy` разблокирован. См. [DS-отчёт](../docs/DS_REPORT.md).
-- **Нефтегаз больше НЕ «провален».** Pipeline v0.9 работает; `fetch_macro_state.py` тянет живые макрофиды, заглушки заменены рабочей логикой.
+- **Conformal-интервалы.** Perturbation-интервалы (`conformal_prediction.py`) — **IN-SAMPLE**. Честная **out-of-sample** валидация — `conformal_split.py` (split-conformal на независимой панели FY2021–2025, тест `test_holdout_coverage_metallurgy`). См. [DS-отчёт](../docs/DS_REPORT.md).
+- **Нефтегаз — рабочий слой.** Pipeline v0.9 даёт числа; `fetch_macro_state.py` тянет живые макрофиды.
 
 ---
 
@@ -214,7 +214,7 @@ python -m pytest tests/ -v              # 269 зелёных, 0 skipped
 | **B2** | Multi-source spillover (`propagate_multi_source` + `propagate_credit_channel`) |
 | **D1** | CI на GitHub Actions (`.github/workflows/test.yml`): pytest + ruff + black |
 | **D2** | ruff/black в `pyproject.toml` |
-| **D (частично)** | Расширение тестов — 269 зелёных (0 skipped) |
+| **D (частично)** | Расширение тестов — 279 зелёных (0 skipped) |
 | **Рефакторинг** | `osl_common.py` — общие `RevenuePredict`/`FXRate`/`mae_pct` для 7 модулей; `batch_run.py` — пакетный прогон |
 
 ### ⏳ Осознанно не закрыто (нет данных)
@@ -247,7 +247,7 @@ _tools/
 ├── agents/                    ← orchestrator.py + rag/
 ├── data/                      ← macro_state, shock_to_industries, brent_scenarios, ...
 ├── calibration/               ← <module>_calibrated.json (7 шт.)
-└── tests/                     ← 269 тестов (0 skipped)
+└── tests/                     ← 279 тестов (0 skipped)
 ```
 
 ---

@@ -79,8 +79,7 @@ def test_fill_prompt_leaves_no_required_placeholder(n):
 def test_prompt_not_truncated_by_nested_fence(n):
     """Извлечённый промпт доходит до финальной строки «Выход — …».
 
-    Вложенный ```-fence раньше обрывал extract_prompt (Agent 5: 377/3277).
-    Для вложенных блоков используем ~~~, а не ```."""
+    Вложенные блоки используют ~~~ (не ```), иначе ```-fence обрывает extract_prompt."""
     prompt = _prompt(n)
     assert "Выход —" in prompt, (
         f"Agent {n} ({FILES[n]}): extract_prompt вернул {len(prompt)} симв. без "

@@ -102,7 +102,7 @@ tags: [макро-радар, docs, architecture, для-IT]
     │   ├── brent_scenarios.json
     │   ├── spillover_matrix.json
     │   └── segment_impact_table.json
-    ├── tests/                   (127 pytest зелёных, 1 skipped)
+    ├── tests/                   (279 pytest зелёных, 0 skipped)
     ├── calibration/
     │   ├── osl_metallurgy_calibrated.json
     │   └── ... (7 JSON + multi-param/multi-period)
@@ -354,14 +354,14 @@ multi_agent: bool
 ## 7. Тестирование (текущее + roadmap)
 
 ### Сейчас
-- ✅ **127 pytest зелёных (1 skipped)** — `cd _tools && python -m pytest tests/ -v`
+- ✅ **279 pytest зелёных (0 skipped)** — `cd _tools && python -m pytest tests/ -v`
 - ✅ **CI: GitHub Actions** (`.github/workflows/test.yml`) — pytest + ruff + black на каждый push
 - ✅ pytest suite для всех 7 OSL модулей + conformal + RAG + L1/L2/L3
 - ✅ Бэк-тест встроен в каждый OSL — `predict_revenue()` сравнивается с `ACTUAL_REVENUE_*`
 - ✅ Conformal `--industry all` показывает coverage 90% interval (in-sample, см. ниже)
 - ✅ Auto-calibrator проверяет MAE через grid search
 
-> Единственный skip — честный out-of-sample skip: нет независимых 9M-фактов для проверки обобщения conformal.
+> Честный out-of-sample — split-conformal в `conformal_split.py` (annual split-conformal). Независимая проверка на 9M-фактах эмитента — плановое уточнение (см. Roadmap).
 
 ### Roadmap
 - 📋 Integration test Multi-Agent (на synthetic новости)
@@ -460,7 +460,7 @@ python osl_oilgas.py --company ЛУКОЙЛ
 | Версия | Содержание | Статус |
 |---|---|---|
 | v0.7–0.9 | energy refactor + multi-period validation | ✅ done |
-| v0.7–0.9 | pytest suite (127 зелёных) + CI/линтеры (ruff/black) | ✅ done |
+| v0.7–0.9 | pytest suite (279 зелёных) + CI/линтеры (ruff/black) | ✅ done |
 | v0.7–0.9 | `pyproject.toml` (зависимости) | ✅ done |
 | v0.8–0.9 | `fetch_macro_state.py` — живые макрофиды | ✅ done |
 | v0.8–0.9 | маршрутизация подкатегорий (`shock_to_industries.json`) | ✅ done |

@@ -144,9 +144,8 @@ persistence / issuer_mean не значимо** (все Diebold–Mariano p > 0.
 ширину неопределённости (`q=0.247`), а не как «точность». Маржинальная гарантия ≥1−α проверена
 отдельно на синтетике с обмениваемыми остатками.
 
-**Разблокирован `test_holdout_coverage_metallurgy`** — ранее `@skip` (9M-actuals были
-выведены из 12M → circular). Теперь независимая панель FY2021–2025 делает temporal
-hold-out настоящим. Это единственный пропущенный тест проекта — **закрыт честно**.
+**Честный temporal hold-out (`test_holdout_coverage_metallurgy`)** — на независимой панели
+FY2021–2025: 9M-actuals не выводятся из 12M, поэтому hold-out настоящий, без circular-leakage.
 
 ## 6. Честные ограничения
 
@@ -160,7 +159,7 @@ hold-out настоящим. Это единственный пропущенн�
 
 ## 7. Инженерия и воспроизводимость
 
-- **269 pytest зелёных, 0 skipped** — детерминированы на чистом клоне (bundled-фикстуры).
+- **279 pytest зелёных, 0 skipped** — детерминированы на чистом клоне (bundled-фикстуры).
   CI: матрица **py3.11/3.12** + e2e smoke + **docker build (clean-clone gate)** + secret/dep-scan;
   **ruff — реальный гейт**; зависимости из закреплённого `requirements.lock`.
 - Новые модули в core (numpy/scikit-learn): `osl_panel`, `osl_models`, `osl_walkforward`,
@@ -170,7 +169,7 @@ hold-out настоящим. Это единственный пропущенн�
 
 ```bash
 cd _tools
-python -m pytest tests/ -q                       # 269 passed, 0 skipped
+python -m pytest tests/ -q                       # 279 passed, 0 skipped
 python osl_panel.py --industry metallurgy        # сводка панели
 pip install -e ".[eda]" && python eda_osl.py     # 8 фигур → docs/figures/eda/
 python osl_models.py                             # in-sample + leave-last-out

@@ -242,9 +242,9 @@ PROFILES: Dict[str, CompanyProfile] = {
 # ============================================================
 # ФАКТИЧЕСКИЕ ДАННЫЕ МСФО 12М 2025 (для бэк-теста)
 # ============================================================
-# ⚠️ ЗАГЛУШКИ — требуют заполнения из отчёта Нефтегаз
-# (внешний отраслевой источник (если доступен))
-# Прибл. цифры — на основе оценок из открытых источников и пред. отчётности.
+# Приблизительные фактические МСФО 12М 2025 из открытых публичных источников —
+# для иллюстративного inline-бэктеста этого модуля. Валидированная панель
+# (walk-forward) — data/panel/panel_revenue.csv; см. docs/DS_REPORT_OILGAS.md.
 
 ACTUAL_REVENUE_12M_2025 = {
     "Роснефть": {"rub_bn": 8_236, "source": "МСФО 12М 2025 — выручка 8.236 трлн ₽ (-18.8%)"},
@@ -573,7 +573,7 @@ def main():
             print(f"    {k}: ${v.avg_price_usd:,.1f}/{v.unit}")
     print()
 
-    print("  ⚠️ Заглушки фактических МСФО — требуют замены из отчёта Нефтегаз")
+    print("  Факт. МСФО 12М 2025 — приблизит. публичные оценки (источник в ACTUAL_*)")
     print()
 
     results = []
@@ -591,7 +591,7 @@ def main():
         )
         if result.actual_rub_bn:
             print(
-                f"  Факт МСФО (заглушка): {result.actual_rub_bn:,.0f} млрд ₽ "
+                f"  Факт МСФО (публ. оценка): {result.actual_rub_bn:,.0f} млрд ₽ "
                 f'({ACTUAL_REVENUE_12M_2025[company]["source"]})'
             )
         if result.mae_pct is not None:
@@ -605,7 +605,7 @@ def main():
 
     # ИТОГ
     print(f'\n{"=" * 70}')
-    print("  ИТОГИ БЭК-ТЕСТА (заглушка фактов)")
+    print("  ИТОГИ БЭК-ТЕСТА (факты — публичные оценки)")
     print(f'{"=" * 70}')
     success = [r for r in results if r.mae_pct is not None and r.mae_pct <= 10]
     accept = [r for r in results if r.mae_pct is not None and 10 < r.mae_pct <= 20]
@@ -614,7 +614,7 @@ def main():
     print(f"  ⚠️ MAE 10-20% (acceptable): {len(accept)} — {[r.company for r in accept]}")
     print(f"  ❌ MAE > 20% (needs work): {len(fail)} — {[r.company for r in fail]}")
     print()
-    print("  📌 NEXT: заменить ACTUAL_REVENUE_12M_2025 на точные цифры из отчёта")
+    print("  📌 Валидированная панель (walk-forward): data/panel/panel_revenue.csv")
     print("     внешний отраслевой источник (если доступен)")
     print()
 

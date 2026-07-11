@@ -10,7 +10,7 @@ portfolio data.
 
 [![tests](https://github.com/white-mi/jmlc_project/actions/workflows/test.yml/badge.svg)](https://github.com/white-mi/jmlc_project/actions/workflows/test.yml)
 ![python](https://img.shields.io/badge/python-3.11%2B-blue)
-![tests-count](https://img.shields.io/badge/tests-269%20passed%2C%200%20skipped-brightgreen)
+![tests-count](https://img.shields.io/badge/tests-279%20passed%2C%200%20skipped-brightgreen)
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 ---
@@ -40,7 +40,7 @@ flowchart TD
     L0 --> L1["L1 · Macro state<br/>RF composite activity · EPU · key-rate regime"]
     L1 --> L15["L1.5 · OSL<br/>issuer revenue = volumes × prices × FX<br/>+ conformal intervals (2–3 mo ahead of IFRS)"]
     L15 --> L2["L2 · Industry spillover<br/>7×7 Fialkowski matrix · credit channel"]
-    L2 --> L3["L3 · Client segments<br/>ΔPD / Δdemand / Δchurn · 18 segments"]
+    L2 --> L3["L3 · Client segments<br/>ΔPD / Δdemand / Δchurn · 10 base → 18 active segments"]
 ```
 
 | Layer | Role | Output |
@@ -49,7 +49,7 @@ flowchart TD
 | **L1** Macro state | Russian composite activity index, EPU, key-rate regime | macro vector |
 | **L1.5** Operational signal (OSL) | Forecasts issuer revenue from physical volumes × prices × FX, ahead of IFRS by 2–3 months | revenue + conformal interval |
 | **L2** Industry spillover | 7×7 dependency matrix (Fialkowski), credit-channel propagation | ΔPD by industry |
-| **L3** Client segments | Channel decomposition across 18 segments (5 channels) | ΔPD / Δdemand / Δchurn |
+| **L3** Client segments | Channel decomposition across 10 base (→18 active) segments (5 channels) | ΔPD / Δdemand / Δchurn |
 
 **Coverage is tiered by data availability** — a documented design choice, not a gap. All seven
 industries (oil & gas, metallurgy, chemicals, retail, power, regional governments, pharma) flow
@@ -65,7 +65,7 @@ git clone https://github.com/white-mi/jmlc_project.git
 cd jmlc_project/_tools
 
 pip install -r ../requirements.lock pytest   # pinned numeric stack (TF-IDF, offline)
-python -m pytest tests/ -q                    # 269 passed, 0 skipped
+python -m pytest tests/ -q                    # 279 passed, 0 skipped
 
 # End-to-end smoke run — numbers at every layer, no LLM call:
 python run_pipeline.py --smoke-shock 4.2 --smoke-industry oilgas

@@ -225,9 +225,9 @@ PyYAML парсит → передаётся в RAG индексатор и Conf
 
 ## 6. Тестирование (текущее состояние)
 
-**Юнит/интеграционные тесты:** 127 pytest зелёных (1 skipped), запуск `cd _tools && python -m pytest tests/ -v`; CI через GitHub Actions.
+**Юнит/интеграционные тесты:** 279 pytest зелёных (0 skipped), запуск `cd _tools && python -m pytest tests/ -v`; CI через GitHub Actions.
 
-> Единственный skip — честный out-of-sample skip (нет независимых 9M-фактов для проверки обобщения conformal).
+> Честный out-of-sample — split-conformal в `conformal_split.py`. Независимая проверка на 9M-фактах эмитента — плановое уточнение.
 
 **Quality assurance через бэк-тест:**
 - Каждый OSL-скрипт имеет `ACTUAL_REVENUE_*_2025` → встроенная проверка predicted vs actual
@@ -279,7 +279,7 @@ Pandas / Django / FastAPI / SQLAlchemy — **не используются**. Т
 - ❌ Authentication — single-user
 
 ### Сделано в v0.8–v0.9
-- ✅ pytest suite (127 зелёных, 1 skipped) + CI (GitHub Actions: pytest/ruff/black)
+- ✅ pytest suite (279 зелёных, 0 skipped) + CI (GitHub Actions: pytest/ruff/black)
 - ✅ `pyproject.toml` (v0.9, с ruff/black)
 - ✅ Multi-period validation (energy refactor + multi-period калибровки)
 - ✅ `fetch_macro_state.py` — живые макрофиды (USD/RUB, Brent, КС ЦБ, инфляция)

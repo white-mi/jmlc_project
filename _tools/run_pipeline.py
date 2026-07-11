@@ -415,8 +415,8 @@ def run_full_pipeline(
             "companies": osl_oilgas_forward_scenarios(brent_pre, brent_post),
         }
 
-    # S3.4: magnitude из severity L0 (раньше фикс 0.8); для шоков ставки ЦБ
-    # (категория 4) — broad credit channel из 5 отраслей, а не одна.
+    # magnitude из severity L0; для шоков ставки ЦБ (категория 4) —
+    # broad credit channel из 5 отраслей, а не одна.
     sev = state["L0_classification"].get("severity_score")
     magnitude = severity_to_magnitude(sev) if sev is not None else 0.8
     if subcat.split(".")[0] == "4":

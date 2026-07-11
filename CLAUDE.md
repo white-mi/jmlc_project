@@ -25,7 +25,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 cd _tools
 
-# Тесты (269 собирается, 0 skipped)
+# Тесты (279 собирается, 0 skipped)
 python -m pytest tests/ -v
 python -m pytest tests/test_v09.py -v                          # один файл
 python -m pytest tests/test_l1_l2_l3.py::test_churn_always_positive -v   # один тест
@@ -93,9 +93,10 @@ extra `agent`); работает без ключа в `--simulate`/`--agent-demo
   Тесты `test_bifurcation_*` это закрепляют — не «чините» их в сторону «все ΔPD одного знака».
 - **Активная таблица сегментов — `segment_impact_table_v0_8.json`** (`DATA_PATH`).
   `segment_impact_table.json` — legacy-совместимость (`LEGACY_DATA_PATH`).
-- **Conformal-покрытие — IN-SAMPLE.** Считается на захардкоженных `ACTUAL_*` в
-  `osl_*.py`, не на out-of-sample. Не утверждать «out-of-sample 96%». Честный
-  hold-out — единственный `skipped` тест (ждёт независимых 9M actuals).
+- **Conformal: perturbation-интервалы IN-SAMPLE, split-conformal — OOS.**
+  Perturbation (`conformal_prediction.py`) считается на захардкоженных `ACTUAL_*` в
+  `osl_*.py` — не утверждать «out-of-sample 96%». Честный out-of-sample hold-out —
+  в `conformal_split.py` (тест `test_holdout_coverage_metallurgy`); **0 skipped**.
 - **Маршрутизация шоков — данные, не код.** Все 27 подкатегорий → отрасли в
   `data/shock_to_industries.json`. Не зашивать в inline-словарь.
 
