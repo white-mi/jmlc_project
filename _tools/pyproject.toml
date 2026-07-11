@@ -82,6 +82,7 @@ omit = [
     "*eda_osl.py",
     "*ds_synthesis.py",
     "*langchain_agent.py",
+    "*scripts/ksp_harvester.py",
 ]
 
 # S5.3: линтеры. ruff/black — мягкий старт (line-length 100, без агрессивных правил).
