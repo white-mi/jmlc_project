@@ -65,3 +65,14 @@ _Презентации/
 # Личные материалы (CV, презентация, фото) и локальная подготовка к защите —
 # в публичный репозиторий НЕ идут.
 личное/
+
+# Внутренние dev/process/research/planning-артефакты — не публикуются.
+CHANGELOG.md
+Свежие модели — 12 кандидатов v1.md
+_tools/ROADMAP_v0.8.md
+docs/docs.md
+docs/AI_WORKFLOW.md
+# Пустые Obsidian folder-notes (навигаторы), в репозитории не нужны.
+_tools/data/data.md
+_tools/tests/tests.md
+_tools/scripts/scripts.md
