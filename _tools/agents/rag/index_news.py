@@ -18,6 +18,11 @@ ANALYSES_DIR = Path(__file__).parent.parent.parent.parent / "_Анализы"
 DB_PATH = Path(__file__).parent / "radar_rag.db"
 
 
+def _embedder_path(db_path):
+    """Путь к персистнутому TF-IDF-эмбеддеру рядом с БД (общий базис index↔query)."""
+    return Path(str(db_path) + ".embedder.joblib")
+
+
 def parse_markdown_analysis(file_path: Path) -> dict:
     """
     Распарсить файл анализа: frontmatter + ключевые секции.
@@ -191,12 +196,12 @@ def _load_corpus_texts(conn) -> list[str]:
 def index_single(file_path, db_path: Path = DB_PATH, use_st: bool | None = None) -> bool:
     """Инкрементально индексирует ОДИН файл анализа (S1.2): UPSERT без стирания БД.
 
-    Embedder обучается на полном корпусе (существующий + новый док), затем
-    считается эмбеддинг нового дока. Эмбеддинги старых записей не пересчитываются —
-    приемлемый компромисс для TF-IDF (find_analogs всё равно re-fit при запросе);
-    после перехода на нейроэмбеддинги (S3.3) вопрос снимается.
+    Использует ПЕРСИСТНУТЫЙ эмбеддер (из index_all): новый док лишь трансформируется в
+    существующем базисе → его вектор консистентен и с БД, и с запросом (find_analogs грузит
+    тот же артефакт). Если персиста нет (легаси/ST/первый вызов) — фит на полном корпусе +
+    персист. Новую лексику полностью подхватит следующий полный index_all.
     """
-    from embeddings import get_embedder
+    from embeddings import get_embedder, load_embedder, save_embedder
 
     file_path = Path(file_path)
     if not file_path.exists():
@@ -211,10 +216,13 @@ def index_single(file_path, db_path: Path = DB_PATH, use_st: bool | None = None)
     data = parse_markdown_analysis(file_path)
     conn, vec_loaded = _connect(db_path)
     try:
-        embedder = get_embedder(prefer_st=use_st)
-        corpus = _load_corpus_texts(conn)
-        corpus += [data["title"], data["what_text"]]
-        embedder.fit(corpus)
+        embedder = load_embedder(_embedder_path(db_path))
+        if embedder is None or not getattr(embedder, "fitted", True):
+            # Нет персистнутого базиса → фит на полном корпусе (существующий + новый) + персист.
+            embedder = get_embedder(prefer_st=use_st)
+            corpus = _load_corpus_texts(conn) + [data["title"], data["what_text"]]
+            embedder.fit(corpus)
+            save_embedder(embedder, _embedder_path(db_path))
         _write_row(conn, embedder, data, vec_loaded)
         conn.commit()
     finally:
@@ -256,6 +264,10 @@ def index_all(
         corpus_texts.append(p["title"])
         corpus_texts.append(p["what_text"])
     embedder.fit(corpus_texts)
+    # Персист фитнутого базиса → find_analogs/index_single используют ТОТ ЖЕ эмбеддер.
+    from embeddings import save_embedder
+
+    save_embedder(embedder, _embedder_path(db_path))
 
     conn, vec_loaded = _connect(db_path)
     indexed = 0

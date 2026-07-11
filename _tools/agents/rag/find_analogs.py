@@ -49,28 +49,32 @@ def find_analogs(
     Returns:
       Список dicts с file_path, title, date, similarity, ...
     """
-    from embeddings import get_embedder, RAG_USE_ST
+    from embeddings import get_embedder, load_embedder, RAG_USE_ST
+    from index_news import _embedder_path
 
     # S3.3: единый выбор эмбеддера (env RADAR_RAG_USE_ST), согласован с индексацией
     use = RAG_USE_ST if use_st is None else use_st
-    embedder = get_embedder(prefer_st=use)
 
-    # Re-fit на корпусе (TF-IDF требует весь корпус)
     conn = sqlite3.connect(str(db_path))
     conn.row_factory = sqlite3.Row
 
-    # Загрузить корпус
-    cursor = conn.execute("SELECT title, shock_summary FROM news_analyses")
-    corpus = []
-    for row in cursor:
-        corpus.append(row["title"])
-        if row["shock_summary"]:
-            corpus.append(row["shock_summary"])
+    # Единый базис: грузим персистнутый при индексации эмбеддер (index_all/index_single),
+    # чтобы запрос кодировался в ТОМ ЖЕ SVD-пространстве, что и БД (косинусы сопоставимы
+    # только в одном базисе).
+    embedder = load_embedder(_embedder_path(db_path))
+    if embedder is None or not getattr(embedder, "fitted", True):
+        # Легаси-БД без персиста (или ST-режим) → откат на re-fit по корпусу БД.
+        embedder = get_embedder(prefer_st=use)
+        cur = conn.execute("SELECT title, shock_summary FROM news_analyses")
+        corpus = []
+        for row in cur:
+            corpus.append(row["title"])
+            if row["shock_summary"]:
+                corpus.append(row["shock_summary"])
+        if corpus:
+            embedder.fit(corpus)
 
-    if len(corpus) > 0:
-        embedder.fit(corpus)
-
-    query_emb = embedder.encode(query_text)
+    query_emb = embedder.encode(query_text, is_query=True)
 
     # Загрузить эмбеддинги + метаданные
     conn.enable_load_extension(True)

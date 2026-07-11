@@ -128,7 +128,7 @@ python orchestrator.py --news-file news.txt --source "ТАСС" --date 2026-06-1
 
 **RAG — ✅ реализован (v0.9, июнь 2026):** реальный код в `rag/*.py` (`init_db`, `embeddings`, `find_analogs`, `index_news`). Локальная БД эмбеддингов всех проанализированных новостей (SQLite + sqlite-vec). Эмбеддер по умолчанию — TF-IDF (всегда доступен, без тяжёлых моделей); опционально нейросетевой e5-small (`intfloat/multilingual-e5-small`, 384d) через env `RADAR_RAG_USE_ST=1` + reindex, с graceful fallback на TF-IDF (не FinBERT по умолчанию). Индексация: `index_single` (UPSERT, не стирает БД) + `index_all`.
 
-**Orchestrator — ✅ реализован (v0.9, июнь 2026):** `orchestrator.py` — автозапуск pipeline на новости (`--llm-mode cli|sdk|dry-run`). Ранее планировался как v2.0.
+**Orchestrator — ✅ реализован (v0.9, июнь 2026):** `orchestrator.py` — автозапуск pipeline на новости (`--llm-mode cli|sdk|dry-run`).
 
 **Впереди:** out-of-sample калибровка RAG, cross-encoder rerank, расширение на новости из открытых источников (не только наши анализы).
 

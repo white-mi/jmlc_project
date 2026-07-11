@@ -57,8 +57,9 @@ class TfidfEmbedder:
         self.svd.fit(tfidf_matrix)
         self.fitted = True
 
-    def encode(self, text: str) -> np.ndarray:
-        """Encoded vector. Если SVD < 384 → padding нулями до 384."""
+    def encode(self, text: str, is_query: bool = False) -> np.ndarray:
+        """Encoded vector. Если SVD < 384 → padding нулями до 384. `is_query` — для
+        единого интерфейса с ST-эмбеддером; TF-IDF симметричен, параметр не влияет."""
         if not self.fitted:
             return np.zeros(EMBEDDING_DIM, dtype=np.float32)
         tfidf_v = self.vectorizer.transform([text])
@@ -97,12 +98,13 @@ class SentenceTransformerEmbedder:
         """No-op — pretrained модель не требует обучения."""
         pass
 
-    def encode(self, text: str) -> np.ndarray:
+    def encode(self, text: str, is_query: bool = False) -> np.ndarray:
         if not self.available:
             return np.zeros(EMBEDDING_DIM, dtype=np.float32)
-        # E5 models require "query: " or "passage: " prefix
-        prefixed = f"passage: {text}"
-        emb = self.model.encode(prefixed, normalize_embeddings=True)
+        # E5 требует АСИММЕТРИЧНЫЙ префикс: "query: " для запроса, "passage: " для документа
+        # (часть контракта retrieval; одинаковый префикс деградирует качество).
+        prefix = "query: " if is_query else "passage: "
+        emb = self.model.encode(prefix + text, normalize_embeddings=True)
         return emb.astype(np.float32)
 
 
@@ -122,6 +124,35 @@ def get_embedder(prefer_st: bool = RAG_USE_ST):
             pass
     print("  → Using TF-IDF embedder (always available)")
     return TfidfEmbedder()
+
+
+# --- Персист фитнутого TF-IDF-эмбеддера (единый базис index↔query) -----------------
+# Косинусы сопоставимы только в одном SVD-базисе, поэтому фитнутый TF-IDF персистится при
+# индексации и загружается при запросе — index и query кодируются одним эмбеддером. ST-путь
+# не персистим: модель предобучена, fit — no-op, базис уже фиксирован.
+
+
+def save_embedder(embedder, path) -> bool:
+    """Сохранить фитнутый TF-IDF-эмбеддер (joblib). Возвращает True если сохранён."""
+    if isinstance(embedder, TfidfEmbedder) and embedder.fitted:
+        import joblib
+
+        joblib.dump(embedder, str(path))
+        return True
+    return False
+
+
+def load_embedder(path):
+    """Загрузить персистнутый эмбеддер; None если файла нет/ошибка чтения."""
+    if not os.path.exists(str(path)):
+        return None
+    try:
+        import joblib
+
+        return joblib.load(str(path))
+    except Exception as e:  # noqa: BLE001 — легаси/битый артефакт → тихий fallback на ре-фит
+        print(f"  ⚠️ load_embedder failed ({e}); fallback to re-fit", file=sys.stderr)
+        return None
 
 
 if __name__ == "__main__":
