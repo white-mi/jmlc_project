@@ -168,3 +168,16 @@ Design facts, not bugs:
 Macro-Radar is both built *with* and built *on* AI: it was developed using Claude Code, and the
 L0 layer is itself a five-agent LLM pipeline with retrieval. The contributor guide for the AI
 assistant is [`CLAUDE.md`](CLAUDE.md).
+
+## Contributing
+
+Contributions are welcome — see [`CONTRIBUTING.md`](CONTRIBUTING.md), the issue/PR templates in
+[`.github/`](.github/), and the [Code of Conduct](CODE_OF_CONDUCT.md). Public/illustrative data
+only — no client or portfolio data.
+
+**Good places to start:**
+- **Add a new OSL industry** — step-by-step recipe in [`CLAUDE.md`](CLAUDE.md) ("Добавление новой
+  OSL-отрасли"): a new `osl_<industry>.py` reusing `osl_common.py`, a panel + `SOURCES.md`, a
+  walk-forward entry, and a smoke test.
+- **Calibrate the ×1.30 spillover amplifier on Russian shocks** (currently a Fialkowski heuristic).
+- **A retrieval-quality benchmark** for the L0 RAG (precision@k on a labelled query→analog set).
