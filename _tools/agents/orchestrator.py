@@ -124,7 +124,7 @@ def extract_json(text: str) -> dict:
     При обрезанном/неполном JSON пытается достроить закрывающие скобки
     через _balance_braces, чтобы не давать каскадный отказ (S1.5)."""
     # 1) ```json ... ``` — допускаем и незакрытый code-fence
-    match = re.search(r"```(?:json)?\s*\n(.*?)```", text, re.DOTALL)
+    match = re.search(r"```(?:json)?\s*\n(.*)```", text, re.DOTALL)
     if match:
         candidate = match.group(1).strip()
     else:
@@ -431,7 +431,7 @@ def slugify(text: str, max_len: int = 50) -> str:
 def save_analysis(markdown: str, state: dict, date: str) -> Path:
     """Сохраняет анализ в _Анализы/<date> — <slug>.md."""
     ANALYSES_DIR.mkdir(exist_ok=True)
-    title = state.get("WHAT", "analysis")[:80]
+    title = (state.get("WHAT") or "analysis")[:80]
     slug = slugify(title)
     file_path = ANALYSES_DIR / f"{date} — {slug}.md"
     counter = 1

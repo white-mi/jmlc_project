@@ -174,7 +174,9 @@ def main():
             f'Negative-EPU {l1_snapshot["epu_negative_pct"]}%'
         )
         out.append(f'- **Yield curve slope:** {l1_snapshot["yield_curve_slope_pp"]} п.п.')
-        out.append(f'- **Режим КС:** {l1_snapshot["kc_regime"]} (КС 14.5%)\n')
+        out.append(
+            f'- **Режим КС:** {l1_snapshot["kc_regime"]} (КС {l1_snapshot.get("key_rate", "?")}%)\n'
+        )
     out.append(
         "> ⚠️ В smoke-режиме L1 одинаков для всех новостей — различаются "
         "L0, L1.5-forward, L2 и L3.\n"

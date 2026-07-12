@@ -461,12 +461,13 @@ def make_interval_energy(company: str, n_sim: int = 200, conf: float = 0.90) -> 
             gen.generation_twh = orig_gen_twh * (1 + rng.normal(0, 0.03))
             gen.capacity_gw = orig_cap_gw * (1 + rng.normal(0, 0.02))
         profile.tariff_multiplier = orig_mult * (1 + rng.normal(0, 0.05))
-        # other_revenue_abs может быть 0 — пертурбация в абсолютных рублях относительно base
-        # для компаний с other_abs=0 даём малую пертурбацию ±20 млрд (чтобы было какое-то rev_other)
+        # other_revenue_abs пертурбируется относительно base. Для компаний с other_abs=0
+        # НЕ фабрикуем «прочую» выручку: max(0, N(0,20)) — folded-normal со сдвигом вверх (~+8),
+        # что смещало conformal-интервал этих эмитентов вверх. Нет прочей выручки → остаётся 0.
         if orig_other_abs > 0:
             profile.other_revenue_abs_rub_bn = max(0.0, orig_other_abs * (1 + rng.normal(0, 0.10)))
         else:
-            profile.other_revenue_abs_rub_bn = max(0.0, rng.normal(0, 20))
+            profile.other_revenue_abs_rub_bn = 0.0
         try:
             pred = m.predict_revenue(company).predicted_rub_bn
             if pred and not np.isnan(pred):

@@ -70,9 +70,15 @@ def _classify_phase(cai: float, yield_slope: Optional[float]) -> str:
     else:
         phase = "contraction"
 
-    # Yield curve correction: сильная инверсия → понизить только если уже не contraction
-    if yield_slope is not None and yield_slope < -2.0 and phase == "expansion":
-        phase = "late-cycle"
+    # Yield curve correction: сильная инверсия → понизить фазу на 1 уровень
+    # (любую не-contraction: expansion→late-cycle→recovery→contraction).
+    if yield_slope is not None and yield_slope < -2.0:
+        downgrade = {
+            "expansion": "late-cycle",
+            "late-cycle": "recovery",
+            "recovery": "contraction",
+        }
+        phase = downgrade.get(phase, phase)
 
     return phase
 
@@ -101,7 +107,10 @@ def compute_cai(snapshot: dict, indicators: dict) -> CAIResult:
 
     cai = weighted_sum / total_weight if total_weight > 0 else 0.0
 
-    yield_slope = snapshot.get("yield_curve_slope_pp") or snapshot.get("_yield_curve_slope_pp")
+    # None-безопасно: плоская кривая ровно 0.0 — валидное значение, `or` его бы потерял.
+    yield_slope = snapshot.get("yield_curve_slope_pp")
+    if yield_slope is None:
+        yield_slope = snapshot.get("_yield_curve_slope_pp")
     phase = _classify_phase(cai, yield_slope)
 
     return CAIResult(

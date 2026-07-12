@@ -249,15 +249,21 @@ def test_channel_breakdown_returned_when_requested():
 
 
 def test_churn_always_positive():
-    """Δchurn — отток на любое изменение среды, знак всегда положительный."""
+    """Δchurn ≥ 0 (отток на любое изменение среды) И содержателен: на выраженном шоке хотя бы
+    один сегмент даёт строго положительный отток, масштабируемый усилителем режима КС
+    (acute > normal). Прежняя версия проверяла лишь abs(...)≥0 — тавтология, проходившая и на
+    полностью нулевом churn."""
     from segment_impact import predict_segment_impact
 
-    for sub in ("1.1", "1.2", "4.1", "4.2"):
-        impacts = predict_segment_impact(sub, kc_regime="moderate_stress")
-        for sgmt, imp in impacts.items():
-            assert imp.delta_churn >= 0, (
-                f"shock={sub} sgmt={sgmt}: Δchurn должен быть ≥0, " f"got {imp.delta_churn}"
-            )
+    acute = predict_segment_impact("4.2", kc_regime="acute_stress")
+    normal = predict_segment_impact("4.2", kc_regime="normal")
+    for imp in acute.values():
+        assert imp.delta_churn >= 0
+    assert any(imp.delta_churn > 0 for imp in acute.values()), "весь Δchurn ноль — pipeline пуст"
+    assert all(acute[s].delta_churn >= normal[s].delta_churn for s in acute)
+    assert any(
+        acute[s].delta_churn > normal[s].delta_churn for s in acute
+    ), "acute-режим должен усиливать отток относительно normal"
 
 
 def test_legacy_direction_inverts_signs():

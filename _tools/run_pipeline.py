@@ -367,6 +367,7 @@ def run_full_pipeline(
     key_rate = cai_result.components.get("key_rate", {}).get("current", 16.0)
     kc_regime = kc_regime_from_rate(key_rate)
     state["kc_regime"] = kc_regime
+    state["L1_macro"]["key_rate"] = key_rate
 
     # ---- L0: классификация ----
     if smoke_shock:

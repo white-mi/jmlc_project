@@ -74,15 +74,14 @@ def test_intervals_valid_on_panel():
 
 
 def test_temporal_holdout_disjoint_years():
-    """proper-train ≤2022, calib=2023, test>2023 — годы не пересекаются (out-of-sample)."""
+    """Реальный сплит temporal_holdout: proper/calib/test строго хронологичны и не пересекаются
+    (out-of-sample). Проверяется на разбиении, которое ВОЗВРАЩАЕТ функция, — ловит регрессию
+    границ окна; прежняя версия переписывала сплит в тесте и проверяла определительную истину."""
     rows = _rows()
     _need(rows)
-    proper = [r for r in rows if r.period_end.year <= 2022]
-    calib = [r for r in rows if r.period_end.year == 2023]
-    test = [r for r in rows if r.period_end.year > 2023]
-    yp = {r.period_end.year for r in proper}
-    yc = {r.period_end.year for r in calib}
-    yt = {r.period_end.year for r in test}
+    res = CS.temporal_holdout(rows, Mo.MODELS["structural_osl"])
+    yp, yc, yt = set(res["proper_years"]), set(res["calib_years"]), set(res["test_years"])
+    assert yp and yc and yt, "какое-то из окон пусто"
     assert yp.isdisjoint(yc) and yp.isdisjoint(yt) and yc.isdisjoint(yt)
     assert max(yp) < min(yc) < min(yt)  # строго хронологично
 

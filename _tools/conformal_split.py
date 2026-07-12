@@ -113,7 +113,12 @@ def temporal_holdout(rows, model_ctor, alpha=0.10, train_max=2022, calib_year=20
     proper = [r for r in rows if r.period_end.year <= train_max]
     calib = [r for r in rows if r.period_end.year == calib_year]
     test = [r for r in rows if r.period_end.year > calib_year]
-    return split_conformal(model_ctor, proper, calib, test, alpha)
+    res = split_conformal(model_ctor, proper, calib, test, alpha)
+    # Фактическое разбиение по годам — для проверки хронологической дизъюнктности OOS-сплита.
+    res["proper_years"] = sorted({r.period_end.year for r in proper})
+    res["calib_years"] = sorted({r.period_end.year for r in calib})
+    res["test_years"] = sorted({r.period_end.year for r in test})
+    return res
 
 
 def main():

@@ -131,6 +131,11 @@ def predict_segment_impact(
     sub = resolve_subcategory(table, shock_category)
     sub_def = table["shock_subcategories"][sub]
 
+    # Инвариант data-driven direction: если передана ЯВНАЯ подкатегория, per-channel знаки
+    # из таблицы авторитетны и глобальный `direction` игнорируется. Глобальный флип (-1)
+    # применим только к top-level категории без указанной подкатегории.
+    eff_direction = 1 if str(shock_category) in table["shock_subcategories"] else direction
+
     if kc_regime not in table["kc_regimes"]:
         raise ValueError(
             f"Unknown КС regime: {kc_regime}. " f"Допустимые: {list(table['kc_regimes'].keys())}"
@@ -163,7 +168,7 @@ def predict_segment_impact(
             sens_ch = sens.get(ch, 0.0) * region_mult.get(ch, 1.0)  # S3.5 region
             ch_def = channels_def.get(ch, {})
             intensity = ch_def.get("intensity", 0.0)
-            ch_dir = ch_def.get("direction", 1) * direction  # legacy flip
+            ch_dir = ch_def.get("direction", 1) * eff_direction  # eff=1 при явной подкатегории
             base = baseline.get(ch, {})
 
             contrib_pd = sens_ch * intensity * ch_dir * base.get("delta_pd", 0.0)

@@ -86,11 +86,16 @@ def _parse_cbr_keyrate_xml(xml_text: str) -> Optional[float]:
 
 def fetch_key_rate(timeout: int = 10) -> Optional[float]:
     """Ключевая ставка ЦБ через SOAP KeyRate (DailyInfoWebServ). Graceful."""
+    from datetime import date, timedelta
+
+    # Скользящее окно ~1.5 года до сегодня — всегда покрывает свежую ставку, не устаревает.
+    today = date.today()
+    frm = (today - timedelta(days=550)).isoformat()
     soap = (
         '<?xml version="1.0" encoding="utf-8"?>'
         '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">'
         '<soap:Body><KeyRate xmlns="http://web.cbr.ru/">'
-        "<fromDate>2026-01-01</fromDate><ToDate>2026-12-31</ToDate>"
+        f"<fromDate>{frm}</fromDate><ToDate>{today.isoformat()}</ToDate>"
         "</KeyRate></soap:Body></soap:Envelope>"
     )
     url = "https://www.cbr.ru/DailyInfoWebServ/DailyInfo.asmx"

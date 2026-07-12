@@ -55,7 +55,15 @@ def walk_forward(rows, model_ctors):
             continue
         # ЛИК-ГАРД: ни одна train-строка не из будущего теста
         assert all(r.period_end.year < t for r in train)
-        fold_log.append({"test_year": t, "n_train": len(train), "n_test": len(test)})
+        fold_log.append(
+            {
+                "test_year": t,
+                "n_train": len(train),
+                "n_test": len(test),
+                "train_max_year": max(r.period_end.year for r in train),
+                "train_years": sorted({r.period_end.year for r in train}),
+            }
+        )
         for name, ctor in model_ctors.items():
             model = ctor().fit(train)
             yhat = model.predict(test)

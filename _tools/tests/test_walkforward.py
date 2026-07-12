@@ -24,27 +24,36 @@ def _need(rows):
 
 
 def test_walkforward_train_strictly_before_test():
-    """В каждом фолде ВСЕ train-строки старше тест-года (нет look-ahead)."""
+    """Структура фолдов ПРОДАКШН-функции: тест-годы = years[1:], expanding (n_train растёт),
+    и в каждом фолде реальный макс. train-год строго меньше тест-года."""
     rows = _rows()
     _need(rows)
-    # одна модель достаточно для проверки структуры фолдов
     preds, folds = W.walk_forward(rows, {"structural_osl": Mo.StructuralOSL})
     assert folds, "нет фолдов"
     years = sorted({r.period_end.year for r in rows})
     assert [f["test_year"] for f in folds] == years[1:]
-    # expanding: n_train растёт
+    for f in folds:
+        # проверяем РЕАЛЬНЫЙ train-состав фолда, а не только счётчик n_train
+        assert (
+            f["train_max_year"] < f["test_year"]
+        ), f"look-ahead: train до {f['train_max_year']}, тест {f['test_year']}"
     ntr = [f["n_train"] for f in folds]
-    assert ntr == sorted(ntr)
+    assert ntr == sorted(ntr)  # expanding window
 
 
 def test_walkforward_no_test_year_in_train():
-    """Прямая проверка: для тест-года t среди train нет строк года t."""
+    """Анти-leakage на реальном сплите walk_forward: тест-год НЕ входит в train-годы фолда.
+    Ловит регрессию сплита на `year <= t` (утечку) — в отличие от прежней версии, которая
+    переписывала сплит инлайн и проверяла определительную истину, не вызывая walk_forward."""
     rows = _rows()
     _need(rows)
-    years = sorted({r.period_end.year for r in rows})
-    for t in years[1:]:
-        train = [r for r in rows if r.period_end.year < t]
-        assert all(r.period_end.year != t for r in train)
+    _, folds = W.walk_forward(rows, {"structural_osl": Mo.StructuralOSL})
+    assert folds, "нет фолдов"
+    for f in folds:
+        assert (
+            f["test_year"] not in f["train_years"]
+        ), f"leakage: тест-год {f['test_year']} среди train {f['train_years']}"
+        assert f["train_max_year"] < f["test_year"]
 
 
 # ---------- метрики ----------

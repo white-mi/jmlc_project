@@ -24,6 +24,34 @@ def cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
     return float(np.dot(a, b) / (na * nb))
 
 
+def _score_row(row, query_emb: np.ndarray, threshold: float) -> dict | None:
+    """Косинус запроса к title/what-эмбеддингам строки → dict аналога или None (< threshold).
+
+    Единый код для vec0 и BLOB-fallback: обе таблицы хранят float32-эмбеддинги.
+    """
+    what_emb = np.frombuffer(row["what_embedding"], dtype=np.float32)
+    title_emb = np.frombuffer(row["title_embedding"], dtype=np.float32)
+    sim_what = cosine_similarity(query_emb, what_emb)
+    sim_title = cosine_similarity(query_emb, title_emb)
+    sim = max(sim_what, sim_title)
+    if sim < threshold:
+        return None
+    return {
+        "file_path": row["file_path"],
+        "date": row["date"],
+        "title": row["title"],
+        "subcategory": row["subcategory"],
+        "severity_score": row["severity_score"],
+        "severity_level": row["severity_level"],
+        "macro_region": row["macro_region"],
+        "micro_region": row["micro_region"],
+        "shock_summary": row["shock_summary"],
+        "similarity": sim,
+        "similarity_what": sim_what,
+        "similarity_title": sim_title,
+    }
+
+
 def find_analogs(
     query_text: str,
     subcategory: str | None = None,
@@ -104,8 +132,15 @@ def find_analogs(
 
     where_sql = "WHERE " + " AND ".join(where_clauses) if where_clauses else ""
 
-    if vec_loaded:
-        # Не используем vec_distance в WHERE из-за фильтров — делаем просто SELECT всех + cosine в Python
+    # Единая обработка vec0 и BLOB-fallback: обе таблицы хранят float32-эмбеддинги, cosine
+    # считаем в Python. Раньше fallback-ветка (без sqlite-vec — дефолтная установка!) возвращала
+    # строки с фейковым similarity=0.0 без ранжирования и без порога — теперь обе ветки
+    # ранжируют по запросу и применяют threshold одинаково.
+    emb_table = "news_embeddings" if vec_loaded else "news_embeddings_fallback"
+    has_emb = conn.execute("SELECT 1 FROM sqlite_master WHERE name = ?", (emb_table,)).fetchone()
+
+    results = []
+    if has_emb:
         cursor = conn.execute(
             f"""
             SELECT n.id, n.file_path, n.date, n.title, n.subcategory,
@@ -113,48 +148,15 @@ def find_analogs(
                    n.shock_summary,
                    e.what_embedding, e.title_embedding
             FROM news_analyses n
-            JOIN news_embeddings e ON n.id = e.news_id
+            JOIN {emb_table} e ON n.id = e.news_id
             {where_sql}
         """,
             params,
         )
-
-        results = []
         for row in cursor:
-            what_emb = np.frombuffer(row["what_embedding"], dtype=np.float32)
-            title_emb = np.frombuffer(row["title_embedding"], dtype=np.float32)
-            sim_what = cosine_similarity(query_emb, what_emb)
-            sim_title = cosine_similarity(query_emb, title_emb)
-            sim = max(sim_what, sim_title)
-            if sim >= threshold:
-                results.append(
-                    {
-                        "file_path": row["file_path"],
-                        "date": row["date"],
-                        "title": row["title"],
-                        "subcategory": row["subcategory"],
-                        "severity_score": row["severity_score"],
-                        "severity_level": row["severity_level"],
-                        "macro_region": row["macro_region"],
-                        "micro_region": row["micro_region"],
-                        "shock_summary": row["shock_summary"],
-                        "similarity": sim,
-                        "similarity_what": sim_what,
-                        "similarity_title": sim_title,
-                    }
-                )
-    else:
-        cursor = conn.execute(
-            f"""
-            SELECT id, file_path, date, title, subcategory, severity_score,
-                   severity_level, macro_region, micro_region, shock_summary
-            FROM news_analyses {where_sql}
-        """,
-            params,
-        )
-        results = []
-        for row in cursor:
-            results.append({**dict(row), "similarity": 0.0})
+            packed = _score_row(row, query_emb, threshold)
+            if packed is not None:
+                results.append(packed)
 
     conn.close()
 

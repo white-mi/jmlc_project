@@ -518,10 +518,10 @@ def run(industry: str = "metallurgy", out_dir: Path = None) -> list:
     out = Path(out_dir) if out_dir is not None else _out_dir(industry)
     out.mkdir(parents=True, exist_ok=True)
     rows = osl_panel.load_panel(industry)
-    df = build_df(industry, rows)
-    if df.empty:
+    if not rows:
         print(f"Панель «{industry}» пуста — заполни data/panel/. EDA пропущена.")
         return []
+    df = build_df(industry, rows)
     ctx = _Ctx(industry, rows, out)
     notes = []
     for fn in FIGURES:

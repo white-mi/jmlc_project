@@ -9,6 +9,7 @@ import sys
 import re
 import argparse
 import yaml
+import numpy as np
 from pathlib import Path
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -16,6 +17,16 @@ if hasattr(sys.stdout, "reconfigure"):
 
 ANALYSES_DIR = Path(__file__).parent.parent.parent.parent / "_Анализы"
 DB_PATH = Path(__file__).parent / "radar_rag.db"
+
+# BLOB-таблица эмбеддингов для режима без sqlite-vec (numpy-cosine fallback).
+FALLBACK_EMB_DDL = """
+    CREATE TABLE IF NOT EXISTS news_embeddings_fallback (
+        news_id INTEGER PRIMARY KEY,
+        title_embedding BLOB,
+        what_embedding BLOB,
+        FOREIGN KEY (news_id) REFERENCES news_analyses(id)
+    )
+"""
 
 
 def _embedder_path(db_path):
@@ -136,12 +147,16 @@ def _write_row(conn, embedder, data: dict, vec_loaded: bool) -> None:
     Удаляет ТОЛЬКО совпадающую по file_path запись (если была), не трогая
     остальной корпус — в отличие от полного DELETE в index_all.
     """
+    if not vec_loaded:
+        conn.execute(FALLBACK_EMB_DDL)
     old = conn.execute(
         "SELECT id FROM news_analyses WHERE file_path = ?", (data["file_path"],)
     ).fetchone()
     if old is not None:
         if vec_loaded:
             conn.execute("DELETE FROM news_embeddings WHERE news_id = ?", (old["id"],))
+        else:
+            conn.execute("DELETE FROM news_embeddings_fallback WHERE news_id = ?", (old["id"],))
         conn.execute("DELETE FROM news_analyses WHERE id = ?", (old["id"],))
 
     cursor = conn.execute(
@@ -170,14 +185,18 @@ def _write_row(conn, embedder, data: dict, vec_loaded: bool) -> None:
     )
     news_id = cursor.lastrowid
 
+    title_emb = np.asarray(embedder.encode(data["title"]), dtype=np.float32)
+    what_emb = np.asarray(embedder.encode(data["what_text"]), dtype=np.float32)
     if vec_loaded:
-        title_emb = embedder.encode(data["title"])
-        what_emb = embedder.encode(data["what_text"])
         conn.execute(
-            """
-            INSERT INTO news_embeddings (news_id, title_embedding, what_embedding)
-            VALUES (?, ?, ?)
-        """,
+            "INSERT INTO news_embeddings (news_id, title_embedding, what_embedding) "
+            "VALUES (?, ?, ?)",
+            (news_id, title_emb.tobytes(), what_emb.tobytes()),
+        )
+    else:
+        conn.execute(
+            "INSERT INTO news_embeddings_fallback (news_id, title_embedding, what_embedding) "
+            "VALUES (?, ?, ?)",
             (news_id, title_emb.tobytes(), what_emb.tobytes()),
         )
 
@@ -276,6 +295,9 @@ def index_all(
         conn.execute("DELETE FROM news_analyses")
         if vec_loaded:
             conn.execute("DELETE FROM news_embeddings")
+        else:
+            conn.execute(FALLBACK_EMB_DDL)
+            conn.execute("DELETE FROM news_embeddings_fallback")
         for data in parsed:
             _write_row(conn, embedder, data, vec_loaded)
             indexed += 1

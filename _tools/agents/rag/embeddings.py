@@ -122,7 +122,7 @@ def get_embedder(prefer_st: bool = RAG_USE_ST):
             return SentenceTransformerEmbedder()
         except ImportError:
             pass
-    print("  → Using TF-IDF embedder (always available)")
+    print("  → Using TF-IDF embedder (always available)", file=sys.stderr)
     return TfidfEmbedder()
 
 
