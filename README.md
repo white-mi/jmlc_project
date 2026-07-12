@@ -10,7 +10,7 @@ portfolio data.
 
 [![tests](https://github.com/white-mi/jmlc_project/actions/workflows/test.yml/badge.svg)](https://github.com/white-mi/jmlc_project/actions/workflows/test.yml)
 ![python](https://img.shields.io/badge/python-3.11%2B-blue)
-![tests-count](https://img.shields.io/badge/tests-279%20passed%2C%200%20skipped-brightgreen)
+![tests-count](https://img.shields.io/badge/tests-297%20passed%2C%200%20skipped-brightgreen)
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 ---
@@ -53,9 +53,9 @@ flowchart TD
 
 **Coverage is tiered by data availability** — a documented design choice, not a gap. All seven
 industries (oil & gas, metallurgy, chemicals, retail, power, regional governments, pharma) flow
-through L0/L1/L2/L3, but **L1.5 OSL is validated out-of-sample for only 4** (metallurgy, oil & gas,
-chemicals, power — public volume×price) and **illustrative for 3** (retail, pharma, regional
-governments — no public Q×P structure). Each industry sits at the depth its public data supports;
+through L0/L1/L2/L3, but **L1.5 OSL is validated out-of-sample for 5** (metallurgy, oil & gas,
+chemicals, power, regional governments — public volume×price or a fitted region×year fiscal panel) and
+**illustrative for 2** (retail, pharma — no public Q×P structure). Each industry sits at the depth its public data supports;
 the full tier map and the *why* per industry are in [`docs/COVERAGE_TIERS.md`](docs/COVERAGE_TIERS.md).
 
 ## Quickstart
@@ -65,7 +65,7 @@ git clone https://github.com/white-mi/jmlc_project.git
 cd jmlc_project/_tools
 
 pip install -r ../requirements.lock pytest   # pinned numeric stack (TF-IDF, offline)
-python -m pytest tests/ -q                    # 279 passed, 0 skipped
+python -m pytest tests/ -q                    # 297 passed, 0 skipped
 
 # End-to-end smoke run — numbers at every layer, no LLM call:
 python run_pipeline.py --smoke-shock 4.2 --smoke-industry oilgas
@@ -96,9 +96,9 @@ walk-forward gives:
 | Naive issuer-mean | 11.1 % | 0.43 |
 | Regularised linear | ~41 % | 0.02 (overfits) |
 
-The honest result: **at N = 24, no model — not even a naive persistence baseline — is
-statistically distinguishable** (all Diebold–Mariano p > 0.4); only the regularised-linear models
-clearly overfit. We *show* this rather than overclaim. The OSL's value is the operational
+The honest result: **at N = 24, no reasonable model — not even a naive persistence baseline — is
+statistically distinguishable** (structural, gradient boosting and both naive baselines all have
+Diebold–Mariano p > 0.4); only the regularised-linear models clearly overfit (p ≈ 0.02). We *show* this rather than overclaim. The OSL's value is the operational
 **lead-time** (estimating revenue from within-year prices before the annual report), not annual
 point-accuracy on a 24-row panel. Split-conformal coverage is reported as a small-N artifact, not a
 calibrated 90 %. Full write-up: [`docs/DS_REPORT.md`](docs/DS_REPORT.md).
@@ -161,7 +161,7 @@ Design facts, not bugs:
   out-of-sample validation lives only in the DS layer (`conformal_split.py`).
 - **L3 is not calibrated on bank data** (`confidence='low'`, expert priors).
 - The ×1.30 spillover amplifier is a Fialkowski heuristic, **not yet calibrated on Russian shocks**.
-- The DS layer is deep on four industries (metallurgy N = 24, oil & gas N = 18, chemistry N = 18, electricity N = 30); the other three rely on in-sample actuals.
+- The DS layer is deep on five industries (metallurgy N = 24, oil & gas N = 18, chemistry N = 18, electricity N = 30, regional governments N = 24 fiscal panel); the other two (retail, pharma) rely on in-sample actuals.
 
 ## Built with AI
 

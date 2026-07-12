@@ -1,5 +1,5 @@
 ---
-tags: [макро-радар, docs, knowledge, tech, для-IT]
+tags: [russian-propagation, docs, knowledge, tech, для-IT]
 дата: "2026-06-15"
 аудитория: "IT-специалист готовый разрабатывать"
 ---
@@ -162,7 +162,7 @@ Embeddings генерируются через **multilingual-e5-small** (384d).
 
 ```yaml
 ---
-tags: [макро-радар, анализ, 4.7]
+tags: [russian-propagation, анализ, 4.7]
 дата_новости: "2026-04-23"
 дата_анализа: "2026-04-25"
 источник_новости: "URL"
@@ -225,7 +225,7 @@ PyYAML парсит → передаётся в RAG индексатор и Conf
 
 ## 6. Тестирование (текущее состояние)
 
-**Юнит/интеграционные тесты:** 279 pytest зелёных (0 skipped), запуск `cd _tools && python -m pytest tests/ -v`; CI через GitHub Actions.
+**Юнит/интеграционные тесты:** 297 pytest зелёных (0 skipped), запуск `cd _tools && python -m pytest tests/ -v`; CI через GitHub Actions.
 
 > Честный out-of-sample — split-conformal в `conformal_split.py`. Независимая проверка на 9M-фактах эмитента — плановое уточнение.
 
@@ -279,7 +279,7 @@ Pandas / Django / FastAPI / SQLAlchemy — **не используются**. Т
 - ❌ Authentication — single-user
 
 ### Сделано в v0.8–v0.9
-- ✅ pytest suite (279 зелёных, 0 skipped) + CI (GitHub Actions: pytest/ruff/black)
+- ✅ pytest suite (297 зелёных, 0 skipped) + CI (GitHub Actions: pytest/ruff/black)
 - ✅ `pyproject.toml` (v0.9, с ruff/black)
 - ✅ Multi-period validation (energy refactor + multi-period калибровки)
 - ✅ `fetch_macro_state.py` — живые макрофиды (USD/RUB, Brent, КС ЦБ, инфляция)

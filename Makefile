@@ -4,7 +4,7 @@
 help:
 	@echo "install      — рантайм-зависимости (requirements.txt)"
 	@echo "install-dev  — + pytest/ruff/black (editable из _tools)"
-	@echo "test         — pytest (279 тестов, TF-IDF режим)"
+	@echo "test         — pytest (297 тестов, TF-IDF режим)"
 	@echo "lint         — ruff check (гейт CI)"
 	@echo "fmt          — black . (black --check — гейт CI)"
 	@echo "typecheck    — mypy . (мягкий, non-blocking CI job)"

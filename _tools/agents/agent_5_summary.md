@@ -29,7 +29,7 @@ output: финальный markdown-документ
 
 ~~~markdown
 ---
-tags: [макро-радар, анализ, <main_category>]
+tags: [russian-propagation, анализ, <main_category>]
 дата_новости: <YYYY-MM-DD>
 дата_анализа: <текущая>
 источник_новости: <URL>

@@ -1,5 +1,5 @@
 ---
-tags: [макро-радар, продукт, персоны, jtbd, ца, junior-ml-contest]
+tags: [russian-propagation, продукт, персоны, jtbd, ца, junior-ml-contest]
 дата: "2026-06-24"
 проект: "Russian Propagation"
 раздел: "Продуктовое мышление — проблема, ЦА, персоны"

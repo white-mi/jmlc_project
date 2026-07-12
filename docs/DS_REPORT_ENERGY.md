@@ -1,5 +1,5 @@
 ---
-tags: [макро-радар, ds, энергетика]
+tags: [russian-propagation, ds, энергетика]
 дата: "2026-06-25"
 версия: "0.9"
 ---
@@ -135,5 +135,5 @@ python osl_panel.py --industry energy                          # 30 строк, 
 python osl_walkforward.py --industry energy                     # §3 (base=structural, честный 11.88%)
 python conformal_split.py --industry energy --model structural_osl   # §4 (100% покрытие)
 python -m pytest tests/test_energy.py -q                        # 10 тестов (incl. unit-smoke + honesty-guard)
-python -m pytest tests/ -q                                       # 279 зелёных, 0 skipped
+python -m pytest tests/ -q                                       # 297 зелёных, 0 skipped
 ```

@@ -1,5 +1,5 @@
 ---
-tags: [макро-радар, agents, multi-agent, pipeline]
+tags: [russian-propagation, agents, multi-agent, pipeline]
 дата: "2026-04-25"
 версия: "1.0"
 ---

@@ -175,15 +175,15 @@ figure are marked **illustrative / not calibrated on Russian data**.
 The whole pipeline is a Python package in `_tools/` with a thin, deterministic core
 (numpy / scipy / scikit-learn / pyyaml) and heavy ML dependencies kept behind optional extras.
 
-- **279 tests, 0 skipped** (`pytest tests/ -q`), including leakage guards (train < test;
+- **297 tests, 0 skipped** (`pytest tests/ -q`), including leakage guards (train < test;
   scaler / fixed-effects / calibration fit on train only), metric/DM/conformal-coverage tests,
   and a contract test that `run_pipeline.py --json` keeps stdout pure JSON (import-time prints
   go to stderr).
-- **CI** (GitHub Actions) runs four jobs: a Python 3.11/3.12 **matrix** (tests + coverage,
+- **CI** (GitHub Actions) runs six job runs: a Python 3.11/3.12 **matrix** (tests + coverage,
   ruff as a hard gate), an **e2e smoke** job asserting non-empty L1.5/L2/L3 in the pipeline's
   JSON output, a **docker build clean-clone gate** (the test suite runs *inside* the image
-  build, so the image only builds when green), and a **security** job (gitleaks secret scan +
-  pip-audit on the lockfile).
+  build, so the image only builds when green), a **security** job (gitleaks secret scan +
+  pip-audit on the lockfile), and a **typecheck** job (mypy, advisory).
 - **Reproducibility:** a pinned `requirements.lock` (numpy 2.4.2 / scipy 1.17.1 /
   scikit-learn 1.8.0) drives both Docker and CI so numeric results are deterministic; a
   `Makefile` exposes `test / lint / smoke / docker-build`.
@@ -196,7 +196,7 @@ A first end-to-end result is one command away:
 ```bash
 cd _tools
 pip install -r ../requirements.lock pytest
-python -m pytest tests/ -q                                   # 279 passed, 0 skipped
+python -m pytest tests/ -q                                   # 297 passed, 0 skipped
 python run_pipeline.py --smoke-shock 4.2 --smoke-industry oilgas   # numbers at every layer, no LLM
 ```
 
@@ -213,9 +213,9 @@ These are design facts, stated up front, not discovered bugs:
 - **The ×1.30 spillover amplifier is a Fialkowski heuristic**, the lower bound of the European
   range, **not yet calibrated on Russian shocks** (the plan: COVID-2020 / sanctions-2022 /
   rate-2024).
-- **The DS layer is deep on four industries** (metallurgy N=24, energy N=30, chemistry N=18,
-  oilgas N=18 with structural OSL deferred); the other three (pharma / retail / oiv) are
-  illustrative — see [`COVERAGE_TIERS.md`](COVERAGE_TIERS.md). The infrastructure is
+- **The DS layer is deep on five industries** (metallurgy N=24, energy N=30, chemistry N=18,
+  oilgas N=18 with structural OSL deferred, regional governments N=24 fiscal panel); the other
+  two (pharma / retail) are illustrative — see [`COVERAGE_TIERS.md`](COVERAGE_TIERS.md). The infrastructure is
   industry-agnostic (extending the panel is a matter of adding CSV rows); the out-of-sample
   walk-forward claim is scoped to those four.
 

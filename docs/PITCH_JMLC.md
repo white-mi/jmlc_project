@@ -63,8 +63,8 @@ style: |
 
 <div class="stats">
 <div class="stat"><b>5 слоёв</b><span>L0 → L3, один прогон</span></div>
-<div class="stat"><b>28 модулей · ≈11k строк</b><span>Python</span></div>
-<div class="stat"><b>279 тестов · CI</b><span>0 skipped</span></div>
+<div class="stat"><b>30 модулей · ≈11k строк</b><span>Python</span></div>
+<div class="stat"><b>297 тестов · CI</b><span>0 skipped</span></div>
 <div class="stat"><b>5 отраслей</b><span>walk-forward + conformal</span></div>
 </div>
 
@@ -172,7 +172,7 @@ def predict(self, issuer, t):
 </div>
 </div>
 
-Точность на реальных МСФО (металлургия): **НЛМК 0.7%**, **ММК 3.1%** MAE.
+Точечный **in-sample** MAE на реальных МСФО (лучшие сырьевики): **НЛМК 0.7%**, **ММК 3.1%**. Честная out-of-sample метрика — **13.7% MAPE** (слайд 7).
 
 Работает для **5 валидированных** отраслей — металлургия, нефтегаз, химия, энергетика, ОИВ (глубина по доступности данных).
 
@@ -299,8 +299,8 @@ $$\mathrm{DM}=\frac{\bar d}{\sqrt{2\pi\,\hat f_d(0)/T}},\quad d_t=L(e^{1}_t)-L(e
 <div>
 
 **Инженерия**
-- **28 модулей** (+6 в agents/rag) · **≈11k строк** · **279 тестов**, 0 skipped
-- CI 4 джоба: matrix 3.11/3.12 · e2e smoke L0→L3 · Docker clean-clone · security
+- **30 модулей** (+6 в agents/rag) · **≈11k строк** · **297 тестов**, 0 skipped
+- CI 6 джобов: matrix 3.11/3.12 · e2e smoke L0→L3 · Docker clean-clone · security · typecheck (mypy)
 - `ruff` (E/F/W) + `black` + coverage — блокирующие гейты
 - `requirements.lock` → CI и Docker детерминированы
 
@@ -308,8 +308,8 @@ $$\mathrm{DM}=\frac{\bar d}{\sqrt{2\pi\,\hat f_d(0)/T}},\quad d_t=L(e^{1}_t)-L(e
 <div>
 
 **Применение ИИ**
-- L0: измерен **классификатор** (Agent 1), gold-set N=15
-- Haiku 4.5 → **93% / 100%**; Sonnet 4.6 → **100% / 100%**
+- L0: измерен **классификатор** (Agent 1), gold-set N=50
+- Haiku 4.5 → **94% / 94%** (47/50); Sonnet 5 → **14/15** (подмножество N=15)
 - контракт промптов L0 закреплён **regression-тестом**
 - разработка агентная: сбор публичных данных, верификация, тесты
 
@@ -319,9 +319,9 @@ $$\mathrm{DM}=\frac{\bar d}{\sqrt{2\pi\,\hat f_d(0)/T}},\quad d_t=L(e^{1}_t)-L(e
 **Дальше:** **ОИВ large-N** (регионы × годы → 150–425 строк) — пробить статзначимость · калибровка на шоках РФ 2014 / 2020 / 2022 · L2 — графовые методы LPCMCI + DebtRank
 
 <!--
-(35 сек): Инженерно — 28 модулей, 11 тысяч строк, 279 тестов, CI из четырёх джобов с Docker
+(35 сек): Инженерно — 30 модулей, 11 тысяч строк, 297 тестов, CI из шести джобов с Docker
 clean-clone, всё запинено и детерминировано. Применение ИИ — L0 не просто промпт, а с измеренным классификатором
-(Agent 1, N=15): Haiku и Sonnet под 100%, контракт промптов закреплён regression-тестом.
+(Agent 1, N=50): Haiku 94%, Sonnet 5 закрывает тонкие boundary-кейсы, контракт промптов закреплён regression-тестом.
 Дальше — региональные бюджеты дают большой N и статзначимость.
 -->
 
@@ -333,7 +333,7 @@ clean-clone, всё запинено и детерминировано. Прим
 
 # Значимость в одном экране
 
-**Опережение** отчётности на 2–3 мес. · **сигнал видит тренд** (100% vs 17%, где история слепа) ·
+**Опережение** отчётности на 2–3 мес. · **сигнал видит тренд** (100% vs 17%, где история слепа; малый N — направление, не доказанные 90%) ·
 **бифуркация** сегментов · **каскад** +28–70%, а не сумма лимитов — и всё **прослеживаемо** до канала и источника.
 
 <span class="sub">Цель дальше — довести L2/L3 до калибровки на реальных данных. Готов к вопросам.</span>
@@ -363,8 +363,8 @@ RAG: SQLite + `sqlite-vec` по корпусу `_Анализы/` (58 индек
 
 | Модель | main | subcat (27) | $ |
 |---|--:|--:|--:|
-| Haiku 4.5 | 93% | **100%** | 0.055 |
-| Sonnet 4.6 | **100%** | **100%** | 0.193 |
+| Haiku 4.5 (N=50) | **94%** | **94%** | 0.18 |
+| Sonnet 5 (N=15 subset) | 14/15 | — | 0.20 |
 
 </div>
 <div>
@@ -465,17 +465,18 @@ $$\text{structural } 26.8\% \;>\; \text{persistence } 19.1\%$$
 **Модули** (≈11k строк): `run_pipeline` 651 · `orchestrator` 525 · `osl_models` 486 ·
 `segment_impact` 359 · `osl_walkforward` 270 · `spillover` 213.
 
-**Тесты** 279 (0 skipped): anti-leakage guards, bifurcation, conformal-split, JSON-контракт
+**Тесты** 297 (0 skipped): anti-leakage guards, bifurcation, conformal-split, JSON-контракт
 stdout, prompt-контракт L0.
 
 </div>
 <div>
 
-**CI** (`.github/workflows/test.yml`, 4 джоба):
-- `tests` — matrix 3.11/3.12: `ruff` + `black --check` + `pytest --cov`≥60
+**CI** (`.github/workflows/test.yml`, 6 джобов):
+- `tests` — matrix 3.11/3.12: `ruff` + `black --check` + `pytest --cov`≥65
 - `smoke` — e2e L0→L3, ассерт непустых слоёв
 - `docker` — clean-clone: тесты внутри сборки
 - `security` — gitleaks + pip-audit
+- `typecheck` — mypy (advisory)
 
 `requirements.lock` (numpy 2.4 / scipy 1.17 / sklearn 1.8) + пин `black`/`ruff` → гейты детерминированы.
 

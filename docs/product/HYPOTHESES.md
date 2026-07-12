@@ -1,5 +1,5 @@
 ---
-tags: [макро-радар, продукт, гипотезы, валидация, junior-ml-contest]
+tags: [russian-propagation, продукт, гипотезы, валидация, junior-ml-contest]
 дата: "2026-06-24"
 проект: "Russian Propagation"
 раздел: "Продуктовое мышление — продуктовые гипотезы"

@@ -154,7 +154,7 @@ def main():
 
     out = []
     out.append("---")
-    out.append("tags: [макро-радар, pipeline, batch, перегон]")
+    out.append("tags: [russian-propagation, pipeline, batch, перегон]")
     out.append(f'дата_перегона: "{date}"')
     out.append('pipeline_version: "0.9"')
     out.append(f"новостей: {n_total}")

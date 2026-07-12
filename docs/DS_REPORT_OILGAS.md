@@ -1,5 +1,5 @@
 ---
-tags: [макро-радар, ds, нефтегаз]
+tags: [russian-propagation, ds, нефтегаз]
 дата: "2026-06-25"
 версия: "0.9"
 ---
@@ -159,7 +159,7 @@ python osl_panel.py --industry oilgas          # 18 строк, 4 эмитент
 python osl_walkforward.py --industry oilgas      # таблица §3 (base=persistence)
 python conformal_split.py --industry oilgas --model hist_gbm   # §4
 python -m pytest tests/test_oilgas.py -q         # 10 тестов
-python -m pytest tests/ -q                        # 279 зелёных, 0 skipped
+python -m pytest tests/ -q                        # 297 зелёных, 0 skipped
 ```
 
 *Артефакты прогона: `_tools/output/osl_metrics/oilgas.md` + `oilgas_metrics.json`.*

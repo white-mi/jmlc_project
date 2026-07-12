@@ -1,5 +1,5 @@
 ---
-tags: [макро-радар, docs, architecture, для-IT]
+tags: [russian-propagation, docs, architecture, для-IT]
 дата: "2026-06-15"
 аудитория: "Tech lead / архитектор / новый разработчик"
 ---
@@ -97,7 +97,7 @@ tags: [макро-радар, docs, architecture, для-IT]
     │   ├── brent_scenarios.json
     │   ├── spillover_matrix.json
     │   └── segment_impact_table.json
-    ├── tests/                   (279 pytest зелёных, 0 skipped)
+    ├── tests/                   (297 pytest зелёных, 0 skipped)
     ├── calibration/
     │   ├── osl_metallurgy_calibrated.json
     │   └── ... (7 JSON + multi-param/multi-period)
@@ -295,7 +295,7 @@ class PredictionInterval:
 ### 5.3. Frontmatter анализа (YAML)
 
 ```yaml
-tags: [макро-радар, анализ, <category>]
+tags: [russian-propagation, анализ, <category>]
 дата_новости: "YYYY-MM-DD"
 дата_анализа: "YYYY-MM-DD"
 источник_новости: "URL"
@@ -349,7 +349,7 @@ multi_agent: bool
 ## 7. Тестирование (текущее + roadmap)
 
 ### Сейчас
-- ✅ **279 pytest зелёных (0 skipped)** — `cd _tools && python -m pytest tests/ -v`
+- ✅ **297 pytest зелёных (0 skipped)** — `cd _tools && python -m pytest tests/ -v`
 - ✅ **CI: GitHub Actions** (`.github/workflows/test.yml`) — pytest + ruff + black на каждый push
 - ✅ pytest suite для всех 7 OSL модулей + conformal + RAG + L1/L2/L3
 - ✅ Бэк-тест встроен в каждый OSL — `predict_revenue()` сравнивается с `ACTUAL_REVENUE_*`
@@ -455,7 +455,7 @@ python osl_oilgas.py --company ЛУКОЙЛ
 | Версия | Содержание | Статус |
 |---|---|---|
 | v0.7–0.9 | energy refactor + multi-period validation | ✅ done |
-| v0.7–0.9 | pytest suite (279 зелёных) + CI/линтеры (ruff/black) | ✅ done |
+| v0.7–0.9 | pytest suite (297 зелёных) + CI/линтеры (ruff/black) | ✅ done |
 | v0.7–0.9 | `pyproject.toml` (зависимости) | ✅ done |
 | v0.8–0.9 | `fetch_macro_state.py` — живые макрофиды | ✅ done |
 | v0.8–0.9 | маршрутизация подкатегорий (`shock_to_industries.json`) | ✅ done |

@@ -1,5 +1,5 @@
 ---
-tags: [макро-радар, L0, eval, классификатор]
+tags: [russian-propagation, L0, eval, классификатор]
 версия: "1.1"
 дата: 2026-07-12
 note: "честный sanity-check L0-классификатора; числа — из _tools/data/l0_eval_results.json"

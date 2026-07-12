@@ -1,5 +1,5 @@
 ---
-tags: [макро-радар, docs, knowledge, macro, для-IT]
+tags: [russian-propagation, docs, knowledge, macro, для-IT]
 дата: "2026-04-25"
 аудитория: "IT-специалист без финансового бекграунда"
 ---

@@ -1,5 +1,5 @@
 ---
-tags: [макро-радар, ds, химия]
+tags: [russian-propagation, ds, химия]
 дата: "2026-06-25"
 версия: "0.9"
 ---
@@ -137,5 +137,5 @@ python osl_panel.py --industry chemistry                       # 18 строк, 
 python osl_walkforward.py --industry chemistry                  # §3 (base=structural)
 python conformal_split.py --industry chemistry --model elasticnet   # §4
 python -m pytest tests/test_chemistry.py -q                     # 9 тестов
-python -m pytest tests/ -q                                       # 279 зелёных, 0 skipped
+python -m pytest tests/ -q                                       # 297 зелёных, 0 skipped
 ```

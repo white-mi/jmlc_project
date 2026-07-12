@@ -461,7 +461,7 @@ def render_markdown(state: dict) -> str:
     """Рендеринг pipeline-state в markdown."""
     lines = []
     lines.append("---")
-    lines.append("tags: [макро-радар, pipeline, mvp]")
+    lines.append("tags: [russian-propagation, pipeline, mvp]")
     lines.append(f'дата_анализа: "{state["date_news"]}"')
     lines.append(f'pipeline_version: "{state["pipeline_version"]}"')
     lines.append("---\n")

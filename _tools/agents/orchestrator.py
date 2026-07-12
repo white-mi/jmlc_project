@@ -1,5 +1,5 @@
 """
-Multi-Agent Pipeline Orchestrator (v0.7).
+Multi-Agent Pipeline Orchestrator (v0.9).
 
 Прогон 5 агентов на одной новости через Anthropic SDK:
   Agent 1 (Classifier) → Agent 2 (Context-RAG) → Agent 3 (Backtest-Analog)
@@ -449,7 +449,7 @@ def save_analysis(markdown: str, state: dict, date: str) -> Path:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Multi-Agent Pipeline для Russian Propagation (v0.7)"
+        description="Multi-Agent Pipeline для Russian Propagation (v0.9)"
     )
     parser.add_argument("--news-file", help="Файл с текстом новости")
     parser.add_argument("--source", required=True, help="Источник новости (URL или издание)")

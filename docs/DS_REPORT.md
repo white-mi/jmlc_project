@@ -1,5 +1,5 @@
 ---
-tags: [макро-радар, DS, валидация, junior-ml-contest]
+tags: [russian-propagation, DS, валидация, junior-ml-contest]
 дата: "2026-06-24"
 проект: "Russian Propagation"
 слой: "L1.5 OSL — DS-доработка"
@@ -159,7 +159,7 @@ FY2021–2025: 9M-actuals не выводятся из 12M, поэтому hold-
 
 ## 7. Инженерия и воспроизводимость
 
-- **279 pytest зелёных, 0 skipped** — детерминированы на чистом клоне (bundled-фикстуры).
+- **297 pytest зелёных, 0 skipped** — детерминированы на чистом клоне (bundled-фикстуры).
   CI: матрица **py3.11/3.12** + e2e smoke + **docker build (clean-clone gate)** + secret/dep-scan;
   **ruff — реальный гейт**; зависимости из закреплённого `requirements.lock`.
 - Новые модули в core (numpy/scikit-learn): `osl_panel`, `osl_models`, `osl_walkforward`,
@@ -169,7 +169,7 @@ FY2021–2025: 9M-actuals не выводятся из 12M, поэтому hold-
 
 ```bash
 cd _tools
-python -m pytest tests/ -q                       # 279 passed, 0 skipped
+python -m pytest tests/ -q                       # 297 passed, 0 skipped
 python osl_panel.py --industry metallurgy        # сводка панели
 pip install -e ".[eda]" && python eda_osl.py     # 8 фигур → docs/figures/eda/
 python osl_models.py                             # in-sample + leave-last-out
@@ -179,7 +179,7 @@ python conformal_split.py --model structural_osl  # OOS conformal-покрыти
 
 ## 8. Что дальше
 
-Инфраструктура отрасле-агностична: распространить панель на остальные 6 отраслей —
+Инфраструктура отрасле-агностична: распространить панель на остальные отрасли —
 дозаливка строк в CSV. Снять Pd-gap при доступе к LBMA/LPPM annual file. Накопить ≥3
 года истории → перейти от skill/DM к полноценному ансамблю.
 

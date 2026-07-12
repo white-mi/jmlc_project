@@ -127,7 +127,7 @@ def render_markdown(manifest=None) -> str:
     n_ill = len(rs) - n_val
     L = [
         "---",
-        "tags: [макро-радар, архитектура, покрытие]",
+        "tags: [russian-propagation, архитектура, покрытие]",
         f'версия: "{man["_version"]}"',
         'note: "сгенерировано _tools/coverage_tiers.py — не редактировать вручную"',
         "---",
