@@ -1,5 +1,5 @@
 """
-Кросс-отраслевой DS-синтез (Макро-радар) — агрегатор уже посчитанных walk-forward результатов.
+Кросс-отраслевой DS-синтез (Russian Propagation) — агрегатор уже посчитанных walk-forward результатов.
 
 `python ds_synthesis.py` читает 4 файла output/osl_metrics/<отрасль>_metrics.json (их пишет
 osl_walkforward.py) и строит:

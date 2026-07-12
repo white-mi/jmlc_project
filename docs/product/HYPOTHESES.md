@@ -1,7 +1,7 @@
 ---
 tags: [макро-радар, продукт, гипотезы, валидация, junior-ml-contest]
 дата: "2026-06-24"
-проект: "Макро-радар"
+проект: "Russian Propagation"
 раздел: "Продуктовое мышление — продуктовые гипотезы"
 ---
 
@@ -76,4 +76,4 @@ tags: [макро-радар, продукт, гипотезы, валидаци
 - Fialkowski et al. 2025 — [arXiv:2502.17044](https://arxiv.org/abs/2502.17044) (H4).
 - Статья Fialkowski 2025 — `docs/Fialkowski_2025_supply_chain_systemic_risk_arXiv_2502.17044.pdf` (H4). Демо-числа H5 — иллюстративный прогон радара.
 
-*Register продуктового слоя · Макро-радар · 2026-06-24 · данные публичные, для Junior ML Contest*
+*Register продуктового слоя · Russian Propagation · 2026-06-24 · данные публичные, для Junior ML Contest*

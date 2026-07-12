@@ -18,7 +18,7 @@ Operational Signal Layer (OSL) — Металлургия.
 долей внутреннего рынка (Северсталь, ММК, НЛМК) нужна гибридная модель:
   Revenue = Q_export × P_FOB + Q_domestic × P_domestic
 
-Этот файл — модуль Фазы 1.5 проекта Макро-радар (v0.9).
+Этот файл — модуль Фазы 1.5 проекта Russian Propagation (v0.9).
 """
 
 import argparse

@@ -8,7 +8,7 @@ tags: [макро-радар, docs, architecture, для-IT]
 
 > **← Хаб** · [← Макро-знания](1_Macro_Knowledge_for_IT.md) · [← Тех-знания](2_Tech_Knowledge_for_IT.md) · [← User Guide](3_User_Guide_Analyst.md)
 
-Полная техническая документация проекта «Макро-радар». Архитектура, модули, API, схемы данных, deployment, тестирование.
+Полная техническая документация проекта «Russian Propagation». Архитектура, модули, API, схемы данных, deployment, тестирование.
 
 ---
 

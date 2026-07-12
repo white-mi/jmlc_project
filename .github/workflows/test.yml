@@ -1,6 +1,6 @@
 name: tests
 
-# CI Макро-радара: тесты (матрица Python) + e2e smoke + docker build (тест «чистого клона»)
+# CI Russian Propagation: тесты (матрица Python) + e2e smoke + docker build (тест «чистого клона»)
 # + безопасность. Зависимости ставятся из закреплённого requirements.lock (детерминизм).
 # RADAR_RAG_USE_ST=0 → TF-IDF режим RAG, без сети и тяжёлых моделей.
 

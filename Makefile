@@ -1,4 +1,4 @@
-# Макро-радар — оркестратор разработки. Запуск из корня репозитория.
+# Russian Propagation — оркестратор разработки. Запуск из корня репозитория.
 .PHONY: help install install-dev test lint fmt typecheck precommit smoke docker-build docker-test clean
 
 help:

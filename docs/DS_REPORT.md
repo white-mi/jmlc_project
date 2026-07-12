@@ -1,13 +1,13 @@
 ---
 tags: [макро-радар, DS, валидация, junior-ml-contest]
 дата: "2026-06-24"
-проект: "Макро-радар"
+проект: "Russian Propagation"
 слой: "L1.5 OSL — DS-доработка"
 ---
 
 # DS-отчёт: прогноз выручки эмитентов металлургии с честной out-of-sample валидацией
 
-> Доработка Data-Science-слоя проекta «Макро-радар» (L1.5 OSL). Цель — превратить
+> Доработка Data-Science-слоя проекta «Russian Propagation» (L1.5 OSL). Цель — превратить
 > структурный эвристический прогноз выручки (одна точка на эмитента, in-sample
 > conformal) в **валидированный supervised-пайплайн** с реальной панелью данных,
 > сравнением моделей и **out-of-sample** метриками. Этот файл — основа «Описания
@@ -185,4 +185,4 @@ python conformal_split.py --model structural_osl  # OOS conformal-покрыти
 
 ---
 
-*DS-отчёт · Макро-радар · 2026-06-24 · данные публичные, для Junior ML Contest*
+*DS-отчёт · Russian Propagation · 2026-06-24 · данные публичные, для Junior ML Contest*

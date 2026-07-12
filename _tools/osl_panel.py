@@ -1,5 +1,5 @@
 """
-Загрузчик панели данных металлургии (эмитент × период) для DS-слоя Макро-радара.
+Загрузчик панели данных металлургии (эмитент × период) для DS-слоя Russian Propagation.
 
 Панель — фундамент честного supervised-обучения и walk-forward валидации OSL:
 вместо одной точки (12М 2025) на эмитента собираем исторический ряд FY 2021-2025
@@ -308,7 +308,7 @@ def main():
     args = ap.parse_args()
     rows = load_panel(industry=args.industry)
     print("=" * 64)
-    print("  ПАНЕЛЬ ДАННЫХ — Макро-радар DS-слой")
+    print("  ПАНЕЛЬ ДАННЫХ — Russian Propagation DS-слой")
     print("=" * 64)
     print(summary(rows))
 

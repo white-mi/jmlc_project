@@ -1,5 +1,5 @@
 """
-LangChain-интеграция Макро-радара: тулы для агентов + сборка агента под Anthropic API.
+LangChain-интеграция Russian Propagation: тулы для агентов + сборка агента под Anthropic API.
 
 Оборачивает 4 слоя пайплайна (L0..L3) в LangChain-тулы. Агент строится через
 ChatAnthropic; API-ключ оставлен ПУСТЫМ (подставь позже через env ANTHROPIC_API_KEY
@@ -307,7 +307,7 @@ TOOLS = [
 ]
 
 SYSTEM_PROMPT = (
-    "Ты — кредитный аналитик Т-Банка с доступом к инструментам Макро-радара "
+    "Ты — кредитный аналитик Т-Банка с доступом к инструментам Russian Propagation "
     "(4-слойный конвейер новость→макро→отрасль→клиентский сегмент). Для анализа "
     "новости: 1) get_macro_state; 2) classify_news_shock (или определи подкатегорию "
     "сам); 3) при необходимости osl_forecast/industry_spillover/segment_impact; "
@@ -486,7 +486,7 @@ def simulate_agent_loop() -> dict:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Макро-радар · LangChain-агент")
+    parser = argparse.ArgumentParser(description="Russian Propagation · LangChain-агент")
     parser.add_argument(
         "--simulate", action="store_true", help="Симуляция покрытия тулов без ключа"
     )

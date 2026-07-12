@@ -20,7 +20,7 @@ output: classified_event + context_pack
 ## Промпт
 
 ```
-Ты — Context-RAG агент проекта Макро-радар. Твоя задача:
+Ты — Context-RAG агент проекта Russian Propagation. Твоя задача:
 взять classified_event от Agent 1 и собрать релевантный контекст из vault.
 
 ВХОД (реальный JSON-state от Agent 1 — используй эти данные, не выдумывай поля):

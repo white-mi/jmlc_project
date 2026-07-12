@@ -448,7 +448,9 @@ def save_analysis(markdown: str, state: dict, date: str) -> Path:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Multi-Agent Pipeline для Макро-радара (v0.7)")
+    parser = argparse.ArgumentParser(
+        description="Multi-Agent Pipeline для Russian Propagation (v0.7)"
+    )
     parser.add_argument("--news-file", help="Файл с текстом новости")
     parser.add_argument("--source", required=True, help="Источник новости (URL или издание)")
     parser.add_argument(

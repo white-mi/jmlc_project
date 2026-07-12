@@ -1,5 +1,5 @@
 """
-EDA панели OSL (DS-слой Макро-радара) — headless-генератор фигур, industry-параметрический.
+EDA панели OSL (DS-слой Russian Propagation) — headless-генератор фигур, industry-параметрический.
 
 `python eda_osl.py [--industry <отрасль>]` строит ~8 графиков в docs/figures/eda[_<отрасль>]/*.png
 и пишет implications.md — по одной «импликации для модели» на каждый график (именно нарратив, а не

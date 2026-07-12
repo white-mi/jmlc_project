@@ -1,4 +1,4 @@
-"""Shared pytest fixtures для тестов Макро-радара."""
+"""Shared pytest fixtures для тестов Russian Propagation."""
 
 import sys
 from pathlib import Path

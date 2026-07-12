@@ -1,4 +1,4 @@
-# Рантайм-ядро Макро-радара (TF-IDF-режим, без сети) — то же, что ставит CI/Docker.
+# Рантайм-ядро Russian Propagation (TF-IDF-режим, без сети) — то же, что ставит CI/Docker.
 # Полный набор (RAG e5-embeddings, LLM-агенты, LangChain) — через extras в _tools/pyproject.toml:
 #   cd _tools && pip install -e ".[agent]"   # LangChain + Anthropic
 #   cd _tools && pip install -e ".[eda]"     # pandas/matplotlib/jupyter (DS EDA)

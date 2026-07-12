@@ -466,7 +466,7 @@ def render_markdown(state: dict) -> str:
     lines.append(f'pipeline_version: "{state["pipeline_version"]}"')
     lines.append("---\n")
 
-    lines.append("# Макро-радар End-to-End анализ")
+    lines.append("# Russian Propagation End-to-End анализ")
     lines.append(f'> Источник: {state.get("source_news", "—")}\n')
 
     # L0

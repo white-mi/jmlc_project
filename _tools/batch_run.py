@@ -1,5 +1,5 @@
 """
-Batch-перегон пайплайна Макро-радара на наборе новостей.
+Batch-перегон пайплайна Russian Propagation на наборе новостей.
 
 Берёт:
   - _tools/output/batch_news_<date>.json   — тексты новостей (date, source, title, news_text)
@@ -63,7 +63,7 @@ def is_bifurcated(l3: dict, thr: float = 0.05) -> bool:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Batch-перегон Макро-радара")
+    parser = argparse.ArgumentParser(description="Batch-перегон Russian Propagation")
     parser.add_argument("--date", required=True, help="Дата набора (YYYY-MM-DD)")
     args = parser.parse_args()
     date = args.date

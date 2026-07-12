@@ -2,7 +2,7 @@
   "meta": {
     "name": "panel_metallurgy",
     "version": "0.1",
-    "description": "Панель эмитент×период для supervised-обучения и walk-forward валидации OSL (Макро-радар, DS-доработка для Junior ML Contest). Граница: ТОЛЬКО публичные данные МСФО/IR + биржевые цены. Никаких клиентских/банковских данных.",
+    "description": "Панель эмитент×период для supervised-обучения и walk-forward валидации OSL (Russian Propagation, DS-доработка для Junior ML Contest). Граница: ТОЛЬКО публичные данные МСФО/IR + биржевые цены. Никаких клиентских/банковских данных.",
     "isolation": "public-only: IFRS/IR reports + LME/LBMA/CBR market data. No T-Bank client data, no portfolio data.",
     "primary_industry": "metallurgy",
     "issuers": ["Норникель", "Северсталь", "ММК", "НЛМК", "Полюс"],

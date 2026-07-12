@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-> Гайд по работе с кодовой базой Макро-радара (claude.ai/code).
+> Гайд по работе с кодовой базой Russian Propagation (claude.ai/code).
 
 ---
 
