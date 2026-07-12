@@ -40,13 +40,13 @@ if hasattr(sys.stdout, "reconfigure"):
 TOOLS_DIR = Path(__file__).parent
 sys.path.insert(0, str(TOOLS_DIR / "agents"))
 
-GOLD_PATH = TOOLS_DIR / "data" / "l0_gold_set.json"
+GOLD_PATH = TOOLS_DIR / "data" / "l0_gold_set_50.json"  # N=50 диверсифицированный (витрина)
 OUT_DIR = TOOLS_DIR / "output" / "l0_eval"
 
 # Полные ID моделей (alias → id). Голый API не принимает короткие алиасы.
 MODEL_IDS = {
     "haiku": "claude-haiku-4-5-20251001",
-    "sonnet": "claude-sonnet-4-6",
+    "sonnet": "claude-sonnet-5",
     "opus": "claude-opus-4-8",
 }
 
@@ -66,7 +66,7 @@ def wilson_ci(k, n, z=1.96):
 # Цены $/MTok (input, output) — для оценки стоимости прогона. Опубликованные тарифы.
 PRICES = {
     "claude-haiku-4-5-20251001": (1.0, 5.0),
-    "claude-sonnet-4-6": (3.0, 15.0),
+    "claude-sonnet-5": (3.0, 15.0),
     "claude-opus-4-8": (15.0, 75.0),
 }
 
@@ -90,8 +90,16 @@ TAXONOMY_INLINE = """\
 CODE_RE = re.compile(r"(\d)\.(\d)")
 
 
-def load_gold():
-    return json.loads(GOLD_PATH.read_text(encoding="utf-8"))["items"]
+def load_gold(path=GOLD_PATH):
+    return json.loads(Path(path).read_text(encoding="utf-8"))["items"]
+
+
+def response_text(resp) -> str:
+    """Текст ответа — именно text-блок (не content[0]): у thinking-моделей (Sonnet-5)
+    content[0] это ThinkingBlock без .text."""
+    return "".join(
+        getattr(b, "text", "") for b in resp.content if getattr(b, "type", None) == "text"
+    )
 
 
 def build_prompt(item):
@@ -131,7 +139,7 @@ def parse_pred(raw_json):
     return main, sub, obj
 
 
-def run(model_alias, limit=None):
+def run(model_alias, limit=None, gold_path=GOLD_PATH):
     import anthropic
     import os
 
@@ -142,7 +150,7 @@ def run(model_alias, limit=None):
     model = MODEL_IDS.get(model_alias, model_alias)
     pi, po = PRICES.get(model, (0.0, 0.0))
     client = anthropic.Anthropic(api_key=key)
-    items = load_gold()
+    items = load_gold(gold_path)
     if limit:
         items = items[:limit]
 
@@ -154,7 +162,7 @@ def run(model_alias, limit=None):
             max_tokens=1200,
             messages=[{"role": "user", "content": prompt}],
         )
-        raw = resp.content[0].text
+        raw = response_text(resp)
         tin += resp.usage.input_tokens
         tout += resp.usage.output_tokens
         main, sub, _ = parse_pred(raw)
@@ -231,8 +239,9 @@ def main():
     ap = argparse.ArgumentParser(description="L0 Agent-1 classifier eval")
     ap.add_argument("--model", default="haiku", help="haiku|sonnet|opus или полный id")
     ap.add_argument("--limit", type=int, default=None, help="ограничить число пунктов")
+    ap.add_argument("--gold", default=str(GOLD_PATH), help="путь к gold-set (по умолчанию N=50)")
     args = ap.parse_args()
-    run(args.model, args.limit)
+    run(args.model, args.limit, args.gold)
 
 
 if __name__ == "__main__":
