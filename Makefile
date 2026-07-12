@@ -39,10 +39,10 @@ smoke:
 	cd _tools && python run_pipeline.py --smoke-shock 4.2 --smoke-industry oilgas
 
 docker-build:
-	docker build -t macro-radar .
+	docker build -t russian-propagation .
 
 docker-test:
-	docker build -t macro-radar . && docker run --rm macro-radar python -m pytest tests/ -q
+	docker build -t russian-propagation . && docker run --rm russian-propagation python -m pytest tests/ -q
 
 clean:
 	find . -type d -name __pycache__ -prune -exec rm -rf {} + 2>/dev/null || true

@@ -1,5 +1,5 @@
 """
-End-to-End Macro-Radar pipeline (v0.7 MVP).
+End-to-End Russian Propagation pipeline (v0.7 MVP).
 
 Один прогон: новость → 4-слойный анализ с числами на каждом уровне.
 
@@ -594,7 +594,7 @@ def render_markdown(state: dict) -> str:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Macro-Radar End-to-End MVP")
+    parser = argparse.ArgumentParser(description="Russian Propagation End-to-End MVP")
     parser.add_argument("--news-file", help="Файл с текстом новости")
     parser.add_argument("--source", default="", help="Источник новости")
     parser.add_argument("--date", default=datetime.now().strftime("%Y-%m-%d"))

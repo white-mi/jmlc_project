@@ -1,8 +1,8 @@
-# Macro-Radar — Project Description
+# Russian Propagation — Project Description
 
 *ITMO Junior ML Contest submission. Public data only — no client or portfolio data.*
 
-Macro-Radar is a layered analytics pipeline that traces a single news event through the
+Russian Propagation is a layered analytics pipeline that traces a single news event through the
 Russian macro state, cross-industry spillover, and into bank client-segment credit risk —
 turning *"what just happened"* into ΔPD / Δdemand / Δchurn estimates **2–3 months before the
 effect reaches financial statements**. It is built around one discipline: every number is
@@ -32,7 +32,7 @@ This is a measurable gap, not a rhetorical one:
 
 The 2026 context amplifies the gap: the Russian key rate sits in an acute-stress regime
 (>18 %), where the credit channel and demand compression amplify correlated defaults — exactly
-the scenario in which an isolated stress test errs most. Macro-Radar adds the missing layer:
+the scenario in which an isolated stress test errs most. Russian Propagation adds the missing layer:
 for a given event it produces one *traceable* chain,
 
 ```
@@ -45,7 +45,7 @@ so an analyst can defend the conclusion instead of trusting a black box.
 
 ## 2. Solution & architecture
 
-Macro-Radar is five layers. State is a growing JSON dict that each layer enriches;
+Russian Propagation is five layers. State is a growing JSON dict that each layer enriches;
 `run_pipeline.run_full_pipeline()` orchestrates L0→L3 in a single pass and renders the result
 to a markdown note.
 
@@ -147,7 +147,7 @@ not after IFRS.
 The differentiator is **not** "we have supply chains" — Bloomberg's SPLC already maps supplier
 graphs. The honest position is an *overlay, not a replacement*:
 
-| Competitor class | Examples | Where Macro-Radar differs |
+| Competitor class | Examples | Where Russian Propagation differs |
 |---|---|---|
 | Global credit platforms | Bloomberg (DRSK/SPLC), Moody's CreditEdge, S&P RiskGauge (400M entities) | Russian-portfolio fit + segment bifurcation + traceability to channel/number; zero licence cost |
 | Enterprise stress-test / ECL | SAS Risk Stratum, in-bank CCAR/EBA | cascade across a correlated group vs. per-borrower in isolation |
@@ -227,4 +227,4 @@ rather than asserted.
 
 ---
 
-*Macro-Radar · 2026-06-24 · public / illustrative data only · ITMO Junior ML Contest*
+*Russian Propagation · 2026-06-24 · public / illustrative data only · ITMO Junior ML Contest*

@@ -77,9 +77,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build image (test suite runs inside the build)
-        run: docker build -t macro-radar .
+        run: docker build -t russian-propagation .
       - name: Run smoke in container
-        run: docker run --rm macro-radar
+        run: docker run --rm russian-propagation
 
   security:
     name: security (secrets + deps)

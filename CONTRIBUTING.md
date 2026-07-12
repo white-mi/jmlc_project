@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for your interest in Macro-Radar. This is a research / contest project; contributions
+Thanks for your interest in Russian Propagation. This is a research / contest project; contributions
 and feedback are welcome.
 
 ## Setup

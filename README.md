@@ -1,4 +1,4 @@
-# Macro-Radar
+# Russian Propagation
 
 A layered analytics pipeline that traces a single news event through the Russian macro
 state, cross-industry spillover, and into bank client-segment credit risk — turning "what
@@ -23,7 +23,7 @@ hitting a *correlated group* of borrowers at once through shared supply chains. 
 al. (2025, [arXiv:2502.17044](https://arxiv.org/abs/2502.17044)) quantify the resulting blind
 spot at **+28 % to +70 %** of systemic risk.
 
-Macro-Radar adds the missing layer. For a given event it produces one *traceable* chain:
+Russian Propagation adds the missing layer. For a given event it produces one *traceable* chain:
 
 ```
 news → Russian macro state → cross-industry cascade → bank client segment
@@ -78,8 +78,8 @@ python agents/orchestrator.py --news-file news.txt --source TASS --date 2026-06-
 Docker (the test suite runs inside the build, so the image only builds when green):
 
 ```bash
-docker build -t macro-radar .
-docker run --rm macro-radar
+docker build -t russian-propagation .
+docker run --rm russian-propagation
 ```
 
 ## Validation
@@ -165,7 +165,7 @@ Design facts, not bugs:
 
 ## Built with AI
 
-Macro-Radar is both built *with* and built *on* AI: it was developed using Claude Code, and the
+Russian Propagation is both built *with* and built *on* AI: it was developed using Claude Code, and the
 L0 layer is itself a five-agent LLM pipeline with retrieval. The contributor guide for the AI
 assistant is [`CLAUDE.md`](CLAUDE.md).
 
