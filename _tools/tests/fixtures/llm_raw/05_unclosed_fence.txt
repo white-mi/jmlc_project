@@ -1,0 +1,2 @@
+```json
+{"main_category": "2", "subcategory": "2.3", "severity_score": 88, "severity_level": "H", "WHAT": "Объявлена пандемия"}

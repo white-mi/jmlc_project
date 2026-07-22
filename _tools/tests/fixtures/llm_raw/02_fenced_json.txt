@@ -1,0 +1,7 @@
+Разбираю новость.
+
+```json
+{"main_category": "1", "subcategory": "1.4", "severity_score": 78, "severity_level": "H", "WHAT": "Введён новый санкционный пакет"}
+```
+
+Готово.

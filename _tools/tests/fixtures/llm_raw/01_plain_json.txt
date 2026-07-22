@@ -1,0 +1,1 @@
+{"main_category": "4", "subcategory": "4.2", "severity_score": 55, "severity_level": "M", "WHAT": "ЦБ снизил ключевую ставку"}

@@ -46,8 +46,50 @@ def test_gold50_has_boundary_cases():
     assert nb >= 5, f"слишком мало boundary-кейсов: {nb}"
 
 
+def _showcase():
+    return json.loads((E.TOOLS_DIR / "data" / "l0_eval_results.json").read_text(encoding="utf-8"))
+
+
 def test_results_showcase_matches_gold():
-    res = json.loads((E.TOOLS_DIR / "data" / "l0_eval_results.json").read_text(encoding="utf-8"))
+    res = _showcase()
     assert res["gold_set_n"] == len(GOLD50["items"])
     assert res["gold_set"].endswith("l0_gold_set_50.json")
     assert any(m["alias"] == "haiku" for m in res["models"]), "нет Haiku в витрине результатов"
+
+
+# Порог качества классификатора. Прогон требует API-ключа и в CI не выполняется, поэтому
+# гейтим САМУ ВИТРИНУ: её нельзя тихо переписать числами хуже заявленных в docs/L0_EVAL.md.
+MIN_SUBCATEGORY_ACCURACY = 0.90
+MIN_CI_LOWER = 0.83
+
+
+def test_showcase_meets_declared_thresholds():
+    full = [m for m in _showcase()["models"] if m.get("n") == len(GOLD50["items"])]
+    assert full, "в витрине нет ни одного прогона на полном gold-set"
+    for m in full:
+        acc = m["subcategory_accuracy"]
+        assert acc >= MIN_SUBCATEGORY_ACCURACY, f"{m['alias']}: subcategory accuracy {acc} упала"
+        lo = m["subcategory_accuracy_ci95"][0]
+        assert lo >= MIN_CI_LOWER, (
+            f"{m['alias']}: нижняя граница 95% CI {lo} ниже заявленной — на N=50 это уже "
+            f"не «почти то же самое»"
+        )
+
+
+def test_showcase_misses_are_explained():
+    """Каждый промах разобран: без разбора «94 %» превращается в цифру без содержания,
+    и непонятно, где ошибка модели, а где спорная эталонная метка."""
+    gold_by_id = {it["id"]: it for it in GOLD50["items"]}
+    # Строки частичных прогонов (подмножество gold-set) имеют другую схему полей —
+    # разбор промахов требуем с полных прогонов.
+    for m in [m for m in _showcase()["models"] if "subcategory_correct" in m]:
+        n_wrong = m["n"] - int(m["subcategory_correct"].split("/")[0])
+        assert (
+            len(m.get("misses", [])) == n_wrong
+        ), f"{m['alias']}: промахов {n_wrong}, а разобрано {len(m.get('misses', []))}"
+        for miss in m.get("misses", []):
+            assert miss["id"] in gold_by_id, f"{m['alias']}: промах по неизвестному id {miss['id']}"
+            assert (
+                gold_by_id[miss["id"]]["gold_sub"] == miss["gold"]
+            ), f"{m['alias']}/{miss['id']}: эталон в витрине расходится с gold-set"
+            assert miss.get("note", "").strip(), f"{m['alias']}/{miss['id']}: промах без разбора"

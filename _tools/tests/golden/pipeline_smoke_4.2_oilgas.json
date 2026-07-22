@@ -1,0 +1,1011 @@
+{
+  "pipeline_version": "0.9",
+  "date_news": "2026-01-01",
+  "source_news": "",
+  "L1_macro": {
+    "cai": -0.604,
+    "phase": "recovery",
+    "yield_curve_slope_pp": -1.2,
+    "epu": 0.0,
+    "epu_negative_pct": 0.0,
+    "epu_n_uncertainty_texts": 0,
+    "epu_n_negative_texts": 0,
+    "epu_n_total_texts": 0,
+    "epu_degraded": true,
+    "key_rate": 14.5
+  },
+  "kc_regime": "moderate_stress",
+  "L0_classification": {
+    "WHAT": "(smoke test)",
+    "main_category": "4",
+    "subcategory": "4.2",
+    "severity_score": 60,
+    "severity_level": "M",
+    "mode": "smoke"
+  },
+  "L1_5_osl": {
+    "retail": {
+      "industry": "retail",
+      "emitents": [
+        {
+          "company": "Wildberries",
+          "base_pred_rub_bn": 953.5,
+          "low_rub_bn": 771.8,
+          "high_rub_bn": 1109.2,
+          "width_pct": 35.4,
+          "actual_rub_bn": 945,
+          "inside_interval": true
+        },
+        {
+          "company": "Ozon",
+          "base_pred_rub_bn": 992.6,
+          "low_rub_bn": 803.5,
+          "high_rub_bn": 1154.7,
+          "width_pct": 35.4,
+          "actual_rub_bn": 998,
+          "inside_interval": true
+        },
+        {
+          "company": "М.Видео",
+          "base_pred_rub_bn": 451,
+          "low_rub_bn": 419.9,
+          "high_rub_bn": 484.4,
+          "width_pct": 14.3,
+          "actual_rub_bn": 451,
+          "inside_interval": true
+        }
+      ]
+    },
+    "oiv": {
+      "industry": "oiv",
+      "emitents": [
+        {
+          "company": "ХМАО-Югра",
+          "base_pred_rub_bn": 374.2,
+          "low_rub_bn": 310.9,
+          "high_rub_bn": 442.7,
+          "width_pct": 35.2,
+          "actual_rub_bn": 360,
+          "inside_interval": true
+        },
+        {
+          "company": "Тюменская обл.",
+          "base_pred_rub_bn": 249.7,
+          "low_rub_bn": 207.5,
+          "high_rub_bn": 295.4,
+          "width_pct": 35.2,
+          "actual_rub_bn": 240,
+          "inside_interval": true
+        },
+        {
+          "company": "ЯНАО",
+          "base_pred_rub_bn": 756.0,
+          "low_rub_bn": 632.6,
+          "high_rub_bn": 885.9,
+          "width_pct": 33.5,
+          "actual_rub_bn": 295,
+          "inside_interval": false
+        },
+        {
+          "company": "Татарстан",
+          "base_pred_rub_bn": 494.5,
+          "low_rub_bn": 411.0,
+          "high_rub_bn": 585.1,
+          "width_pct": 35.2,
+          "actual_rub_bn": 480,
+          "inside_interval": true
+        },
+        {
+          "company": "Сахалинская обл.",
+          "base_pred_rub_bn": 175.6,
+          "low_rub_bn": 150.0,
+          "high_rub_bn": 200.4,
+          "width_pct": 28.7,
+          "actual_rub_bn": 172,
+          "inside_interval": true
+        }
+      ]
+    },
+    "metallurgy": {
+      "industry": "metallurgy",
+      "emitents": [
+        {
+          "company": "Норникель",
+          "base_pred_rub_bn": 1225.2,
+          "low_rub_bn": 1168.0,
+          "high_rub_bn": 1291.4,
+          "width_pct": 10.1,
+          "actual_rub_bn": 1224.907,
+          "inside_interval": true
+        },
+        {
+          "company": "Северсталь",
+          "base_pred_rub_bn": 713.1,
+          "low_rub_bn": 647.3,
+          "high_rub_bn": 765.3,
+          "width_pct": 16.5,
+          "actual_rub_bn": 712.9,
+          "inside_interval": true
+        },
+        {
+          "company": "ММК",
+          "base_pred_rub_bn": 610.7,
+          "low_rub_bn": 554.4,
+          "high_rub_bn": 655.4,
+          "width_pct": 16.5,
+          "actual_rub_bn": 609.87,
+          "inside_interval": true
+        },
+        {
+          "company": "НЛМК",
+          "base_pred_rub_bn": 831.9,
+          "low_rub_bn": 755.1,
+          "high_rub_bn": 892.8,
+          "width_pct": 16.5,
+          "actual_rub_bn": 831.35,
+          "inside_interval": true
+        },
+        {
+          "company": "Полюс",
+          "base_pred_rub_bn": 776.6,
+          "low_rub_bn": 700.5,
+          "high_rub_bn": 842.2,
+          "width_pct": 18.3,
+          "actual_rub_bn": 776.3470000000001,
+          "inside_interval": true
+        }
+      ]
+    },
+    "chemistry": {
+      "industry": "chemistry",
+      "emitents": [
+        {
+          "company": "ФосАгро",
+          "base_pred_rub_bn": 589.6,
+          "low_rub_bn": 539.9,
+          "high_rub_bn": 637.6,
+          "width_pct": 16.6,
+          "actual_rub_bn": 590,
+          "inside_interval": true
+        },
+        {
+          "company": "Акрон",
+          "base_pred_rub_bn": 237.4,
+          "low_rub_bn": 216.6,
+          "high_rub_bn": 256.0,
+          "width_pct": 16.6,
+          "actual_rub_bn": 237.6,
+          "inside_interval": true
+        },
+        {
+          "company": "СИБУР",
+          "base_pred_rub_bn": 1200.4,
+          "low_rub_bn": 1101.2,
+          "high_rub_bn": 1277.0,
+          "width_pct": 14.6,
+          "actual_rub_bn": 1200,
+          "inside_interval": true
+        }
+      ]
+    },
+    "oilgas": {
+      "industry": "oilgas",
+      "emitents": [
+        {
+          "company": "Роснефть",
+          "base_pred_rub_bn": 8199.8,
+          "low_rub_bn": 7680.6,
+          "high_rub_bn": 8614.4,
+          "width_pct": 11.4,
+          "actual_rub_bn": 8236,
+          "inside_interval": true
+        },
+        {
+          "company": "ЛУКОЙЛ",
+          "base_pred_rub_bn": 3768.3,
+          "low_rub_bn": 3532.3,
+          "high_rub_bn": 3956.3,
+          "width_pct": 11.3,
+          "actual_rub_bn": 3768,
+          "inside_interval": true
+        },
+        {
+          "company": "Газпром",
+          "base_pred_rub_bn": 7000.9,
+          "low_rub_bn": 6603.7,
+          "high_rub_bn": 7322.7,
+          "width_pct": 10.3,
+          "actual_rub_bn": 7000,
+          "inside_interval": true
+        },
+        {
+          "company": "Новатэк",
+          "base_pred_rub_bn": 1444.5,
+          "low_rub_bn": 1370.8,
+          "high_rub_bn": 1510.9,
+          "width_pct": 9.7,
+          "actual_rub_bn": 1446,
+          "inside_interval": true
+        }
+      ]
+    }
+  },
+  "L1_5_oilgas_forward": {
+    "brent_pre": 68.0,
+    "brent_post": 68.0,
+    "companies": {
+      "Роснефть": {
+        "pred_pre_rub_bn": 7550.0,
+        "pred_post_rub_bn": 7550.0,
+        "delta_pct": 0.0,
+        "sensitivity": 0.65,
+        "business_model": "oil_vink"
+      },
+      "ЛУКОЙЛ": {
+        "pred_pre_rub_bn": 3454.0,
+        "pred_post_rub_bn": 3454.0,
+        "delta_pct": 0.0,
+        "sensitivity": 0.65,
+        "business_model": "oil_vink"
+      },
+      "Газпром": {
+        "pred_pre_rub_bn": 6776.0,
+        "pred_post_rub_bn": 6776.0,
+        "delta_pct": 0.0,
+        "sensitivity": 0.25,
+        "business_model": "gas_vink"
+      },
+      "Новатэк": {
+        "pred_pre_rub_bn": 1372.0,
+        "pred_post_rub_bn": 1372.0,
+        "delta_pct": 0.0,
+        "sensitivity": 0.4,
+        "business_model": "lng_player"
+      }
+    }
+  },
+  "L2_spillover": {
+    "source": "multi:retail,oiv,metallurgy,chemistry,oilgas",
+    "magnitude_pp": 0.9,
+    "impacts": {
+      "metallurgy": 0.45,
+      "oilgas": 0.36,
+      "chemistry": 0.45,
+      "retail": 0.9,
+      "energy": 0.203,
+      "pharma": 0.135,
+      "oiv": 0.675
+    },
+    "ranked": [
+      [
+        "retail",
+        0.9
+      ],
+      [
+        "oiv",
+        0.675
+      ],
+      [
+        "metallurgy",
+        0.45
+      ],
+      [
+        "chemistry",
+        0.45
+      ],
+      [
+        "oilgas",
+        0.36
+      ],
+      [
+        "energy",
+        0.203
+      ],
+      [
+        "pharma",
+        0.135
+      ]
+    ]
+  },
+  "shock_direction": 1,
+  "shock_subcategory_used": "4.2",
+  "L3_segments": {
+    "fl_massovy": {
+      "delta_pd_pp": -0.597,
+      "delta_demand_pct": 14.67,
+      "delta_churn_pp": 0.684,
+      "confidence": "low",
+      "channel_breakdown": {
+        "consumer": {
+          "sensitivity": 1.0,
+          "intensity": 1.0,
+          "direction": -1,
+          "delta_pd_contrib": -0.6,
+          "delta_demand_contrib": 15.0
+        },
+        "fiscal": {
+          "sensitivity": 0.1,
+          "intensity": 0.6,
+          "direction": -1,
+          "delta_pd_contrib": -0.027,
+          "delta_demand_contrib": 0.27
+        },
+        "fx": {
+          "sensitivity": 0.2,
+          "intensity": 0.5,
+          "direction": 1,
+          "delta_pd_contrib": 0.03,
+          "delta_demand_contrib": -0.6
+        }
+      }
+    },
+    "fl_sredniy": {
+      "delta_pd_pp": -0.373,
+      "delta_demand_pct": 9.44,
+      "delta_churn_pp": 0.575,
+      "confidence": "low",
+      "channel_breakdown": {
+        "consumer": {
+          "sensitivity": 0.7,
+          "intensity": 1.0,
+          "direction": -1,
+          "delta_pd_contrib": -0.42,
+          "delta_demand_contrib": 10.5
+        },
+        "fiscal": {
+          "sensitivity": 0.05,
+          "intensity": 0.6,
+          "direction": -1,
+          "delta_pd_contrib": -0.0135,
+          "delta_demand_contrib": 0.135
+        },
+        "fx": {
+          "sensitivity": 0.4,
+          "intensity": 0.5,
+          "direction": 1,
+          "delta_pd_contrib": 0.06,
+          "delta_demand_contrib": -1.2
+        }
+      }
+    },
+    "fl_premium": {
+      "delta_pd_pp": -0.135,
+      "delta_demand_pct": 3.9,
+      "delta_churn_pp": 0.503,
+      "confidence": "low",
+      "channel_breakdown": {
+        "consumer": {
+          "sensitivity": 0.4,
+          "intensity": 1.0,
+          "direction": -1,
+          "delta_pd_contrib": -0.24,
+          "delta_demand_contrib": 6.0
+        },
+        "fx": {
+          "sensitivity": 0.7,
+          "intensity": 0.5,
+          "direction": 1,
+          "delta_pd_contrib": 0.105,
+          "delta_demand_contrib": -2.1
+        }
+      }
+    },
+    "fl_private": {
+      "delta_pd_pp": 0.0,
+      "delta_demand_pct": 0.6,
+      "delta_churn_pp": 0.42,
+      "confidence": "low",
+      "channel_breakdown": {
+        "consumer": {
+          "sensitivity": 0.2,
+          "intensity": 1.0,
+          "direction": -1,
+          "delta_pd_contrib": -0.12,
+          "delta_demand_contrib": 3.0
+        },
+        "fx": {
+          "sensitivity": 0.8,
+          "intensity": 0.5,
+          "direction": 1,
+          "delta_pd_contrib": 0.12,
+          "delta_demand_contrib": -2.4
+        }
+      }
+    },
+    "sme_micro": {
+      "delta_pd_pp": -0.621,
+      "delta_demand_pct": 14.58,
+      "delta_churn_pp": 0.743,
+      "confidence": "low",
+      "channel_breakdown": {
+        "consumer": {
+          "sensitivity": 0.9,
+          "intensity": 1.0,
+          "direction": -1,
+          "delta_pd_contrib": -0.54,
+          "delta_demand_contrib": 13.5
+        },
+        "fiscal": {
+          "sensitivity": 0.2,
+          "intensity": 0.6,
+          "direction": -1,
+          "delta_pd_contrib": -0.054,
+          "delta_demand_contrib": 0.54
+        },
+        "fx": {
+          "sensitivity": 0.3,
+          "intensity": 0.5,
+          "direction": 1,
+          "delta_pd_contrib": 0.045,
+          "delta_demand_contrib": -0.9
+        },
+        "supply_chain": {
+          "sensitivity": 0.4,
+          "intensity": 0.4,
+          "direction": -1,
+          "delta_pd_contrib": -0.072,
+          "delta_demand_contrib": 1.44
+        }
+      }
+    },
+    "sme_small": {
+      "delta_pd_pp": -0.523,
+      "delta_demand_pct": 11.81,
+      "delta_churn_pp": 0.631,
+      "confidence": "low",
+      "channel_breakdown": {
+        "consumer": {
+          "sensitivity": 0.7,
+          "intensity": 1.0,
+          "direction": -1,
+          "delta_pd_contrib": -0.42,
+          "delta_demand_contrib": 10.5
+        },
+        "oil_revenue": {
+          "sensitivity": 0.1,
+          "intensity": 0.3,
+          "direction": -1,
+          "delta_pd_contrib": -0.0225,
+          "delta_demand_contrib": 0.225
+        },
+        "fiscal": {
+          "sensitivity": 0.2,
+          "intensity": 0.6,
+          "direction": -1,
+          "delta_pd_contrib": -0.054,
+          "delta_demand_contrib": 0.54
+        },
+        "fx": {
+          "sensitivity": 0.3,
+          "intensity": 0.5,
+          "direction": 1,
+          "delta_pd_contrib": 0.045,
+          "delta_demand_contrib": -0.9
+        },
+        "supply_chain": {
+          "sensitivity": 0.4,
+          "intensity": 0.4,
+          "direction": -1,
+          "delta_pd_contrib": -0.072,
+          "delta_demand_contrib": 1.44
+        }
+      }
+    },
+    "sme_mid": {
+      "delta_pd_pp": -0.438,
+      "delta_demand_pct": 9.0,
+      "delta_churn_pp": 0.567,
+      "confidence": "low",
+      "channel_breakdown": {
+        "consumer": {
+          "sensitivity": 0.5,
+          "intensity": 1.0,
+          "direction": -1,
+          "delta_pd_contrib": -0.3,
+          "delta_demand_contrib": 7.5
+        },
+        "oil_revenue": {
+          "sensitivity": 0.2,
+          "intensity": 0.3,
+          "direction": -1,
+          "delta_pd_contrib": -0.045,
+          "delta_demand_contrib": 0.45
+        },
+        "fiscal": {
+          "sensitivity": 0.3,
+          "intensity": 0.6,
+          "direction": -1,
+          "delta_pd_contrib": -0.081,
+          "delta_demand_contrib": 0.81
+        },
+        "fx": {
+          "sensitivity": 0.4,
+          "intensity": 0.5,
+          "direction": 1,
+          "delta_pd_contrib": 0.06,
+          "delta_demand_contrib": -1.2
+        },
+        "supply_chain": {
+          "sensitivity": 0.4,
+          "intensity": 0.4,
+          "direction": -1,
+          "delta_pd_contrib": -0.072,
+          "delta_demand_contrib": 1.44
+        }
+      }
+    },
+    "ml_mid_corp": {
+      "delta_pd_pp": -0.381,
+      "delta_demand_pct": 6.81,
+      "delta_churn_pp": 0.483,
+      "confidence": "low",
+      "channel_breakdown": {
+        "consumer": {
+          "sensitivity": 0.3,
+          "intensity": 1.0,
+          "direction": -1,
+          "delta_pd_contrib": -0.18,
+          "delta_demand_contrib": 4.5
+        },
+        "oil_revenue": {
+          "sensitivity": 0.4,
+          "intensity": 0.3,
+          "direction": -1,
+          "delta_pd_contrib": -0.09,
+          "delta_demand_contrib": 0.9
+        },
+        "fiscal": {
+          "sensitivity": 0.3,
+          "intensity": 0.6,
+          "direction": -1,
+          "delta_pd_contrib": -0.081,
+          "delta_demand_contrib": 0.81
+        },
+        "fx": {
+          "sensitivity": 0.4,
+          "intensity": 0.5,
+          "direction": 1,
+          "delta_pd_contrib": 0.06,
+          "delta_demand_contrib": -1.2
+        },
+        "supply_chain": {
+          "sensitivity": 0.5,
+          "intensity": 0.4,
+          "direction": -1,
+          "delta_pd_contrib": -0.09,
+          "delta_demand_contrib": 1.8
+        }
+      }
+    },
+    "ml_large_corp": {
+      "delta_pd_pp": -0.296,
+      "delta_demand_pct": 3.82,
+      "delta_churn_pp": 0.41,
+      "confidence": "low",
+      "channel_breakdown": {
+        "consumer": {
+          "sensitivity": 0.1,
+          "intensity": 1.0,
+          "direction": -1,
+          "delta_pd_contrib": -0.06,
+          "delta_demand_contrib": 1.5
+        },
+        "oil_revenue": {
+          "sensitivity": 0.7,
+          "intensity": 0.3,
+          "direction": -1,
+          "delta_pd_contrib": -0.1575,
+          "delta_demand_contrib": 1.575
+        },
+        "fiscal": {
+          "sensitivity": 0.3,
+          "intensity": 0.6,
+          "direction": -1,
+          "delta_pd_contrib": -0.081,
+          "delta_demand_contrib": 0.81
+        },
+        "fx": {
+          "sensitivity": 0.5,
+          "intensity": 0.5,
+          "direction": 1,
+          "delta_pd_contrib": 0.075,
+          "delta_demand_contrib": -1.5
+        },
+        "supply_chain": {
+          "sensitivity": 0.4,
+          "intensity": 0.4,
+          "direction": -1,
+          "delta_pd_contrib": -0.072,
+          "delta_demand_contrib": 1.44
+        }
+      }
+    },
+    "ml_large_corp_oilgas": {
+      "delta_pd_pp": -0.289,
+      "delta_demand_pct": 3.15,
+      "delta_churn_pp": 0.407,
+      "confidence": "low",
+      "channel_breakdown": {
+        "consumer": {
+          "sensitivity": 0.05,
+          "intensity": 1.0,
+          "direction": -1,
+          "delta_pd_contrib": -0.03,
+          "delta_demand_contrib": 0.75
+        },
+        "oil_revenue": {
+          "sensitivity": 1.0,
+          "intensity": 0.3,
+          "direction": -1,
+          "delta_pd_contrib": -0.225,
+          "delta_demand_contrib": 2.25
+        },
+        "fiscal": {
+          "sensitivity": 0.2,
+          "intensity": 0.6,
+          "direction": -1,
+          "delta_pd_contrib": -0.054,
+          "delta_demand_contrib": 0.54
+        },
+        "fx": {
+          "sensitivity": 0.55,
+          "intensity": 0.5,
+          "direction": 1,
+          "delta_pd_contrib": 0.0825,
+          "delta_demand_contrib": -1.65
+        },
+        "supply_chain": {
+          "sensitivity": 0.35,
+          "intensity": 0.4,
+          "direction": -1,
+          "delta_pd_contrib": -0.063,
+          "delta_demand_contrib": 1.26
+        }
+      }
+    },
+    "ml_large_corp_metallurgy": {
+      "delta_pd_pp": -0.183,
+      "delta_demand_pct": 2.92,
+      "delta_churn_pp": 0.457,
+      "confidence": "low",
+      "channel_breakdown": {
+        "consumer": {
+          "sensitivity": 0.1,
+          "intensity": 1.0,
+          "direction": -1,
+          "delta_pd_contrib": -0.06,
+          "delta_demand_contrib": 1.5
+        },
+        "oil_revenue": {
+          "sensitivity": 0.1,
+          "intensity": 0.3,
+          "direction": -1,
+          "delta_pd_contrib": -0.0225,
+          "delta_demand_contrib": 0.225
+        },
+        "fiscal": {
+          "sensitivity": 0.3,
+          "intensity": 0.6,
+          "direction": -1,
+          "delta_pd_contrib": -0.081,
+          "delta_demand_contrib": 0.81
+        },
+        "fx": {
+          "sensitivity": 0.65,
+          "intensity": 0.5,
+          "direction": 1,
+          "delta_pd_contrib": 0.0975,
+          "delta_demand_contrib": -1.95
+        },
+        "supply_chain": {
+          "sensitivity": 0.65,
+          "intensity": 0.4,
+          "direction": -1,
+          "delta_pd_contrib": -0.117,
+          "delta_demand_contrib": 2.34
+        }
+      }
+    },
+    "ml_large_corp_retail": {
+      "delta_pd_pp": -0.34,
+      "delta_demand_pct": 7.91,
+      "delta_churn_pp": 0.656,
+      "confidence": "low",
+      "channel_breakdown": {
+        "consumer": {
+          "sensitivity": 0.5,
+          "intensity": 1.0,
+          "direction": -1,
+          "delta_pd_contrib": -0.3,
+          "delta_demand_contrib": 7.5
+        },
+        "oil_revenue": {
+          "sensitivity": 0.05,
+          "intensity": 0.3,
+          "direction": -1,
+          "delta_pd_contrib": -0.0112,
+          "delta_demand_contrib": 0.1125
+        },
+        "fiscal": {
+          "sensitivity": 0.1,
+          "intensity": 0.6,
+          "direction": -1,
+          "delta_pd_contrib": -0.027,
+          "delta_demand_contrib": 0.27
+        },
+        "fx": {
+          "sensitivity": 0.65,
+          "intensity": 0.5,
+          "direction": 1,
+          "delta_pd_contrib": 0.0975,
+          "delta_demand_contrib": -1.95
+        },
+        "supply_chain": {
+          "sensitivity": 0.55,
+          "intensity": 0.4,
+          "direction": -1,
+          "delta_pd_contrib": -0.099,
+          "delta_demand_contrib": 1.98
+        }
+      }
+    },
+    "ml_large_corp_finance": {
+      "delta_pd_pp": -0.232,
+      "delta_demand_pct": 4.79,
+      "delta_churn_pp": 0.393,
+      "confidence": "low",
+      "channel_breakdown": {
+        "consumer": {
+          "sensitivity": 0.3,
+          "intensity": 1.0,
+          "direction": -1,
+          "delta_pd_contrib": -0.18,
+          "delta_demand_contrib": 4.5
+        },
+        "oil_revenue": {
+          "sensitivity": 0.1,
+          "intensity": 0.3,
+          "direction": -1,
+          "delta_pd_contrib": -0.0225,
+          "delta_demand_contrib": 0.225
+        },
+        "fiscal": {
+          "sensitivity": 0.2,
+          "intensity": 0.6,
+          "direction": -1,
+          "delta_pd_contrib": -0.054,
+          "delta_demand_contrib": 0.54
+        },
+        "fx": {
+          "sensitivity": 0.4,
+          "intensity": 0.5,
+          "direction": 1,
+          "delta_pd_contrib": 0.06,
+          "delta_demand_contrib": -1.2
+        },
+        "supply_chain": {
+          "sensitivity": 0.2,
+          "intensity": 0.4,
+          "direction": -1,
+          "delta_pd_contrib": -0.036,
+          "delta_demand_contrib": 0.72
+        }
+      }
+    },
+    "ml_large_corp_chemistry": {
+      "delta_pd_pp": -0.203,
+      "delta_demand_pct": 2.54,
+      "delta_churn_pp": 0.361,
+      "confidence": "low",
+      "channel_breakdown": {
+        "consumer": {
+          "sensitivity": 0.05,
+          "intensity": 1.0,
+          "direction": -1,
+          "delta_pd_contrib": -0.03,
+          "delta_demand_contrib": 0.75
+        },
+        "oil_revenue": {
+          "sensitivity": 0.5,
+          "intensity": 0.3,
+          "direction": -1,
+          "delta_pd_contrib": -0.1125,
+          "delta_demand_contrib": 1.125
+        },
+        "fiscal": {
+          "sensitivity": 0.2,
+          "intensity": 0.6,
+          "direction": -1,
+          "delta_pd_contrib": -0.054,
+          "delta_demand_contrib": 0.54
+        },
+        "fx": {
+          "sensitivity": 0.5,
+          "intensity": 0.5,
+          "direction": 1,
+          "delta_pd_contrib": 0.075,
+          "delta_demand_contrib": -1.5
+        },
+        "supply_chain": {
+          "sensitivity": 0.45,
+          "intensity": 0.4,
+          "direction": -1,
+          "delta_pd_contrib": -0.081,
+          "delta_demand_contrib": 1.62
+        }
+      }
+    },
+    "ml_public": {
+      "delta_pd_pp": -0.422,
+      "delta_demand_pct": 5.18,
+      "delta_churn_pp": 0.297,
+      "confidence": "low",
+      "channel_breakdown": {
+        "consumer": {
+          "sensitivity": 0.1,
+          "intensity": 1.0,
+          "direction": -1,
+          "delta_pd_contrib": -0.06,
+          "delta_demand_contrib": 1.5
+        },
+        "oil_revenue": {
+          "sensitivity": 0.5,
+          "intensity": 0.3,
+          "direction": -1,
+          "delta_pd_contrib": -0.1125,
+          "delta_demand_contrib": 1.125
+        },
+        "fiscal": {
+          "sensitivity": 0.9,
+          "intensity": 0.6,
+          "direction": -1,
+          "delta_pd_contrib": -0.243,
+          "delta_demand_contrib": 2.43
+        },
+        "fx": {
+          "sensitivity": 0.2,
+          "intensity": 0.5,
+          "direction": 1,
+          "delta_pd_contrib": 0.03,
+          "delta_demand_contrib": -0.6
+        },
+        "supply_chain": {
+          "sensitivity": 0.2,
+          "intensity": 0.4,
+          "direction": -1,
+          "delta_pd_contrib": -0.036,
+          "delta_demand_contrib": 0.72
+        }
+      }
+    },
+    "ml_public_oilgas": {
+      "delta_pd_pp": -0.512,
+      "delta_demand_pct": 5.56,
+      "delta_churn_pp": 0.335,
+      "confidence": "low",
+      "channel_breakdown": {
+        "consumer": {
+          "sensitivity": 0.05,
+          "intensity": 1.0,
+          "direction": -1,
+          "delta_pd_contrib": -0.03,
+          "delta_demand_contrib": 0.75
+        },
+        "oil_revenue": {
+          "sensitivity": 0.95,
+          "intensity": 0.3,
+          "direction": -1,
+          "delta_pd_contrib": -0.2137,
+          "delta_demand_contrib": 2.1375
+        },
+        "fiscal": {
+          "sensitivity": 1.0,
+          "intensity": 0.6,
+          "direction": -1,
+          "delta_pd_contrib": -0.27,
+          "delta_demand_contrib": 2.7
+        },
+        "fx": {
+          "sensitivity": 0.25,
+          "intensity": 0.5,
+          "direction": 1,
+          "delta_pd_contrib": 0.0375,
+          "delta_demand_contrib": -0.75
+        },
+        "supply_chain": {
+          "sensitivity": 0.2,
+          "intensity": 0.4,
+          "direction": -1,
+          "delta_pd_contrib": -0.036,
+          "delta_demand_contrib": 0.72
+        }
+      }
+    },
+    "ml_public_metallurgy": {
+      "delta_pd_pp": -0.342,
+      "delta_demand_pct": 4.62,
+      "delta_churn_pp": 0.386,
+      "confidence": "low",
+      "channel_breakdown": {
+        "consumer": {
+          "sensitivity": 0.1,
+          "intensity": 1.0,
+          "direction": -1,
+          "delta_pd_contrib": -0.06,
+          "delta_demand_contrib": 1.5
+        },
+        "oil_revenue": {
+          "sensitivity": 0.1,
+          "intensity": 0.3,
+          "direction": -1,
+          "delta_pd_contrib": -0.0225,
+          "delta_demand_contrib": 0.225
+        },
+        "fiscal": {
+          "sensitivity": 0.85,
+          "intensity": 0.6,
+          "direction": -1,
+          "delta_pd_contrib": -0.2295,
+          "delta_demand_contrib": 2.295
+        },
+        "fx": {
+          "sensitivity": 0.4,
+          "intensity": 0.5,
+          "direction": 1,
+          "delta_pd_contrib": 0.06,
+          "delta_demand_contrib": -1.2
+        },
+        "supply_chain": {
+          "sensitivity": 0.5,
+          "intensity": 0.4,
+          "direction": -1,
+          "delta_pd_contrib": -0.09,
+          "delta_demand_contrib": 1.8
+        }
+      }
+    },
+    "ml_public_diversified": {
+      "delta_pd_pp": -0.317,
+      "delta_demand_pct": 4.94,
+      "delta_churn_pp": 0.29,
+      "confidence": "low",
+      "channel_breakdown": {
+        "consumer": {
+          "sensitivity": 0.2,
+          "intensity": 1.0,
+          "direction": -1,
+          "delta_pd_contrib": -0.12,
+          "delta_demand_contrib": 3.0
+        },
+        "oil_revenue": {
+          "sensitivity": 0.05,
+          "intensity": 0.3,
+          "direction": -1,
+          "delta_pd_contrib": -0.0112,
+          "delta_demand_contrib": 0.1125
+        },
+        "fiscal": {
+          "sensitivity": 0.7,
+          "intensity": 0.6,
+          "direction": -1,
+          "delta_pd_contrib": -0.189,
+          "delta_demand_contrib": 1.89
+        },
+        "fx": {
+          "sensitivity": 0.2,
+          "intensity": 0.5,
+          "direction": 1,
+          "delta_pd_contrib": 0.03,
+          "delta_demand_contrib": -0.6
+        },
+        "supply_chain": {
+          "sensitivity": 0.15,
+          "intensity": 0.4,
+          "direction": -1,
+          "delta_pd_contrib": -0.027,
+          "delta_demand_contrib": 0.54
+        }
+      }
+    }
+  }
+}

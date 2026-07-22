@@ -18,6 +18,8 @@ dependencies = [
 dev = [
     "pytest>=7.4",
     "pytest-cov>=4.1",
+    # property-based тесты слоёв L2/L3 (tests/test_properties_l2_l3.py)
+    "hypothesis>=6.100",
     "ruff>=0.5",
     "black>=24.0",
     "mypy>=1.8",
@@ -54,7 +56,7 @@ py-modules = [
     "osl_oiv",
     "osl_calibrator",
     "conformal_prediction",
-    # DS-слой (доработка для Junior ML Contest): панель + модели + валидация + split-conformal
+    # DS-слой: панель + модели + валидация + split-conformal
     "osl_panel",
     "osl_models",
     "osl_walkforward",
@@ -83,13 +85,15 @@ omit = [
     "*ds_synthesis.py",
     "*langchain_agent.py",
     "*scripts/ksp_harvester.py",
+    # research-скрипты (разовые замеры для docs/EVAL.md), не часть прод-ядра
+    "*experiments/*",
 ]
 
-# S5.3: линтеры. ruff/black — мягкий старт (line-length 100, без агрессивных правил).
+# Линтеры. ruff/black — мягкий режим (line-length 100, без агрессивных правил).
 [tool.ruff]
 line-length = 100
 target-version = "py310"
-# E501 (длина) и др. — не блокируем на старте; включать постепенно.
+# E501 (длина) и др. — вне блокирующего гейта; полный список — в lint.ignore ниже.
 lint.select = ["E", "F", "W"]
 # E501 длина · E741 имена l/I · W605 escape · E402 импорт после sys.stdout.reconfigure (cross-OS) ·
 # E702 ; в тестовых хелперах (стиль). Остальные E/F/W — реальный гейт.

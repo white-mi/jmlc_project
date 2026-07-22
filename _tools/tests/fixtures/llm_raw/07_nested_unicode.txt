@@ -1,0 +1,3 @@
+```json
+{"main_category": "5", "subcategory": "5.2", "severity_score": 12, "severity_level": "L", "WHAT": "Решение «уже в ценах»", "notes": {"quote": "рынок отреагировал \"нейтрально\"", "tags": ["шум", "ожидаемо"]}}
+```

@@ -11,10 +11,14 @@ WORKDIR /app
 # Зависимости — из закреплённого lock-файла (детерминизм численных результатов). Тяжёлый ML-стек
 # (sentence-transformers/LLM) не нужен для тестов и smoke — он в extras pyproject.
 COPY requirements.lock /app/requirements.lock
-RUN pip install --no-cache-dir -r /app/requirements.lock pytest
+# pytest + hypothesis (property-based тесты L2/L3) сверх пиннутого рантайм-стека — как в CI-job tests.
+RUN pip install --no-cache-dir -r /app/requirements.lock pytest hypothesis
 
-# Исходники проекта (тесты гоняются на bundled-фикстуре tests/fixtures/, корпус _Анализы/ не нужен).
+# Исходники проекта. Живой корпус разборов не нужен (тесты используют фикстуры
+# tests/fixtures/), а `_Анализы/_история/` обязателен: на нём считается retrieval-eval
+# реального gold-set (tests/test_rag_eval.py) — гейт, который прогоняется внутри сборки.
 COPY _tools/ /app/_tools/
+COPY _Анализы/_история/ /app/_Анализы/_история/
 # docs/ нужен тестам: test_coverage проверяет, что манифест industry_coverage.json ссылается на
 # реальные DS-отчёты / COVERAGE_TIERS.md / DEVELOPERS_EVALUATION.md (они лежат в docs/, не в _tools/).
 COPY docs/ /app/docs/

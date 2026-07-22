@@ -1,0 +1,2 @@
+```json
+{"main_category": "2", "subcategory": "2.1", "severity_score": 91, "severity_level": "H", "WHAT": "Системный финансовый кризис", "detail": {"markets": "обвал"
