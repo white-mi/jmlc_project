@@ -9,7 +9,7 @@ tags: [russian-propagation, ds, химия]
 > Зеркало DS-отчётов [металлургии](DS_REPORT.md) и [нефтегаза](DS_REPORT_OILGAS.md). Та же
 > дисциплина: реальная панель FY2021–2025 (публичные МСФО/IR + World Bank), честная
 > out-of-sample walk-forward, split-conformal, наивные бейзлайны, явные ограничения.
-> **Отличие химии: структурная модель ПОДКЛЮЧЕНА** (в нефтегазе была отложена) — у химии
+> **Отличие химии: структурная модель ПОДКЛЮЧЕНА** (в нефтегазе она отложена) — у химии
 > публичные годовые цены и нет налогового клина.
 
 **Изоляция:** только публичные данные. Никаких клиентских/портфельных данных банка.
@@ -51,7 +51,7 @@ tags: [russian-propagation, ds, химия]
 
 ---
 
-## 2. Модели — структурная ПОДКЛЮЧЕНА (Фаза C)
+## 2. Модели — структурная ПОДКЛЮЧЕНА
 
 1. **StructuralOSL — реально работает для химии** (в отличие от нефтегаза). Reuse `osl_chemistry`:
    цена_период = `base × (драйвер / реф_2025)`, где `base` — 2025-калиброванная avg-цена-за-тонну
@@ -117,7 +117,7 @@ proper-train ≤2022 · calib 2023 · test 2024–25. α=0.10.
 ## 5. Анти-leakage
 
 - **Цены контемпоральны** (окно ⊆ периода, `test_price_window_within_reporting_period` покрывает химию).
-- **Структурные refs/base — фиксированные константы**, не из train/test (проверено ревью Фазы C).
+- **Структурные refs/base — фиксированные константы**, не из train/test (проверено ревью).
 - **Статистики только train** (scaler/FE/k); сплит по времени; MAPE валюто-инвариантна.
 
 ## 6. Честные ограничения
@@ -137,5 +137,5 @@ python osl_panel.py --industry chemistry                       # 18 строк, 
 python osl_walkforward.py --industry chemistry                  # §3 (base=structural)
 python conformal_split.py --industry chemistry --model elasticnet   # §4
 python -m pytest tests/test_chemistry.py -q                     # 9 тестов
-python -m pytest tests/ -q                                       # 297 зелёных, 0 skipped
+python -m pytest tests/ -q                                       # 335 зелёных, 0 skipped
 ```

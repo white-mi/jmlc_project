@@ -9,21 +9,21 @@ tags: [russian-propagation, инструменты, регламент]
 
 > **← Хаб**
 
-Регламент использования `osl_calibrator.py` для регулярной калибровки моделей. Цель — **сделать так, чтобы калибровка не была разовым ручным hack'ом, а штатной регулярной процедурой**.
+Регламент использования `osl_calibrator.py`: калибровка OSL-моделей как **штатная регулярная процедура** — с фиксированным поводом для запуска, порогом дрейфа и чек-листом.
 
 ---
 
 ## Архитектура
 
-> Актуально для **v0.9** (контекст ниже изначально написан для v0.6 от 2026-04-25; логика калибровки не менялась).
+> Регламент актуален для **v0.9**.
 
 ```
 _tools/
 ├── osl_common.py                # общие структуры OSL: RevenuePredict / FXRate / mae_pct
-│                                #   (новый в v0.9 — устранено дублирование по 7 модулям;
-│                                #    калибратор и conformal опираются на эти структуры)
+│                                #   (единая схема для 7 модулей; калибратор и conformal
+│                                #    опираются на эти структуры)
 ├── osl_calibrator.py            # auto-tune + apply + drift_check
-├── conformal_prediction.py      # автоматически применяет калибровки при импорте (v0.6+)
+├── conformal_prediction.py      # автоматически применяет калибровки при импорте
 └── calibration/
     ├── osl_metallurgy_calibrated.json
     ├── osl_oilgas_calibrated.json
@@ -154,7 +154,7 @@ python conformal_prediction.py --industry <отрасль>
 
 Auto-tune подбирает **один параметр под один факт** (12М 2025). Это может означать что прогноз хорош для 2025, но плох для 2026 (если структура revenue изменилась).
 
-**Решение:** при появлении нескольких quarterly actuals — minimize MAE через **multiple periods** (не реализовано в v0.6).
+**Решение:** при появлении нескольких quarterly actuals — minimize MAE через **multiple periods** (не реализовано).
 
 ### 2. Структурные проблемы — за пределами single-param tune
 
@@ -168,9 +168,9 @@ Auto-tune подбирает **один параметр под один фак�
 
 ### 3. Энергетика — формула calculator проблемная
 
-Текущая формула `target_total = subtotal / (1 - other_share)` — при `other_share` близком к 1 даёт **нестабильность**. Видно по результатам v0.6: base прогнозы прыгают, conformal интервалы не согласованы.
+Текущая формула `target_total = subtotal / (1 - other_share)` — при `other_share` близком к 1 даёт **нестабильность**: base прогнозы прыгают, conformal интервалы не согласованы.
 
-**Рекомендация v0.7:** переписать predict_generation в osl_energy.py как **сумму абсолютных сегментов** (gen_revenue + capacity_revenue + sales_revenue + heat_revenue), без divide-by-(1-other) формулы.
+**Рекомендация:** переписать predict_generation в osl_energy.py как **сумму абсолютных сегментов** (gen_revenue + capacity_revenue + sales_revenue + heat_revenue), без divide-by-(1-other) формулы.
 
 ---
 

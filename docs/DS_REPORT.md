@@ -7,11 +7,10 @@ tags: [russian-propagation, DS, валидация, junior-ml-contest]
 
 # DS-отчёт: прогноз выручки эмитентов металлургии с честной out-of-sample валидацией
 
-> Доработка Data-Science-слоя проекta «Russian Propagation» (L1.5 OSL). Цель — превратить
-> структурный эвристический прогноз выручки (одна точка на эмитента, in-sample
-> conformal) в **валидированный supervised-пайплайн** с реальной панелью данных,
-> сравнением моделей и **out-of-sample** метриками. Этот файл — основа «Описания
-> проекта» для Junior ML Contest.
+> Data-Science-слой проекта «Russian Propagation» (L1.5 OSL): **валидированный
+> supervised-пайплайн** прогноза выручки эмитентов — реальная панель данных, сравнение
+> моделей и **out-of-sample** метрики. Этот файл — основа «Описания проекта» для
+> Junior ML Contest.
 
 ## 1. Задача и данные
 
@@ -39,7 +38,7 @@ tags: [russian-propagation, DS, валидация, junior-ml-contest]
 - **Цена палладия** (≈30% выручки Норникеля) — недоступна в открытых источниках
   (World Bank не ведёт Pd; Johnson Matthey — только графики). → структурная модель
   использует module-константу; learned-модели Pd-признака не имеют.
-- **Цена стали HRC FOB** — только платный спот. → добавлен **прокси `steel_proxy_iron_ore`**
+- **Цена стали HRC FOB** — только платный спот. → используется **прокси `steel_proxy_iron_ore`**
   (World Bank железная руда) как признак сектора + per-period масштабирование цены стали.
 
 Изоляция: **только публичные данные**, никаких клиентских/портфельных данных банка.
@@ -78,9 +77,9 @@ tags: [russian-propagation, DS, валидация, junior-ml-contest]
 | **ElasticNet / Ridge** | log(цены) + within-issuer FE, таргет log(выручка) | регуляризация против коллинеарности цен (EDA #2) |
 | **HistGradientBoosting** | + объёмы (нативный NaN), зажат (depth=2, leaf=4, L2=1) | гибкий компаратор; ожидаемо переобучается при N=24 |
 
-**Within-issuer FE** (вычитаем per-issuer среднее log-таргета по train) — критично: без
-него регуляризация сжимала уровень эмитента и тянула USD-Полюс к RUB-масштабу (MAPE
-взлетал до 130%+). С FE сравнение стало честным.
+**Within-issuer FE** (вычитание per-issuer среднего log-таргета по train) — критично: без
+него регуляризация сжимает уровень эмитента и тянет USD-Полюс к RUB-масштабу (MAPE
+до 130%+). С FE сравнение моделей корректно.
 
 ## 4. Walk-forward валидация (`_tools/osl_walkforward.py`)
 
@@ -106,11 +105,11 @@ persistence / issuer_mean не значимо** (все Diebold–Mariano p > 0.
 регуляризованные линейные (~41%) **переобучаются** на экстраполяции цен (скачок золота 2025).
 
 Зрелый DS-вывод: **на N=24 панель статистически НЕ различает ни одну «разумную» модель — включая
-тривиальный persistence**; мы это показываем (DM/skill), а не прячем за голым MAPE. Ценность OSL —
+тривиальный persistence**; это показано через DM/skill, а не скрыто за голым MAPE. Ценность OSL —
 **не в годовой точечной точности** (где на таком N наивный baseline конкурентен), а в **операционном
 лид-тайме**: OSL оценивает выручку из текущих (YTD) физических объёмов × цен **до** публикации годовой
-отчётности — чего `persistence` (нужна прошлогодняя выручка) и `issuer_mean` дать не могут. Точечную
-точность репортим честно; раннесть сигнала — отдельное измеримое преимущество (PRODUCT_REPORT, H1).
+отчётности — чего `persistence` (нужна прошлогодняя выручка) и `issuer_mean` дать не могут. Точечная
+точность репортится как есть; раннесть сигнала — отдельное измеримое преимущество (PRODUCT_REPORT, H1).
 
 ### 4b. Анти-leakage и воспроизводимость (проверено форензик-аудитом → вывод: чисто)
 
@@ -131,8 +130,8 @@ persistence / issuer_mean не значимо** (все Diebold–Mariano p > 0.
 
 ## 5. Conformal — честное out-of-sample покрытие (`_tools/conformal_split.py`)
 
-Старые perturbation-интервалы (`conformal_prediction.py`) честно помечены **IN-SAMPLE**.
-Добавлен **split/inductive conformal**:
+Perturbation-интервалы (`conformal_prediction.py`) помечены **IN-SAMPLE**. Out-of-sample
+покрытие даёт **split/inductive conformal**:
 - proper-train ≤2022 → calibration 2023 (**относительные** остатки |y−ŷ|/y — обмениваемы
   при смешении валют) → **отложенный test 2024–2025** (годы не пересекаются).
 - конформный квантиль `ceil((n+1)(1−α))/n`; интервал `[ŷ(1−q), ŷ(1+q)]`.
@@ -159,17 +158,17 @@ FY2021–2025: 9M-actuals не выводятся из 12M, поэтому hold-
 
 ## 7. Инженерия и воспроизводимость
 
-- **297 pytest зелёных, 0 skipped** — детерминированы на чистом клоне (bundled-фикстуры).
+- **335 pytest зелёных, 0 skipped** — детерминированы на чистом клоне (bundled-фикстуры).
   CI: матрица **py3.11/3.12** + e2e smoke + **docker build (clean-clone gate)** + secret/dep-scan;
   **ruff — реальный гейт**; зависимости из закреплённого `requirements.lock`.
-- Новые модули в core (numpy/scikit-learn): `osl_panel`, `osl_models`, `osl_walkforward`,
+- Модули в core (numpy/scikit-learn): `osl_panel`, `osl_models`, `osl_walkforward`,
   `conformal_split`. EDA (`eda_osl`) — в опц. extra `[eda]` (pandas/matplotlib), CI не тянет.
 - Тесты: leakage-гарды (train<test, scaler/FE/k_ только на train), **бит-в-бит воспроизводимость**,
   метрики, DM, conformal-покрытие. Анти-leakage подтверждён отдельным форензик-аудитом (вывод: чисто).
 
 ```bash
 cd _tools
-python -m pytest tests/ -q                       # 297 passed, 0 skipped
+python -m pytest tests/ -q                       # 335 passed, 0 skipped
 python osl_panel.py --industry metallurgy        # сводка панели
 pip install -e ".[eda]" && python eda_osl.py     # 8 фигур → docs/figures/eda/
 python osl_models.py                             # in-sample + leave-last-out

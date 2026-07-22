@@ -12,19 +12,19 @@ Python-пакет для расчёта индикаторов и моделей
 
 **Состояние v0.9.2 (июнь 2026):**
 - `pyproject` version = **0.9.0**, `pipeline_version='0.9'`.
-- **297 pytest зелёных, 0 skipped** (+9 DS-ОИВ region×year панель; +10 DS-нефтегаз; +9 DS-химия; +EDA/DS-синтез).
+- **335 pytest зелёных, 0 skipped** (включая DS-тесты: ОИВ region×year панель, нефтегаз, химия, EDA/DS-синтез).
 - OSL покрывает **7 отраслей тирами по доступности данных**: **5 валидированы** (walk-forward +
   conformal + DS-отчёт), **2 иллюстративны** (нет публичного Q×P) — см. [`COVERAGE_TIERS`](../docs/COVERAGE_TIERS.md).
 - `fetch_macro_state.py` тянет **4 живых макрофида**.
 
-**DS-слой (доработка для Junior ML Contest, июнь 2026):** реальная панель FY2021–2025 +
+**DS-слой:** реальная панель FY2021–2025 +
 сравнение 3 моделей + честная **out-of-sample** walk-forward + **split-conformal**. Глубоко
 проработаны **пять отраслей**: металлургия ([отчёт](../docs/DS_REPORT.md), N=24), нефтегаз
 ([отчёт](../docs/DS_REPORT_OILGAS.md), N=18), химия ([отчёт](../docs/DS_REPORT_CHEMISTRY.md),
 N=18; структурная подключена), энергетика ([отчёт](../docs/DS_REPORT_ENERGY.md), N=30;
-двухкомпонентная структурная + урок про честность) и ОИВ ([отчёт](../docs/DS_REPORT_OIV.md),
+двухкомпонентная структурная) и ОИВ ([отчёт](../docs/DS_REPORT_OIV.md),
 N=24; фискальная панель region×year). DS-харнесс **industry-параметрический**
-(разовая инвестиция на все 7 отраслей). Модули:
+(один и тот же код на все 7 отраслей). Модули:
 
 | Файл | Назначение |
 |---|---|
@@ -46,7 +46,7 @@ N=24; фискальная панель region×year). DS-харнесс **indus
 |---|---|
 | `agents/orchestrator.py` | Оркестратор multi-agent пайплайна |
 | `agents/rag/` | RAG-подсистема: индексация новостей, эмбеддинги, поиск аналогов (`index_news.py`, `embeddings.py`, `find_analogs.py`, `init_db.py`) |
-| `batch_run.py` | **(новый в v0.9)** Пакетный прогон нескольких новостей за один запуск |
+| `batch_run.py` | Пакетный прогон нескольких новостей за один запуск |
 
 ### L1 — Макро-состояние
 
@@ -54,13 +54,13 @@ N=24; фискальная панель region×year). DS-харнесс **indus
 |---|---|
 | `calc_rf_cai.py` | Расчёт РФ-CAI (composite activity index) |
 | `calc_rf_epu.py` | Расчёт индекса EPU; поддержка `--source fred` (FRED fallback), end_date-якорь, флаг `epu_degraded` |
-| `fetch_macro_state.py` | **(новый в v0.9)** Авто-обновление макро-состояния — 4 живых фида (см. ниже). Перезаписывает только `current_state` в `data/macro_state.json` |
+| `fetch_macro_state.py` | Авто-обновление макро-состояния — 4 живых фида (см. ниже). Перезаписывает только `current_state` в `data/macro_state.json` |
 
 ### L1.5 — Операционный сигнал (OSL)
 
 | Файл | Назначение |
 |---|---|
-| `osl_common.py` | **(новый в v0.9)** Общие структуры: `RevenuePredict`, `FXRate`, `mae_pct` — устранено дублирование по 7 модулям |
+| `osl_common.py` | Общие структуры: `RevenuePredict`, `FXRate`, `mae_pct` — единая схема для всех 7 OSL-модулей |
 | `osl_metallurgy.py` | OSL для металлургии |
 | `osl_oilgas.py` | OSL для нефтегаза |
 | `osl_chemistry.py` | OSL для химии |
@@ -105,7 +105,9 @@ N=24; фискальная панель region×year). DS-харнесс **indus
 |---|---|
 | `.github/workflows/test.yml` | CI: pytest + ruff + black (TF-IDF режим без сети) |
 | `pyproject.toml` | Зависимости + конфигурация ruff/black/pytest |
-| `tests/` | 297 тестов (0 skipped) |
+| `tests/` | 335 тестов (0 skipped): юнит + property-based (hypothesis) + golden-снапшот пайплайна + голден-фикстуры LLM-ответов + регрессионные гейты качества ретрива |
+| `eval_all.py` | сводная витрина метрик: значение · порог · чем воспроизвести → [docs/EVAL.md](../docs/EVAL.md) |
+| `eval_rag.py` / `eval_l0_classifier.py` | retrieval-eval (два gold-set × два эмбеддера) / eval классификатора L0 |
 
 ---
 
@@ -155,7 +157,7 @@ python batch_run.py                     # пакетный прогон неск
 
 ```bash
 cd _tools
-python -m pytest tests/ -v              # 297 зелёных, 0 skipped
+python -m pytest tests/ -v              # 335 зелёных, 0 skipped
 ```
 
 ---
@@ -196,7 +198,7 @@ python -m pytest tests/ -v              # 297 зелёных, 0 skipped
 - `pytest`, `pytest-cov` — тесты и покрытие
 - `ruff`, `black` — линтинг и форматирование
 
-> Прежнее утверждение «нет зависимостей, только stdlib» больше неактуально — пакет использует научный стек и LLM-SDK.
+> Пакет опирается на научный стек и LLM-SDK — не только на stdlib.
 
 ---
 
@@ -204,24 +206,24 @@ python -m pytest tests/ -v              # 297 зелёных, 0 skipped
 
 Статус v0.9.x:
 
-### ✅ Выполнено в v0.9
+### ✅ Реализовано
 
-| Пункт | Что сделано |
+| Возможность | Чем закрыта |
 |---|---|
-| **A1** | `fetch_macro_state.py` — авто-обновление макро (4 живых фида) |
-| **A3** | FRED fallback в `calc_rf_epu.py --source fred`; end_date-якорь + `epu_degraded` |
-| **B1** | Маршрутизация шоков — все 27 подкатегорий (`data/shock_to_industries.json`) |
-| **B2** | Multi-source spillover (`propagate_multi_source` + `propagate_credit_channel`) |
-| **D1** | CI на GitHub Actions (`.github/workflows/test.yml`): pytest + ruff + black |
-| **D2** | ruff/black в `pyproject.toml` |
-| **D (частично)** | Расширение тестов — 297 зелёных (0 skipped) |
-| **Рефакторинг** | `osl_common.py` — общие `RevenuePredict`/`FXRate`/`mae_pct` для 7 модулей; `batch_run.py` — пакетный прогон |
+| Авто-обновление макро | `fetch_macro_state.py` (4 живых фида) |
+| FRED fallback для EPU | `calc_rf_epu.py --source fred`; end_date-якорь + `epu_degraded` |
+| Маршрутизация шоков | все 27 подкатегорий (`data/shock_to_industries.json`) |
+| Multi-source spillover | `propagate_multi_source` + `propagate_credit_channel` |
+| Out-of-sample conformal | `conformal_split.py` + панель FY2021–2025 |
+| CI на GitHub Actions | `.github/workflows/test.yml`: pytest + ruff + black |
+| Конфигурация линтеров | ruff/black в `pyproject.toml` |
+| Тестовое покрытие | 335 зелёных (0 skipped) |
+| Единая схема OSL | `osl_common.py` — `RevenuePredict`/`FXRate`/`mae_pct` для 7 модулей; `batch_run.py` — пакетный прогон |
 
 ### ⏳ Осознанно не закрыто (нет данных)
 
 | Пункт | Почему |
 |---|---|
-| **Out-of-sample conformal** | ✅ ЗАКРЫТО DS-доработкой — `conformal_split.py` + панель FY2021–2025 (был `skipped`, теперь зелёный) |
 | **L3-калибровка на данных банка** | Нет доступа к внутренним данным портфеля |
 | **Diebold-Yilmaz / DebtRank** | Нужно 3+ года истории revenue и balance sheets топ-заёмщиков |
 
@@ -234,19 +236,19 @@ _tools/
 ├── README.md                  ← этот файл
 ├── pyproject.toml             ← зависимости + ruff/black/pytest
 ├── CALIBRATION_GUIDE.md       ← регламент калибровки OSL
-├── osl_common.py              ← общие структуры OSL (новый)
+├── osl_common.py              ← общие структуры OSL
 ├── osl_metallurgy.py / osl_oilgas.py / osl_chemistry.py
 ├── osl_energy.py / osl_pharma.py / osl_retail.py / osl_oiv.py
 ├── conformal_prediction.py    ← интервалы доверия
 ├── osl_calibrator.py          ← авто-калибровка
 ├── calc_rf_cai.py / calc_rf_epu.py
-├── fetch_macro_state.py       ← авто-обновление макро (новый)
+├── fetch_macro_state.py       ← авто-обновление макро
 ├── spillover.py / segment_impact.py
 ├── run_pipeline.py / batch_run.py
 ├── agents/                    ← orchestrator.py + rag/
 ├── data/                      ← macro_state, shock_to_industries, brent_scenarios, ...
 ├── calibration/               ← <module>_calibrated.json (7 шт.)
-└── tests/                     ← 297 тестов (0 skipped)
+└── tests/                     ← 335 тестов (0 skipped)
 ```
 
 ---

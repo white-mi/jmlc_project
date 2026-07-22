@@ -16,6 +16,8 @@ note: "честный sanity-check L0-классификатора; числа �
 > а не leaderboard. Метки проставлены вручную по таксономии; новости синтетические
 > (клиентских/портфельных данных банка нет — [принцип изоляции](../CLAUDE.md)).
 
+Сводная витрина всех метрик проекта — [EVAL.md](EVAL.md) (`python eval_all.py`).
+
 Источник чисел — [`_tools/data/l0_eval_results.json`](../_tools/data/l0_eval_results.json)
 (собран из сырых прогонов `output/l0_eval/`, которые в `.gitignore`).
 Gold-set — [`_tools/data/l0_gold_set_50.json`](../_tools/data/l0_gold_set_50.json)
@@ -55,8 +57,8 @@ Gold-set — [`_tools/data/l0_gold_set_50.json`](../_tools/data/l0_gold_set_50.j
 | subcat без boundary | 95.2% (40/42) | — |
 | boundary | 7/8 | — |
 
-Стоимость Haiku-прогона: **$0.18**. CI на N=50 заметно уже, чем на прежних N=15, но это
-по-прежнему sanity-check, не бенчмарк.
+Стоимость Haiku-прогона: **$0.18**. CI на N=50 заметно уже, чем на сокращённом наборе
+N=15, но это всё равно sanity-check, не бенчмарк.
 
 **Разбор всех трёх промахов** (все — на пограничной/неоднозначной дизамбигуации, не случайные):
 
@@ -109,7 +111,7 @@ cd _tools
 export ANTHROPIC_API_KEY=...                     # без ключа — graceful exit, CI-safe
 python eval_l0_classifier.py --model haiku        # N=50, ~$0.18
 python eval_l0_classifier.py --model sonnet       # N=50, дороже (thinking)
-python eval_l0_classifier.py --model haiku --gold data/l0_gold_set.json   # прежний N=15
+python eval_l0_classifier.py --model haiku --gold data/l0_gold_set.json   # сокращённый набор N=15
 # сырые результаты → output/l0_eval/<model>_results.json (в .gitignore)
 
 # офлайн (без API), CI-safe:

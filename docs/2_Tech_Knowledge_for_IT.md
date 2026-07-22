@@ -47,7 +47,7 @@ _tools/
 └── osl_oiv.py
 ```
 
-**Почему так:** OSL для каждой отрасли имеет уникальную логику (хочет разные параметры). Унифицированный API через базовый класс был бы overengineered на текущем этапе. **При v0.7+** — рефакторинг в `OSLModel` интерфейс уместен.
+**Почему так:** OSL для каждой отрасли имеет уникальную логику (хочет разные параметры). Унифицированный API через базовый класс был бы overengineered на текущем этапе. Рефакторинг в `OSLModel`-интерфейс — задача следующего этапа.
 
 ### 2.2. Calibration — JSON-конфиг отдельно от кода
 
@@ -135,7 +135,7 @@ def tune_param(predict_fn, target, p_min, p_max, n_steps=30):
     return best_param, best_err
 ```
 
-Это **не настоящая оптимизация** (нет градиентов), но для одно-параметрической калибровки — достаточно. Для multi-param tune (v0.7) → `scipy.optimize.differential_evolution`.
+Это **не настоящая оптимизация** (нет градиентов), но для одно-параметрической калибровки — достаточно. Для multi-param tune → `scipy.optimize.differential_evolution`.
 
 ### 3.4. RAG поиск аналогов
 
@@ -225,7 +225,7 @@ PyYAML парсит → передаётся в RAG индексатор и Conf
 
 ## 6. Тестирование (текущее состояние)
 
-**Юнит/интеграционные тесты:** 297 pytest зелёных (0 skipped), запуск `cd _tools && python -m pytest tests/ -v`; CI через GitHub Actions.
+**Юнит/интеграционные тесты:** 335 pytest зелёных (0 skipped), запуск `cd _tools && python -m pytest tests/ -v`; CI через GitHub Actions.
 
 > Честный out-of-sample — split-conformal в `conformal_split.py`. Независимая проверка на 9M-фактах эмитента — плановое уточнение.
 
@@ -234,7 +234,7 @@ PyYAML парсит → передаётся в RAG индексатор и Conf
 - Conformal `--industry all` показывает покрытие 90% interval — это и есть quality gate
 - Auto-calibrator проверяет MAE через grid search — само-проверка
 
-**CI/линтеры (v0.9):**
+**CI/линтеры:**
 - GitHub Actions (`.github/workflows/test.yml`) — pytest + ruff + black на каждый push
 
 ---
@@ -278,14 +278,14 @@ Pandas / Django / FastAPI / SQLAlchemy — **не используются**. Т
 - ❌ Docker — Python script достаточно
 - ❌ Authentication — single-user
 
-### Сделано в v0.8–v0.9
-- ✅ pytest suite (297 зелёных, 0 skipped) + CI (GitHub Actions: pytest/ruff/black)
-- ✅ `pyproject.toml` (v0.9, с ruff/black)
+### Реализовано
+- ✅ pytest suite (335 зелёных, 0 skipped) + CI (GitHub Actions: pytest/ruff/black)
+- ✅ `pyproject.toml` (с ruff/black)
 - ✅ Multi-period validation (energy refactor + multi-period калибровки)
 - ✅ `fetch_macro_state.py` — живые макрофиды (USD/RUB, Brent, КС ЦБ, инфляция)
 - ✅ `osl_common.py` — общие структуры, дедуп 7 OSL-модулей
 
-### Roadmap v0.9+
+### Roadmap
 - 📋 API connectors LME/LBMA/Минэнерго (auto-update PRICES_*)
 - 📋 Python orchestrator для Multi-Agent (вместо ручного запуска 5 промптов)
 - 📋 Унифицированный `OSLModel` интерфейс
@@ -308,7 +308,7 @@ npm install -g @marp-team/marp-cli
 # Claude Code (anthropic)
 ```
 
-**`pyproject.toml` уже есть (v0.9):** numpy / scipy / scikit-learn / pyyaml + опц. `sentence-transformers` / `feedparser`; dev-зависимости — `pytest` / `ruff` / `black`.
+**`pyproject.toml`:** numpy / scipy / scikit-learn / pyyaml + опц. `sentence-transformers` / `feedparser`; dev-зависимости — `pytest` / `ruff` / `black`.
 
 ---
 

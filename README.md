@@ -10,7 +10,7 @@ portfolio data.
 
 [![tests](https://github.com/white-mi/jmlc_project/actions/workflows/test.yml/badge.svg)](https://github.com/white-mi/jmlc_project/actions/workflows/test.yml)
 ![python](https://img.shields.io/badge/python-3.11%2B-blue)
-![tests-count](https://img.shields.io/badge/tests-297%20passed%2C%200%20skipped-brightgreen)
+![tests-count](https://img.shields.io/badge/tests-335%20passed%2C%200%20skipped-brightgreen)
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 ---
@@ -65,7 +65,7 @@ git clone https://github.com/white-mi/jmlc_project.git
 cd jmlc_project/_tools
 
 pip install -r ../requirements.lock pytest   # pinned numeric stack (TF-IDF, offline)
-python -m pytest tests/ -q                    # 297 passed, 0 skipped
+python -m pytest tests/ -q                    # 335 passed, 0 skipped
 
 # End-to-end smoke run — numbers at every layer, no LLM call:
 python run_pipeline.py --smoke-shock 4.2 --smoke-industry oilgas
@@ -84,6 +84,24 @@ docker run --rm russian-propagation
 
 ## Validation
 
+**Model quality in one command** — every number below is reproducible, and the thresholds it
+must not fall below are enforced by tests:
+
+```bash
+cd _tools && python eval_all.py     # metric · gate · how to reproduce, in one table
+```
+
+| What is measured | Gold set | Result | Gate |
+|---|---|---|---|
+| Shock classification (L0, 27 subcategories) | 50 labelled news items, all 27 subcategories | **94 %** accuracy (Haiku 4.5), 95 % CI [0.84, 0.98] | ≥ 0.90 |
+| Historical-analog retrieval (RAG) | **38 real retrospective shock write-ups × 38 paraphrase queries** | precision@1 **0.66**, recall@5 **0.84** (e5-small) | baseline − 1 miss |
+
+The retrieval gold set is deliberately hard: it contains eight separate key-rate decisions and
+five sanction packages, and queries are paraphrases that share no wording with document titles.
+An easier synthetic set scores 92–100 % — kept as a fast CI gate, but labelled as such rather
+than advertised. Full write-up, per-miss analysis, embedder A/B and the chunking rationale:
+[`docs/EVAL.md`](docs/EVAL.md).
+
 The data-science layer is validated **out-of-sample**, not by assertion. On a public
 metallurgy panel (5 issuers × FY2021–2025, IFRS revenue + exchange prices), expanding-window
 walk-forward gives:
@@ -98,13 +116,13 @@ walk-forward gives:
 
 The honest result: **at N = 24, no reasonable model — not even a naive persistence baseline — is
 statistically distinguishable** (structural, gradient boosting and both naive baselines all have
-Diebold–Mariano p > 0.4); only the regularised-linear models clearly overfit (p ≈ 0.02). We *show* this rather than overclaim. The OSL's value is the operational
+Diebold–Mariano p > 0.4); only the regularised-linear models clearly overfit (p ≈ 0.02). The OSL's value is the operational
 **lead-time** (estimating revenue from within-year prices before the annual report), not annual
 point-accuracy on a 24-row panel. Split-conformal coverage is reported as a small-N artifact, not a
 calibrated 90 %. Full write-up: [`docs/DS_REPORT.md`](docs/DS_REPORT.md).
 
 A **second industry — oil & gas** (4 issuers × FY2021–2025, revenue verified against IFRS/IR
-releases) is now validated the
+releases) is validated the
 same way. Here the finding *flips*: on volatile oil-&-gas revenue the price/volume models **beat
 naive persistence** — `hist_gbm` 19.0 % vs. persistence 21.8 % MAPE, skill +13 %, DM p = 0.053 —
 because naive "last-year = this-year" fails harder on geopolitical swings. The structural model is
@@ -118,10 +136,10 @@ MAPE beats naive persistence (16.1 %) and ties the best learned model, all Diebo
 at N≈10–16. So across three industries the winner differs by data regime: persistence (metallurgy),
 learned (oil & gas), structural (chemistry). Write-up: [`docs/DS_REPORT_CHEMISTRY.md`](docs/DS_REPORT_CHEMISTRY.md).
 
-A **fourth industry — electricity (N=30, the largest/cleanest panel)** adds the project's sharpest
-honesty lesson. Its structural model is genuinely new — **two-component regulated revenue** (generation×day-ahead-price **+** capacity×КОМ). An early version hand-set per-company heat-revenue
-intercepts and scored a flattering 8.1% MAPE; a reviewer flagged those intercepts as 32–38%-of-revenue
-fitting, so we **removed them** — the honest pure-physics structural is **11.9%**, and on walk-forward
+A **fourth industry — electricity (N=30, the largest/cleanest panel)** carries the sharpest
+specification caveat. Its structural model is **two-component regulated revenue** (generation×day-ahead-price **+** capacity×КОМ). Hand-set per-company heat-revenue
+intercepts are deliberately **out of the specification**: they yield a flattering 8.1% MAPE, but at
+32–38% of revenue they are fitting rather than physics. The pure-physics structural is **11.9%**, and on walk-forward
 learned (7.9%) and even naive persistence (8.7%) beat it (smooth rising revenue + un-modeled heat). But
 split-conformal flips it: the structural covers **12/12 = 100%** while persistence/learned cover **17%** —
 because the structural reads *contemporaneous* prices/generation (the OSL premise) while autoregression

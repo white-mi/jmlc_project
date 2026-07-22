@@ -89,7 +89,7 @@ tags: [russian-propagation, docs, architecture, для-IT]
     ├── spillover.py             (L2 межотраслевой spillover)
     ├── segment_impact.py        (L3 воздействие на сегменты)
     ├── run_pipeline.py          (end-to-end)
-    ├── pyproject.toml           (v0.9 — зависимости + ruff/black)
+    ├── pyproject.toml           (зависимости + ruff/black)
     ├── README.md
     ├── CALIBRATION_GUIDE.md
     ├── data/
@@ -97,7 +97,7 @@ tags: [russian-propagation, docs, architecture, для-IT]
     │   ├── brent_scenarios.json
     │   ├── spillover_matrix.json
     │   └── segment_impact_table.json
-    ├── tests/                   (297 pytest зелёных, 0 skipped)
+    ├── tests/                   (335 pytest зелёных, 0 skipped)
     ├── calibration/
     │   ├── osl_metallurgy_calibrated.json
     │   └── ... (7 JSON + multi-param/multi-period)
@@ -200,7 +200,7 @@ CREATE VIRTUAL TABLE news_embeddings USING vec0(
 - Управление через `orchestrator.md` (ручной запуск через Claude Code)
 - В v2.0 — Python orchestrator через Anthropic SDK
 
-### 3.6. Общие модули и данные (v0.8–v0.9)
+### 3.6. Общие модули и данные
 
 - **`osl_common.py`** — общие dataclass-структуры и хелперы; устраняет дублирование между 7 OSL-модулями.
 - **`fetch_macro_state.py`** — 4 живых макрофида: USD/RUB, Brent (Yahoo), КС ЦБ (CBR SOAP), инфляция (World Bank). Пишет `data/macro_state.json`.
@@ -212,7 +212,7 @@ CREATE VIRTUAL TABLE news_embeddings USING vec0(
 
 ## 4. Потоки данных
 
-### 4.1. Поток анализа новости (Multi-Agent v1.0)
+### 4.1. Поток анализа новости (Multi-Agent)
 
 ```
 User
@@ -349,7 +349,7 @@ multi_agent: bool
 ## 7. Тестирование (текущее + roadmap)
 
 ### Сейчас
-- ✅ **297 pytest зелёных (0 skipped)** — `cd _tools && python -m pytest tests/ -v`
+- ✅ **335 pytest зелёных (0 skipped)** — `cd _tools && python -m pytest tests/ -v`
 - ✅ **CI: GitHub Actions** (`.github/workflows/test.yml`) — pytest + ruff + black на каждый push
 - ✅ pytest suite для всех 7 OSL модулей + conformal + RAG + L1/L2/L3
 - ✅ Бэк-тест встроен в каждый OSL — `predict_revenue()` сравнивается с `ACTUAL_REVENUE_*`
@@ -369,7 +369,7 @@ multi_agent: bool
 ### Текущее (single-user, local)
 
 ```bash
-# 1. Установить зависимости (есть pyproject.toml, v0.9)
+# 1. Установить зависимости (есть pyproject.toml)
 pip install -e .              # numpy/scipy/sklearn/pyyaml; опц. extras + dev (pytest/ruff/black)
 # либо вручную:
 pip install pyyaml numpy scipy scikit-learn sqlite-vec sentence-transformers
@@ -408,7 +408,7 @@ python agents/rag/find_analogs.py "<query>"
 
 ## 10. Метрики и мониторинг
 
-| Метрика | Цель | Текущее v0.9 |
+| Метрика | Цель | Текущее |
 |---|---|---|
 | OSL MAE по 28 эмитентам | ≤ 5% (среднее) | ~3% (после auto-calibration) |
 | Conformal coverage (90% interval) | ≥ 90% | 82% (23/28) |
@@ -450,22 +450,20 @@ python osl_oilgas.py --company ЛУКОЙЛ
 
 ## 12. Roadmap (приоритизированный)
 
-Статусы на v0.9.2 (июнь 2026):
-
-| Версия | Содержание | Статус |
-|---|---|---|
-| v0.7–0.9 | energy refactor + multi-period validation | ✅ done |
-| v0.7–0.9 | pytest suite (297 зелёных) + CI/линтеры (ruff/black) | ✅ done |
-| v0.7–0.9 | `pyproject.toml` (зависимости) | ✅ done |
-| v0.8–0.9 | `fetch_macro_state.py` — живые макрофиды | ✅ done |
-| v0.8–0.9 | маршрутизация подкатегорий (`shock_to_industries.json`) | ✅ done |
-| v0.8–0.9 | multi-source / credit-channel spillover (L2) | ✅ done |
-| — | API connectors LME/LBMA/Минэнерго | 📋 план |
-| — | OSLModel унифицированный интерфейс | 📋 план |
-| — | Python orchestrator для Multi-Agent | 📋 план |
-| — | out-of-sample conformal (независимые 9M actuals) | 📋 план |
-| — | L3-калибровка на данных банка; Diebold-Yilmaz / DebtRank | 📋 план |
-| v2.0 | Web UI + multi-user + Postgres | 📋 план |
+| Содержание | Статус |
+|---|---|
+| energy refactor + multi-period validation | ✅ done |
+| pytest suite (335 зелёных) + CI/линтеры (ruff/black) | ✅ done |
+| `pyproject.toml` (зависимости) | ✅ done |
+| `fetch_macro_state.py` — живые макрофиды | ✅ done |
+| маршрутизация подкатегорий (`shock_to_industries.json`) | ✅ done |
+| multi-source / credit-channel spillover (L2) | ✅ done |
+| API connectors LME/LBMA/Минэнерго | 📋 план |
+| OSLModel унифицированный интерфейс | 📋 план |
+| Python orchestrator для Multi-Agent | 📋 план |
+| out-of-sample conformal (независимые 9M actuals) | 📋 план |
+| L3-калибровка на данных банка; Diebold-Yilmaz / DebtRank | 📋 план |
+| Web UI + multi-user + Postgres (v2.0) | 📋 план |
 
 ---
 

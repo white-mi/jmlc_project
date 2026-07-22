@@ -9,7 +9,7 @@ effect reaches financial statements**. It is built around one discipline: every 
 attributable to a transmission channel and a public source, and every claim is either
 validated out-of-sample or marked as illustrative. This document is a concise overview; the
 companion write-ups are [`DS_REPORT.md`](DS_REPORT.md) (data science, with the
-cross-industry [`DS_REPORT_SYNTHESIS.md`](DS_REPORT_SYNTHESIS.md) over all four industries),
+cross-industry [`DS_REPORT_SYNTHESIS.md`](DS_REPORT_SYNTHESIS.md) over all five industries),
 [`PRODUCT_REPORT.md`](PRODUCT_REPORT.md) (product), and
 [`4_Tech_Architecture.md`](4_Tech_Architecture.md) (engineering).
 
@@ -59,8 +59,8 @@ to a markdown note.
 
 Seven industries are covered, but **L1.5 OSL coverage is tiered by public-data availability** — a
 documented principle, not a gap. All seven (oil & gas, metallurgy, chemicals, retail, power, regional
-governments, pharma) flow through L0/L1/L2/L3; at L1.5, **4 are validated out-of-sample** (metallurgy,
-oil & gas, chemicals, power) and **3 are illustrative** (retail, pharma, regional governments — revenue
+governments, pharma) flow through L0/L1/L2/L3; at L1.5, **5 are validated out-of-sample** (metallurgy,
+oil & gas, chemicals, power, regional governments) and **2 are illustrative** (retail, pharma — revenue
 isn't a public volume×price). Full tier map and per-industry rationale: [`COVERAGE_TIERS.md`](COVERAGE_TIERS.md).
 
 Two design invariants distinguish the architecture from a naive scorecard:
@@ -129,9 +129,8 @@ flexibility is not warranted — is *shown* by walk-forward plus a DM test, not 
 **Conformal intervals.** A split/inductive conformal procedure (proper-train ≤ 2022 →
 calibration 2023 → temporal hold-out 2024–2025, using relative residuals that stay exchangeable
 under currency mixing) reaches **6/6 = 100 % out-of-sample coverage** against a 90 % target
-(conservative, n_calib = 5). This unblocks the project's single previously skipped test
-(`test_holdout_coverage_metallurgy`), now genuinely out-of-sample because the panel is
-independent of the in-code actuals.
+(conservative, n_calib = 5). It is gated by `test_holdout_coverage_metallurgy`, which is
+genuinely out-of-sample because the panel is independent of the in-code actuals.
 
 ---
 
@@ -158,8 +157,8 @@ experiment, no SLA), real client data (L3 is `confidence='low'`), and a spillove
 that is still a heuristic. The position is: *"a layer on top of the standard stress test — it
 does not replace it, it extends it."*
 
-**MVP & impact.** All four/five layers produce numbers in a single run (MVP closed at v0.7,
-April 2026; current v0.9.x adds robustness and methodology). Business value is illustrated
+**MVP & impact.** All five layers produce numbers in a single run — the MVP scope is
+closed, and robustness and methodology sit on top of it. Business value is illustrated
 retrospectively on **Mechel 2025** — explicitly a *"what the radar would have shown, and when"*
 walkthrough, not a live catch. The public facts: revenue −26 %, a 10.4 bn₽ loss, a **132 bn₽**
 debt deferral, and an ACRA outlook cut to negative — all of which a per-borrower view treated as
@@ -175,7 +174,7 @@ figure are marked **illustrative / not calibrated on Russian data**.
 The whole pipeline is a Python package in `_tools/` with a thin, deterministic core
 (numpy / scipy / scikit-learn / pyyaml) and heavy ML dependencies kept behind optional extras.
 
-- **297 tests, 0 skipped** (`pytest tests/ -q`), including leakage guards (train < test;
+- **335 tests, 0 skipped** (`pytest tests/ -q`), including leakage guards (train < test;
   scaler / fixed-effects / calibration fit on train only), metric/DM/conformal-coverage tests,
   and a contract test that `run_pipeline.py --json` keeps stdout pure JSON (import-time prints
   go to stderr).
@@ -196,7 +195,7 @@ A first end-to-end result is one command away:
 ```bash
 cd _tools
 pip install -r ../requirements.lock pytest
-python -m pytest tests/ -q                                   # 297 passed, 0 skipped
+python -m pytest tests/ -q                                   # 335 passed, 0 skipped
 python run_pipeline.py --smoke-shock 4.2 --smoke-industry oilgas   # numbers at every layer, no LLM
 ```
 
@@ -217,7 +216,7 @@ These are design facts, stated up front, not discovered bugs:
   oilgas N=18 with structural OSL deferred, regional governments N=24 fiscal panel); the other
   two (pharma / retail) are illustrative — see [`COVERAGE_TIERS.md`](COVERAGE_TIERS.md). The infrastructure is
   industry-agnostic (extending the panel is a matter of adding CSV rows); the out-of-sample
-  walk-forward claim is scoped to those four.
+  walk-forward claim is scoped to those five.
 
 The project's strongest signal is precisely this discipline: the forecast core (H1–H2) is
 proven out-of-sample and conformal coverage (H3) is honestly scoped as partial, the overlays
