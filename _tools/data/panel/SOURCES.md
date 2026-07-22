@@ -60,7 +60,7 @@ provisional-FX 83.7555 даёт $13.70 млрд — отсюда видно, ч�
 > **Железная руда** (`steel_proxy_iron_ore`) — прокси цены сталелитейного сектора (годовая HRC FOB
 > Чёрное море недоступна). Единица — **$/dmtu** (за 1% Fe, бенчмарк 62% Fe cfr China), НЕ $/dmt.
 > Признак только для learned-моделей; в StructuralOSL не используется.
-> Золото обновлено до первичного World Bank (раньше — metalcharts, согласуется: 1799/1800/1941/2386).
+> Золото — первичный источник World Bank; согласуется со вторичным metalcharts (1799/1800/1941/2386).
 
 ### USD/RUB среднегодовой — ✅ high (IRS) / 2025 ⚠️ low
 [IRS Yearly average currency exchange rates](https://www.irs.gov/individuals/international-taxpayers/yearly-average-currency-exchange-rates): 2021=73.686, 2022=69.896, 2023=85.509, 2024=92.837. 2025=83.7555 — [exchangerates.org.uk](https://www.exchangerates.org.uk/USD-RUB-spot-exchange-rates-history-2025.html), provisional (`low`).

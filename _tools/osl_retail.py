@@ -14,7 +14,7 @@ Operational Signal Layer (OSL) — Розница непродовольстве
 
 Бэк-тест на 12М 2025: predicted vs actual (МСФО / РСБУ).
 
-Этот файл — модуль Фазы 1.5 (v0.9).
+Этот файл — модуль слоя L1.5 (операционный сигнал).
 """
 
 import argparse
@@ -22,7 +22,7 @@ import sys
 from dataclasses import dataclass
 from typing import List
 
-from osl_common import RevenuePredict  # S3.1: общая структура
+from osl_common import RevenuePredict  # общая структура прогноза выручки
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
@@ -50,7 +50,7 @@ class CompanyProfile:
     notes: str = ""
 
 
-# RevenuePredict — из osl_common (S3.1)
+# RevenuePredict — из osl_common
 
 
 # ============================================================
@@ -203,7 +203,7 @@ def backtest_one(predict: RevenuePredict) -> RevenuePredict:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="OSL — Розница v0.9")
+    parser = argparse.ArgumentParser(description="OSL — Розница")
     parser.add_argument(
         "--company",
         choices=[

@@ -1,5 +1,5 @@
 """
-РФ-EPU lite (Economic Policy Uncertainty index, v0.7).
+РФ-EPU lite (Economic Policy Uncertainty index).
 
 Реализация принципа Baker-Bloom-Davis (2016):
    Считаем частоту слов из триады словарей в текстах:
@@ -19,11 +19,13 @@
   на фоне базы (если корпус ~однородный) и проверить что любой апрельский анализ
   с шоком категории «1.» даёт более 50% EPU score.
 
-TODO v0.8:
-  - Подключить feedparser к 5 RSS (ТАСС, Коммерсантъ, РБК, Ведомости, Forbes)
-  - Считать EPU на полном новостном архиве, не только на анализах Радара
-  - Калибровка на исторических точках (03.2022 — пик; 06.2023 — нормализация)
-  - Альтернативный fallback: US-EPU из FRED как proxy
+Ограничения текущей реализации:
+  - Корпус ограничен анализами Радара: RSS-ленты (ТАСС, Коммерсантъ, РБК,
+    Ведомости, Forbes) через feedparser не подключены, EPU считается не на
+    полном новостном архиве
+  - Калибровки на исторических точках (03.2022 — пик; 06.2023 — нормализация) нет
+  - US-EPU из FRED (--source fred) — ручной proxy-fallback, в pipeline
+    автоматически не используется
 
 Использование:
   python calc_rf_epu.py                    # current EPU
@@ -164,7 +166,7 @@ class EPUResult:
     period_label: str
     matched_files: list[str]
     negative_files: list[str]
-    epu_degraded: bool = False  # S2.2: True если корпус в окне слишком мал
+    epu_degraded: bool = False  # True если корпус в окне слишком мал
     source: str = "corpus"  # 'corpus' | 'fred'
 
 
@@ -234,7 +236,7 @@ def compute_epu(
 ) -> EPUResult:
     """Считает EPU на корпусе анализов в заданном окне.
     Возвращает обе метрики: общий EPU и долю negative-uncertainty.
-    S2.2: при числе текстов в окне < min_texts ставит epu_degraded=True
+    При числе текстов в окне < min_texts ставит epu_degraded=True
     (вместо тихого 0.0, который читается как «нет неопределённости»)."""
     if not analyses_dir.exists():
         return EPUResult(0.0, 0.0, 0, 0, 0, "no analyses", [], [], epu_degraded=True)
@@ -288,7 +290,7 @@ def compute_epu(
 
 
 def fetch_us_epu_fred(timeout: int = 10) -> Optional[float]:
-    """S2.2: fallback — последнее значение US-EPU (FRED USEPUINDXD) как proxy
+    """Fallback — последнее значение US-EPU (FRED USEPUINDXD) как proxy
     global-uncertainty. Возвращает float или None при недоступности сети.
     Сетевой вызов — НЕ используется автоматически в pipeline (только CLI)."""
     url = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=USEPUINDXD"
@@ -310,12 +312,12 @@ def get_current_epu(
     window_days: int = 30, end_date: Optional[datetime] = None, min_texts: int = 3
 ) -> EPUResult:
     """Возвращает EPU за последние N дней (используется pipeline'ом).
-    S2.2: end_date позволяет якорить окно на дате новости, а не на now()."""
+    end_date позволяет якорить окно на дате новости, а не на now()."""
     return compute_epu(window_days=window_days, end_date=end_date, min_texts=min_texts)
 
 
 def main():
-    parser = argparse.ArgumentParser(description="РФ-EPU lite v0.9")
+    parser = argparse.ArgumentParser(description="РФ-EPU lite")
     parser.add_argument(
         "--window-days", type=int, default=None, help="Окно в днях; если не задано — весь корпус"
     )

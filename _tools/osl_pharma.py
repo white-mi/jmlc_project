@@ -23,7 +23,7 @@ import argparse
 import sys
 from dataclasses import dataclass
 
-from osl_common import RevenuePredict  # S3.1: общая структура
+from osl_common import RevenuePredict  # общая структура прогноза выручки
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
@@ -49,7 +49,7 @@ class CompanyProfile:
     notes: str = ""
 
 
-# RevenuePredict — из osl_common (S3.1)
+# RevenuePredict — из osl_common
 
 
 # ============================================================
@@ -57,11 +57,11 @@ class CompanyProfile:
 # ============================================================
 
 PHARMA_MARKET_2025 = {
-    # v0.3 финал калибровка: фактический коммерческий аптечный сегмент
-    # для дистрибутора (выручка дистрибуторской маржи, а не конечный розничный товарооборот)
-    # уточнено по факту: Пульс 386 / market_share_retail 22.9% = total ≈ 1690 (не 1950)
+    # Коммерческий аптечный сегмент задан в базе дистрибуторской выручки,
+    # а не конечного розничного товарооборота; калибровка по факту:
+    # Пульс 386 / market_share_retail 22.9% ≈ 1690.
     "total_rub_bn": 2_900,
-    "commercial_retail_rub_bn": 1_690,  # уточнено через факт Пульс/Протек/Катрен
+    "commercial_retail_rub_bn": 1_690,  # калибровано по факту Пульс/Протек/Катрен
     "gov_segment_rub_bn": 261,
     "commercial_growth_yoy": 0.133,
 }
@@ -211,7 +211,7 @@ def backtest_one(predict: RevenuePredict) -> RevenuePredict:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="OSL — Фарма v0.9")
+    parser = argparse.ArgumentParser(description="OSL — Фарма")
     parser.add_argument("--company", choices=list(PROFILES.keys()) + ["all"], default="all")
     args = parser.parse_args()
 

@@ -1,5 +1,5 @@
 """
-OSL Calibrator v0.6 — auto-tune параметров OSL-моделей.
+OSL Calibrator — auto-tune параметров OSL-моделей.
 
 Цель: обеспечить **бесшовную регулярную калибровку** моделей по мере появления
 новых actuals (новый квартал, новые цены). Без этого модели «дрейфуют»
@@ -218,7 +218,7 @@ def apply_calibration(module_name: str, verbose: bool = False) -> int:
     Использование (бесшовно):
         from osl_calibrator import apply_calibration
         apply_calibration('osl_metallurgy')
-        # теперь predict_revenue использует калиброванные параметры
+        # → predict_revenue использует калиброванные параметры
 
     Возвращает: количество применённых калибровок.
     """
@@ -317,7 +317,7 @@ def drift_check(module_name: str, threshold_pct: float = 5.0) -> dict:
 
 
 def calibrate_energy() -> dict:
-    """Калибровка энергетики (v0.7): tune profile.tariff_multiplier (диапазон 0.5-2.0).
+    """Калибровка энергетики: tune profile.tariff_multiplier (диапазон 0.5-2.0).
     Other_revenue_abs (тепло/сбыт/прочее) задано в PROFILES из IR.
     Tariff_multiplier учитывает региональную/сегментную премию или дисконт."""
     import osl_energy as m
@@ -669,7 +669,7 @@ def main():
     args = parser.parse_args()
 
     print("=" * 70)
-    print("  OSL Calibrator v0.6")
+    print("  OSL Calibrator")
     print("=" * 70)
 
     calibrators = {

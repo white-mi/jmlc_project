@@ -20,14 +20,14 @@ Operational Signal Layer (OSL) — ОИВ (регионы).
 (налоговые+неналоговые доходы бюджета субъекта на urals×FX) с честной out-of-sample
 walk-forward + split-conformal валидацией: см. data/panel/, osl_walkforward.py
 --industry oiv и docs/DS_REPORT_OIV.md. Этот модуль — интерпретируемая точечная оценка
-(price-linked коэффициент вместо прежней захардкоженной константы).
+с price-linked коэффициентом налога на прибыль.
 """
 
 import argparse
 import sys
 from dataclasses import dataclass
 
-from osl_common import RevenuePredict  # S3.1: общая структура
+from osl_common import RevenuePredict  # общая структура прогноза выручки
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
@@ -44,7 +44,7 @@ class RegionProfile:
     notes: str = ""
 
 
-# RevenuePredict — из osl_common (S3.1)
+# RevenuePredict — из osl_common
 
 
 # ============================================================
@@ -59,9 +59,9 @@ class RegionProfile:
 #   - налог на прибыль нефтекомпаний (отдаётся в регион размещения / добычи)
 #   - НДФЛ нефтяников (где работают)
 #
-# Коэффициент налога на прибыль — ПРИВЯЗАН К ЦЕНЕ (не захардкоженная константа).
-# Прежде был фиксированный 4500 ₽/т, «не привязанный к ценам»; теперь выводится из
-# urals×FX — фискальный сигнал следует за ценой нефти. Эластичность 0.10 = доля
+# Коэффициент налога на прибыль — ПРИВЯЗАН К ЦЕНЕ: выводится из urals×FX, поэтому
+# фискальный сигнал следует за ценой нефти, а не остаётся фиксированной ₽-константой
+# при любом уровне цен. Эластичность 0.10 = доля
 # ₽-выручки с тонны добычи, оседающая в регионе (налог на прибыль + связанный НДФЛ);
 # калибрована к базису 2024 (urals 67.85 $/барр, FX 92.837). ВАЛИДИРОВАННАЯ модель —
 # не эта точечная формула, а fitted-панель region×year на urals×FX с out-of-sample
@@ -77,7 +77,7 @@ def oil_profit_tax_per_ton_rub(urals_usd: float, fx_usd_rub: float) -> float:
     return OIL_TAX_ELASTICITY * urals_usd * fx_usd_rub * BARRELS_PER_TONNE_OIL
 
 
-# Модульный дефолт = формула на базисе 2024 (≈4617 ₽/т) вместо прежнего хардкода 4500.
+# Модульный дефолт = формула на базисе 2024 (≈4617 ₽/т).
 OIL_PROFIT_TAX_PER_TON_RUB = oil_profit_tax_per_ton_rub(URALS_2024_USD, FX_2024_USD_RUB)
 GAS_PROFIT_TAX_PER_BCM_RUB = 850_000_000  # ₽/млрд м³ (оценка для газа; иллюстративная)
 
@@ -201,7 +201,7 @@ def backtest_one(predict: RevenuePredict) -> RevenuePredict:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="OSL — ОИВ v0.9")
+    parser = argparse.ArgumentParser(description="OSL — ОИВ")
     parser.add_argument("--region", choices=list(PROFILES.keys()) + ["all"], default="all")
     args = parser.parse_args()
 

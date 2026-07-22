@@ -18,7 +18,7 @@ Operational Signal Layer (OSL) — Металлургия.
 долей внутреннего рынка (Северсталь, ММК, НЛМК) нужна гибридная модель:
   Revenue = Q_export × P_FOB + Q_domestic × P_domestic
 
-Этот файл — модуль Фазы 1.5 проекта Russian Propagation (v0.9).
+Этот файл — модуль слоя L1.5 (операционный сигнал) проекта Russian Propagation.
 """
 
 import argparse
@@ -26,7 +26,7 @@ import sys
 from dataclasses import dataclass, field
 from typing import Dict, List
 
-from osl_common import RevenuePredict, FXRate  # S3.1: общие структуры
+from osl_common import RevenuePredict, FXRate  # общие структуры прогноза выручки
 
 # Windows console fix: force UTF-8 for ₽, ✅, etc.
 if hasattr(sys.stdout, "reconfigure"):
@@ -74,14 +74,14 @@ class CompanyProfile:
     notes: str = ""
 
 
-# RevenuePredict / FXRate — из osl_common (S3.1)
+# RevenuePredict / FXRate — из osl_common
 
 
 # ============================================================
 # СРЕДНИЕ ЦЕНЫ 12М 2025 (USD)
 # ============================================================
-# Усредненные данные по году. Для точности нужно подключить FRED/LME APIs
-# (отложено до фазы 2). Сейчас — экспертная оценка по диапазонам:
+# Усредненные данные по году. Точные средние требуют подключения FRED/LME API;
+# здесь — экспертная оценка по диапазонам:
 #   медь: $8 892 (01.2025) → $13 862 (01.2026), среднегодовая ~$9 500
 #   никель: $14-19K в 2025, средняя ~$16 500
 #   палладий: $1 000-1 100/унц
@@ -95,7 +95,7 @@ PRICES_12M_2025: Dict[str, CommodityPrice] = {
     "palladium": CommodityPrice("palladium", "oz", 1_050, "12M2025", "LBMA avg"),
     "platinum": CommodityPrice("platinum", "oz", 970, "12M2025", "LBMA avg"),
     "gold": CommodityPrice("gold", "oz", 3_350, "12M2025", "LBMA avg"),
-    # Byproducts Норникеля (v0.3 final)
+    # Byproducts Норникеля
     "cobalt": CommodityPrice("cobalt", "t", 22_000, "12M2025", "LME cobalt avg"),
     "rhodium": CommodityPrice("rhodium", "oz", 5_500, "12M2025", "оценка spot"),
     "iridium": CommodityPrice("iridium", "oz", 4_500, "12M2025", "оценка spot"),
@@ -122,7 +122,7 @@ NORNICKEL_PRODUCTION = [
     ProductionData("Норникель", "nickel", 200_000, "t", "12M2025"),
     ProductionData("Норникель", "palladium", 2_700_000, "oz", "12M2025"),
     ProductionData("Норникель", "platinum", 650_000, "oz", "12M2025"),
-    # Byproducts (v0.3 final)
+    # Byproducts
     ProductionData(
         "Норникель", "gold", 200_000, "oz", "12M2025", "байпродукт никелевой переработки"
     ),
@@ -169,16 +169,16 @@ PROFILES: Dict[str, CompanyProfile] = {
         },  # Au+Co+Rh+Ir+Te+Se ~7% выручки
         other_income_pct=0.05,  # treatment charges + services
         domestic_share=0.05,
-        notes="v0.3 final: 10 metals (4 main + 6 byproducts); revenue +~7%",
+        notes="10 metals (4 main + 6 byproducts); byproducts ~7% выручки",
     ),
     "Северсталь": CompanyProfile(
         name="Северсталь",
         revenue_model="hybrid",
         revenue_share={"steel": 1.00},
         other_income_pct=0.05,  # +mining concentrate sales
-        domestic_share=0.85,  # +5 п.п. — реально больше внутр. рынка
-        domestic_premium_pct=0.40,  # grid search: 0.20→0.40 (премиум-сталь, авто)
-        notes="v0.3 final: domestic_premium повышен до 40% (premium grades + auto-steel)",
+        domestic_share=0.85,  # основная часть отгрузок — внутренний рынок
+        domestic_premium_pct=0.40,  # grid search по внутренней премии (премиум-сталь, авто)
+        notes="domestic_premium 40% (premium grades + auto-steel)",
     ),
     "ММК": CompanyProfile(
         name="ММК",
@@ -361,7 +361,7 @@ def predict_revenue(company: str, fx: FXRate = FX_12M_2025) -> RevenuePredict:
         "Полюс": POLYUS_PRODUCTION,
     }
 
-    # S1.6: понятная ошибка вместо KeyError при неизвестном эмитенте
+    # понятная ошибка вместо KeyError при неизвестном эмитенте
     if company not in PROFILES or company not in productions_map:
         raise ValueError(
             f"Неизвестный эмитент металлургии: {company!r}. "
@@ -384,7 +384,7 @@ def backtest_one(predict: RevenuePredict) -> RevenuePredict:
     if not actual:
         return predict
 
-    if actual["usd_bn"]:  # S1.6: не None и не 0 — защита от деления на ноль
+    if actual["usd_bn"]:  # не None и не 0 — защита от деления на ноль
         actual_usd = actual["usd_bn"]
         predict.actual_usd_bn = actual_usd
         predict.mae_pct = abs(predict.predicted_usd_bn - actual_usd) / actual_usd * 100
@@ -402,7 +402,7 @@ def backtest_one(predict: RevenuePredict) -> RevenuePredict:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="OSL — Металлургия v0.9")
+    parser = argparse.ArgumentParser(description="OSL — Металлургия")
     parser.add_argument(
         "--company",
         choices=["Норникель", "Северсталь", "ММК", "НЛМК", "Полюс", "all"],

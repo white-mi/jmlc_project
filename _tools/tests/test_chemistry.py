@@ -1,6 +1,6 @@
 """
-DS-слой ХИМИИ (3-я отрасль). Отличие от нефтегаза: структурная модель ПОДКЛЮЧЕНА
-(Фаза C) — у химии есть публичные годовые цены (World Bank удобрения/нефть) и нет
+DS-слой ХИМИИ (3-я отрасль). Отличие от нефтегаза: структурная модель ПОДКЛЮЧЕНА —
+у химии есть публичные годовые цены (World Bank удобрения/нефть) и нет
 налогового блокера, поэтому StructuralOSL предсказывает, и база сравнения = structural_osl.
 
 Закрепляем: structural активна и competitive; КуйбышевАзот без объёма → _raw None
@@ -36,9 +36,7 @@ def test_chemistry_panel_loads():
     assert len(rows) >= 16, f"мало строк: {len(rows)}"
     assert ISSUERS <= {r.issuer for r in rows}
     assert all(r.industry == "chemistry" for r in rows)
-    assert "Нижнекамскнефтехим" not in {
-        r.issuer for r in rows
-    }, "НКНХ должен быть удалён (плохой клиент)"
+    assert "Нижнекамскнефтехим" not in {r.issuer for r in rows}, "НКНХ вне панели (плохой клиент)"
 
 
 def test_chemistry_issuers_3plus_periods():
@@ -67,7 +65,7 @@ def test_chemistry_required_prices_present():
             assert r.prices.get(k) is not None, f"{r.issuer} {r.period}: нет цены {k}"
 
 
-# ---------- структурная модель (Фаза C — ПОДКЛЮЧЕНА) ----------
+# ---------- структурная модель (подключена) ----------
 
 
 def test_chemistry_structural_predicts():

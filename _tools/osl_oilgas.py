@@ -1,18 +1,18 @@
 """
-Operational Signal Layer (OSL) — Нефтегаз v0.3.
+Operational Signal Layer (OSL) — Нефтегаз.
 
 Прогноз выручки публичных нефтегазовых эмитентов РФ по операционным сигналам.
 
-ИЗМЕНЕНИЯ v0.2 → v0.3:
-- ✅ Реальные actuals 12М 2025 МСФО (вместо заглушек)
+Состав модели:
+- Бэк-тест против фактических МСФО 12М 2025:
   Роснефть: 8 236 млрд ₽ (-18.8%), EBITDA 2 173 млрд ₽
   ЛУКОЙЛ: 3 768 млрд ₽ (-15%), EBITDA 892 млрд ₽
   Газпром: ~7 000 млрд ₽ (оценка из 9М ~5.85 трлн)
   Новатэк: 1 446 млрд ₽ (-6.5%), EBITDA 859 млрд ₽
-- ✅ Реальная НДПИ-формула с поправочным коэффициентом К_дм
-- ✅ Топливный демпфер (платежи в бюджет в 2025)
-- ✅ Раздельный upstream / downstream без двойного счёта
-- ✅ Realistic transfer pricing для downstream
+- НДПИ-формула с поправочным коэффициентом К_дм
+- Топливный демпфер (платежи в бюджет в 2025)
+- Раздельный upstream / downstream без двойного счёта
+- Transfer pricing для downstream
 
 Источники:
 - Минэнерго РФ — добыча нефти/газа по компаниям
@@ -30,7 +30,7 @@ import sys
 from dataclasses import dataclass
 from typing import Dict, List
 
-from osl_common import RevenuePredict, FXRate  # S3.1: общие структуры
+from osl_common import RevenuePredict, FXRate  # общие структуры прогноза выручки
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
@@ -74,7 +74,7 @@ class CompanyProfile:
     notes: str = ""
 
 
-# RevenuePredict / FXRate — из osl_common (S3.1)
+# RevenuePredict / FXRate — из osl_common
 
 
 # ============================================================
@@ -222,7 +222,7 @@ PROFILES: Dict[str, CompanyProfile] = {
         ndpi_share=0.20,  # ↑ из-за нефтяной части (Газпром нефть)
         export_share=0.32,  # точнее по факту 2025
         discount_to_brent=0,
-        notes="v0.3 final: учтена Газпром нефть как отдельный сегмент через other_share",
+        notes="Газпром нефть учтена как отдельный сегмент через other_share",
     ),
     "Новатэк": CompanyProfile(
         name="Новатэк",
@@ -302,7 +302,7 @@ def predict_oil_vink(
     fx: FXRate,
 ) -> RevenuePredict:
     """
-    Модель для нефтяной ВИНК (Роснефть, ЛУКОЙЛ) v0.3.
+    Модель для нефтяной ВИНК (Роснефть, ЛУКОЙЛ).
 
     Разделение upstream / downstream без двойного счёта:
       - Q_crude_export = Q_oil_total × export_share (отгружается сырой)
@@ -516,7 +516,7 @@ def predict_revenue(company: str, fx: FXRate = FX_12M_2025) -> RevenuePredict:
         "Газпром": GAZPROM_PRODUCTION,
         "Новатэк": NOVATEK_PRODUCTION,
     }
-    # S1.6: понятная ошибка вместо KeyError при неизвестном эмитенте
+    # понятная ошибка вместо KeyError при неизвестном эмитенте
     if company not in PROFILES or company not in productions_map:
         raise ValueError(
             f"Неизвестный эмитент нефтегаза: {company!r}. "
@@ -551,7 +551,7 @@ def backtest_one(predict: RevenuePredict) -> RevenuePredict:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="OSL — Нефтегаз v0.9")
+    parser = argparse.ArgumentParser(description="OSL — Нефтегаз")
     parser.add_argument(
         "--company", choices=["Роснефть", "ЛУКОЙЛ", "Газпром", "Новатэк", "all"], default="all"
     )

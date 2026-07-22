@@ -1,5 +1,5 @@
 {
-  "_comment": "S2.1: маршрутизация всех 27 подкатегорий шоков на затронутые отрасли (primary первой — её берёт propagate_shock как источник). Ключи согласованы с shock_subcategories из segment_impact_table_v0_8.json и с mapping-таблицей 'Таксономия шоков.md'. Отрасли: oilgas, metallurgy, chemistry, retail, energy, oiv, pharma. Пустой список = использовать primary_industry из L0 (для информационного шума 5.x).",
+  "_comment": "Маршрутизация всех 27 подкатегорий шоков на затронутые отрасли (primary первой — её берёт propagate_shock как источник). Ключи согласованы с shock_subcategories из segment_impact_table_v0_8.json и с mapping-таблицей 'Таксономия шоков.md'. Отрасли: oilgas, metallurgy, chemistry, retail, energy, oiv, pharma. Пустой список = использовать primary_industry из L0 (для информационного шума 5.x).",
   "version": "0.9",
   "map": {
     "1.1": ["oilgas", "oiv", "metallurgy"],

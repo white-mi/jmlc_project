@@ -50,7 +50,7 @@ def test_dm_no_significant_winner():
     for r in rows:
         p = r["winner_dm_p"]
         if p is not None:  # None ⇒ победитель совпал с базой
-            assert p > 0.05, f'{r["industry"]}: DM p={p:.3f} стал значим — проверь синтез-нарратив'
+            assert p > 0.05, f'{r["industry"]}: DM p={p:.3f} значим — проверь синтез-нарратив'
 
 
 def test_conformal_transcription_is_honest():

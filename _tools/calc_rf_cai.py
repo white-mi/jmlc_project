@@ -1,5 +1,5 @@
 """
-РФ-CAI (Composite Activity Indicator) — упрощённая lite-версия (v0.7).
+РФ-CAI (Composite Activity Indicator) — упрощённая lite-версия.
 
 Вход: 6 макропоказателей в `data/macro_state.json` + historical baseline.
 Выход: композитный индекс CAI ∈ [-3; +3] (z-score нормализованный) и фаза цикла.
@@ -149,7 +149,7 @@ def _print_result(result: CAIResult, label: str = ""):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="РФ-CAI v0.7 (lite)")
+    parser = argparse.ArgumentParser(description="РФ-CAI (lite)")
     parser.add_argument(
         "--backtest", action="store_true", help="Прогнать на всех исторических снапшотах"
     )

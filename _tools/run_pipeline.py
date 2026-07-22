@@ -1,5 +1,5 @@
 """
-End-to-End Russian Propagation pipeline (v0.7 MVP).
+End-to-End Russian Propagation pipeline (MVP).
 
 Один прогон: новость → 4-слойный анализ с числами на каждом уровне.
 
@@ -109,9 +109,9 @@ def osl_oilgas_forward_scenarios(brent_pre: float, brent_post: float) -> dict:
 # Mapping: shock category → industry override
 # ============================================================
 
-# S2.1: маршрутизация вынесена в data/shock_to_industries.json (все 27 подкатегорий).
-# Раньше inline-словарь покрывал лишь 9 → 18 подкатегорий падали на грубый
-# top-level fallback (перегон 15 новостей: 7/15 уходили не в ту отрасль).
+# Маршрутизация — данные, а не код: data/shock_to_industries.json покрывает все
+# 27 подкатегорий. Inline-словарь на 9 подкатегорий оставлял бы остальные 18 на
+# грубом top-level fallback (на перегоне 15 новостей это 7/15 не в ту отрасль).
 _SHOCK_MAP_PATH = TOOLS_DIR / "data" / "shock_to_industries.json"
 
 
@@ -126,7 +126,7 @@ def _load_shock_map() -> dict:
 
 SHOCK_TO_INDUSTRIES = _load_shock_map()
 
-# S2.5: forward-сценарии Brent вынесены в data/brent_scenarios.json.
+# Forward-сценарии Brent заданы в data/brent_scenarios.json.
 _BRENT_SCEN_PATH = TOOLS_DIR / "data" / "brent_scenarios.json"
 
 
@@ -154,7 +154,7 @@ _TOP_LEVEL_FALLBACK = {
 def get_industries_for_shock(
     subcategory: str, fallback: str, state: Optional[dict] = None
 ) -> list[str]:
-    """Маппинг подкатегории шока на затронутые отрасли (S2.1).
+    """Маппинг подкатегории шока на затронутые отрасли.
 
     Приоритет: карта из JSON → primary_industry (пустой список в карте, напр. 5.x)
     → грубый top-level резерв с пометкой routing_fallback в state.
@@ -331,7 +331,7 @@ def run_full_pipeline(
     smoke_severity: int = 60,
 ) -> dict:
     """Полный pipeline. Возвращает state-dict с числами на всех слоях.
-    smoke_severity — сила шока для smoke-режима (S3.4: влияет на L2 magnitude)."""
+    smoke_severity — сила шока для smoke-режима (влияет на L2 magnitude)."""
 
     state = {
         "pipeline_version": "0.9",
@@ -342,7 +342,7 @@ def run_full_pipeline(
 
     # ---- L1: текущее макро-состояние (CAI + EPU) ----
     cai_result = get_current_cai()
-    # S2.2: якорим окно EPU на дате новости, а не на now() — иначе при свежей
+    # Окно EPU якорится на дате новости, а не на now() — иначе при свежей
     # дате окно не покрывает корпус _Анализы/ и EPU схлопывается в 0.
     epu_end = None
     try:
@@ -404,7 +404,7 @@ def run_full_pipeline(
 
     # Forward-сценарий для нефтегаза (если затронут): сравнение
     # «статус-кво до события» vs «после события» при разных уровнях Brent.
-    # S2.5: пары pre/post берутся из data/brent_scenarios.json; null → текущий Brent.
+    # Пары pre/post берутся из data/brent_scenarios.json; null → текущий Brent.
     if "oilgas" in industries:
         cur_brent = float(cai_result.components.get("brent_usd", {}).get("current", 78.0))
         scen = BRENT_SCENARIOS.get(subcat, BRENT_SCENARIOS.get("default", {}))
@@ -431,7 +431,7 @@ def run_full_pipeline(
         "ranked": spill.ranked,
     }
 
-    # ---- L3: Segment Impact (v0.8 channel-decomposition) ----
+    # ---- L3: Segment Impact (channel-decomposition) ----
     # При наличии подкатегории direction берётся per-channel из таблицы;
     # глобальный direction не нужен и не применяется.
     direction = infer_direction(news_text or "", subcat)
@@ -559,7 +559,7 @@ def render_markdown(state: dict) -> str:
 
     # L3
     l3 = state.get("L3_segments", {})
-    lines.append("\n## L3 — Client Behavior (10 сегментов, channel-decomposition v0.8)")
+    lines.append("\n## L3 — Client Behavior (10 сегментов, channel-decomposition)")
     lines.append("\n| Сегмент | ΔPD (п.п.) | Δdemand (%) | Δchurn (п.п.) | Confidence |")
     lines.append("|---|---|---|---|---|")
     for sgmt, data in l3.items():
@@ -589,7 +589,10 @@ def render_markdown(state: dict) -> str:
             lines.append("| " + " | ".join(row) + " |")
 
     lines.append("\n---")
-    lines.append(f'*MVP pipeline v0.8 · L3 channel-decomposition · timestamp {state["timestamp"]}*')
+    lines.append(
+        f'*pipeline v{state["pipeline_version"]} · L3 channel-decomposition · '
+        f'timestamp {state["timestamp"]}*'
+    )
 
     return "\n".join(lines)
 

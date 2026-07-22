@@ -1,7 +1,7 @@
 """
-Operational Signal Layer (OSL) — Энергетика (v0.7).
+Operational Signal Layer (OSL) — Энергетика.
 
-Формула (refactor v0.7 — сумма абсолютных сегментов):
+Формула (сумма абсолютных сегментов):
     Revenue = generation_twh × 1e6 × tariff × tariff_multiplier
             + capacity_gw × cap_payment_per_gw_year
             + other_revenue_abs_rub_bn × 1e9
@@ -10,9 +10,9 @@ Operational Signal Layer (OSL) — Энергетика (v0.7).
 Калибровочный параметр — tariff_multiplier (учитывает региональную/сегментную
 премию или дисконт к среднерыночному тарифу).
 
-До v0.7 формула была revenue = subtotal / (1 - other_share) — нестабильна
-для эмитентов где модель уже даёт > actual (Юнипро/Росатом, MAE 10–13%).
-Новая форма: каждый сегмент — независимый абсолютный вклад.
+Каждый сегмент входит независимым абсолютным вкладом. Мультипликативная форма
+revenue = subtotal / (1 - other_share) для этой отрасли неустойчива: у эмитентов,
+где модель даёт > actual (Юнипро/Росатом, MAE 10–13%), она усиливает ошибку.
 
 Источники:
   - СО ЕЭС: ежемесячная выработка по компаниям
@@ -27,7 +27,7 @@ import argparse
 import sys
 from dataclasses import dataclass
 
-from osl_common import RevenuePredict  # S3.1: общая структура
+from osl_common import RevenuePredict  # общая структура прогноза выручки
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
@@ -58,7 +58,7 @@ class CompanyProfile:
     notes: str = ""
 
 
-# RevenuePredict — из osl_common (S3.1)
+# RevenuePredict — из osl_common
 
 
 # ============================================================
@@ -223,14 +223,14 @@ def backtest_one(predict: RevenuePredict) -> RevenuePredict:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="OSL — Энергетика v0.7")
+    parser = argparse.ArgumentParser(description="OSL — Энергетика")
     parser.add_argument("--company", choices=list(PROFILES.keys()) + ["all"], default="all")
     args = parser.parse_args()
 
     targets = list(PROFILES.keys()) if args.company == "all" else [args.company]
 
     print("=" * 70)
-    print("  OSL Backtest — Энергетика 12М 2025 (v0.7 abs-sum formula)")
+    print("  OSL Backtest — Энергетика 12М 2025 (abs-sum formula)")
     print(f"  Tariff: ₽{TARIFFS_2025.avg_tariff_rub_per_mwh}/МВт·ч")
     print(f"  КОМ: ₽{TARIFFS_2025.capacity_payment_per_gw_year/1e9:.2f} млрд/ГВт/год")
     print("=" * 70)

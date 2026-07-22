@@ -43,8 +43,8 @@ def test_walkforward_train_strictly_before_test():
 
 def test_walkforward_no_test_year_in_train():
     """Анти-leakage на реальном сплите walk_forward: тест-год НЕ входит в train-годы фолда.
-    Ловит регрессию сплита на `year <= t` (утечку) — в отличие от прежней версии, которая
-    переписывала сплит инлайн и проверяла определительную истину, не вызывая walk_forward."""
+    Ловит регрессию сплита на `year <= t` (утечку). Проверяется состав фолдов, который вернул
+    walk_forward: переписанный инлайн сплит проверял бы определительную истину."""
     rows = _rows()
     _need(rows)
     _, folds = W.walk_forward(rows, {"structural_osl": Mo.StructuralOSL})

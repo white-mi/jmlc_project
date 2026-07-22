@@ -1,5 +1,5 @@
 """
-L2 — Industry Spillover (v0.7 минимальная версия).
+L2 — Industry Spillover (минимальная версия).
 
 Numeric matrix-based трансмиссия шока между 7 отраслями Радара.
 Веса заданы в `data/spillover_matrix.json` на основе качественной карты
@@ -11,7 +11,7 @@ API:
 magnitude_pp — масштаб первичного шока в процентных пунктах ΔPD (например, 0.8).
 Для отрасли TO эффект: matrix[FROM][TO] × magnitude_pp.
 
-Что НЕ делает (TODO v0.9):
+Что НЕ делает (осознанные ограничения):
   - Diebold-Yilmaz VAR на отраслевых индексах (нужен 3+ года истории revenue)
   - DebtRank каскад (нужны capital buffers топ-50 заёмщиков)
   - Multi-step propagation (currently 1-hop only)
@@ -76,15 +76,16 @@ def propagate_shock(
     )
 
 
-# S3.4: severity (0-100) → magnitude (п.п. ΔPD). Раньше magnitude была фикс 0.8
-# для любого шока; теперь масштаб выводится из силы шока L0.
+# severity (0-100) → magnitude (п.п. ΔPD): масштаб первичного шока выводится из
+# силы шока L0 — один и тот же множитель для шока любой силы не давал бы
+# различимых сценариев.
 def severity_to_magnitude(severity_score: float, scale: float = 1.5) -> float:
     """Линейно: severity 0→0, 50→0.75, 100→1.5 п.п. ΔPD."""
     s = max(0.0, min(100.0, float(severity_score)))
     return round(s / 100.0 * scale, 3)
 
 
-# S3.4: относительные веса broad credit channel для шоков ставки ЦБ (категория 4) —
+# Относительные веса broad credit channel для шоков ставки ЦБ (категория 4) —
 # несколько отраслей бьются одновременно (retail сильнее всего, дальше по убыванию).
 CREDIT_CHANNEL_WEIGHTS = {
     "retail": 1.0,
@@ -98,7 +99,7 @@ CREDIT_CHANNEL_WEIGHTS = {
 def propagate_multi_source(
     sources: dict, matrix_path: Path = DATA_PATH, aggregate: str = "max"
 ) -> SpilloverResult:
-    """S3.4: распространяет шок от НЕСКОЛЬКИХ отраслей-источников, агрегируя по target.
+    """Распространяет шок от НЕСКОЛЬКИХ отраслей-источников, агрегируя по target.
 
     Args:
         sources: {industry: magnitude_pp} — источники с их силой
@@ -126,7 +127,7 @@ def propagate_multi_source(
 def propagate_credit_channel(
     magnitude_pp: float = 0.8, matrix_path: Path = DATA_PATH
 ) -> SpilloverResult:
-    """S3.4: broad credit channel для шоков ставки ЦБ (категория 4) —
+    """Broad credit channel для шоков ставки ЦБ (категория 4) —
     5 debt-чувствительных отраслей бьются одновременно с разной силой."""
     sources = {ind: round(w * magnitude_pp, 3) for ind, w in CREDIT_CHANNEL_WEIGHTS.items()}
     return propagate_multi_source(sources, matrix_path, aggregate="max")
@@ -157,7 +158,7 @@ def matrix_invariants_check(matrix_path: Path = DATA_PATH) -> dict:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="L2 Spillover v0.7")
+    parser = argparse.ArgumentParser(description="L2 Spillover")
     parser.add_argument("--shock", help="Отрасль-источник шока (required если без --check)")
     parser.add_argument(
         "--magnitude", type=float, default=1.0, help="Масштаб шока в п.п. ΔPD (default: 1.0)"

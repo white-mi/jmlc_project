@@ -1,5 +1,5 @@
 """
-OSL v0.4 — Inductive Conformal Prediction для калиброванных интервалов.
+OSL — Inductive Conformal Prediction для калиброванных интервалов.
 
 Концепция:
   При прогнозе ΔRevenue / Revenue точечная оценка недостаточна. Нужен интервал
@@ -19,13 +19,13 @@ OSL v0.4 — Inductive Conformal Prediction для калиброванных и
 Validation против факта:
   Для эмитентов где известен actual: проверяем содержит ли interval actual value.
 
-  ⚠️ ВАЖНО (S2.3 / находка F5): это IN-SAMPLE проверка. Параметры OSL калиброваны
+  ⚠️ ВАЖНО: это IN-SAMPLE проверка. Параметры OSL калиброваны
   на тех же ACTUAL_REVENUE_*_2025, против которых строится «покрытие», поэтому
   высокий % покрытия (≈96%) отражает остроту/согласованность интервалов, а НЕ
   обобщающую способность (out-of-sample). Настоящий temporal hold-out (калибровка
-  на 9M → проверка на отложенном 12M) требует НЕЗАВИСИМЫХ 9M-actuals из IR —
-  текущие 9M выведены из 12M через period_share (annualized-9M ≡ 12M). См. план
-  S4.2 и skip-тест tests/test_conformal.py::test_holdout_coverage_metallurgy.
+  на 9M → проверка на отложенном 12M) требует НЕЗАВИСИМЫХ 9M-actuals из IR:
+  9M, выведенные из 12M через period_share, дают annualized-9M ≡ 12M. См. тест
+  tests/test_conformal.py::test_holdout_coverage_metallurgy.
 
 Источник методологии:
   arXiv:2508.14078 — Out-of-Sample Hydrocarbon Production Forecasting
@@ -41,9 +41,9 @@ from typing import Callable, Optional
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
-# v0.6: автоматически применить сохранённые калибровки при импорте.
-# S(v0.9 loop): лог идёт в stderr, НЕ в stdout — иначе ломается контракт
-# `run_pipeline.py --json` (import-time print попадал в JSON-вывод).
+# Сохранённые калибровки применяются автоматически при импорте.
+# Лог идёт в stderr, НЕ в stdout — иначе ломается контракт
+# `run_pipeline.py --json` (import-time print попал бы в JSON-вывод).
 try:
     from osl_calibrator import apply_all_calibrations
 
@@ -72,8 +72,8 @@ def _finalize_interval(
     company: str, base_pred: float, predictions, actual: Optional[float], conf: float = 0.90
 ) -> PredictionInterval:
     """Общий «хвост» всех make_interval_*: квантильный интервал из распределения
-    perturbed-прогнозов → PredictionInterval. Раньше дублировался ~6 раз
-    (v0.9 loop: дедупликация при сохранении бэспоук perturbation-логики на модуль)."""
+    perturbed-прогнозов → PredictionInterval. Общая здесь только финальная
+    квантильная свёртка; perturbation-логика остаётся своя на каждый модуль."""
     if predictions is None or len(predictions) == 0:
         return PredictionInterval(company, base_pred, base_pred, base_pred, 0.0, actual, None, None)
     arr = np.array(predictions)
@@ -299,10 +299,9 @@ def make_interval_generic(
 
     Подход: перехватываем поля цен/курса, применимые для отрасли (PRICES/FX),
     сохраняем оригиналы, применяем шум в каждой симуляции, откатываем после.
-    actual выводится из ACTUAL_* модуля автоматически.
-
-    (v0.9 loop: убран мёртвый параметр perturbation_fields — он не использовался,
-    а вызывающие передавали туда число actual, которое молча игнорировалось.)
+    actual выводится из ACTUAL_* модуля автоматически — отдельного параметра со
+    списком возмущаемых полей нет: значение, переданное вызывающим кодом, молча
+    игнорировалось бы.
     """
     import importlib
 
@@ -427,7 +426,7 @@ def make_interval_retail(company: str, n_sim: int = 200, conf: float = 0.90) -> 
 
 
 def make_interval_energy(company: str, n_sim: int = 200, conf: float = 0.90) -> PredictionInterval:
-    """Conformal для osl_energy (v0.7). Perturbation на tariff_multiplier
+    """Conformal для osl_energy. Perturbation на tariff_multiplier
     + other_revenue_abs_rub_bn + tariff/capacity rates + production."""
     import osl_energy as m
 
@@ -570,7 +569,7 @@ def make_interval_pharma(company: str, n_sim: int = 200, conf: float = 0.90) -> 
 
 
 def main():
-    parser = argparse.ArgumentParser(description="OSL v0.4 — Conformal Prediction All Industries")
+    parser = argparse.ArgumentParser(description="OSL — Conformal Prediction All Industries")
     parser.add_argument("--n-sim", type=int, default=200)
     parser.add_argument("--confidence", type=float, default=0.90)
     parser.add_argument(
@@ -581,7 +580,7 @@ def main():
     args = parser.parse_args()
 
     print("=" * 70)
-    print("  OSL v0.4 — Conformal Prediction (all industries)")
+    print("  OSL — Conformal Prediction (all industries)")
     print(f"  N simulations: {args.n_sim}, confidence: {args.confidence}")
     print("=" * 70)
 
@@ -660,7 +659,7 @@ def main():
     print()
     print("  ⚠️ Эмитенты с width=0% — Conformal wrapper НЕ работает")
     print("     (модули energy/pharma/oiv/retail используют параметры вне PRICES_12M_2025)")
-    print("     → требуют индивидуальной адаптации в v0.5")
+    print("     → требуют индивидуальной адаптации perturbation-схемы под свои драйверы")
     print()
 
     by_industry = {}
@@ -675,7 +674,7 @@ def main():
     print("  Покрытие по отраслям (только эмитенты с работающим perturbation):")
     for ind, stats in by_industry.items():
         if stats["perturbed"] == 0:
-            print(f"    {ind:15s}: 0/0 perturbation NOT working — требует v0.5 рефакторинга")
+            print(f"    {ind:15s}: 0/0 perturbation NOT working — драйверы вне PRICES_12M_2025")
         else:
             rate = stats["inside"] / stats["perturbed"] * 100
             print(

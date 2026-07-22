@@ -76,7 +76,7 @@ def test_oilgas_structural_deferred_returns_nan():
     pred = Mo.StructuralOSL().fit(rows).predict(rows)
     assert np.all(
         np.isnan(pred)
-    ), "structural не должен предсказывать нефтегаз (Фаза C ещё не подключена)"
+    ), "structural не должен предсказывать нефтегаз (нет годовых НДПИ/демпфера)"
 
 
 def test_oilgas_learned_models_predict_finite():

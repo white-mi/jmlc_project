@@ -68,7 +68,7 @@ multi_agent: true
 [таблица из L3_segments — все микросегменты с tags]
 > Примечание: КС-режим = <ks_regime>, активирован эксперт <moe_expert_activated>
 
-## Исторические аналоги (новое в multi-agent)
+## Исторические аналоги
 [краткая таблица из historical_analogs с lessons_for_current]
 
 ## Громкость СМИ vs Реальный импакт

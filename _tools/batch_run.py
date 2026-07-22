@@ -92,7 +92,7 @@ def main():
             date=n["date"],
             smoke_shock=subcat,
             smoke_industry=industry,
-            smoke_severity=c.get("severity_score", 60),  # S3.4: реальная сила → L2 magnitude
+            smoke_severity=c.get("severity_score", 60),  # реальная сила → L2 magnitude
         )
 
         # Патчим L0 реальными данными 5-агентного конвейера
@@ -237,7 +237,7 @@ def main():
     out.append("## Индивидуальные отчёты\n")
     out.append(f"Сохранены в `_Анализы/_batch/` ({n_total} файлов).")
     out.append("")
-    out.append(f"*Перегон {n_total} новостей · pipeline v0.8 · {date}*")
+    out.append(f"*Перегон {n_total} новостей · {date}*")
 
     report_path = OUTPUT_DIR / f"Перегон {n_total} новостей — {date}.md"
     report_path.write_text("\n".join(out), encoding="utf-8")

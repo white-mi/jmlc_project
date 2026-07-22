@@ -1,5 +1,5 @@
 """
-Walk-forward валидация моделей прогноза выручки (Stage D) — ЧЕСТНЫЙ out-of-sample.
+Walk-forward валидация моделей прогноза выручки — ЧЕСТНЫЙ out-of-sample.
 
 Expanding-window: для каждого тест-периода t обучаем на всех строках с годом < t,
 тестируем на строках года t. Это реальный сценарий применения OSL: «по данным
@@ -156,7 +156,7 @@ def diebold_mariano(ae_a, ae_b):
 
 def evaluate(preds):
     """Полная сводка: per-model метрики (на своих валидных строках) + skill/DM на общем наборе.
-    Ключи skill_vs_struct/dm_*_vs_struct исторические — фактическая база = _pick_base (structural
+    Ключи skill_vs_struct/dm_*_vs_struct — legacy-имена; фактическая база = _pick_base (structural
     для металлургии, persistence когда structural отключён)."""
     base = _pick_base(preds)
     common = _common_keys(preds)

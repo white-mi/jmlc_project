@@ -52,8 +52,7 @@ def test_required_placeholders_present(n):
     assert not missing, (
         f"Agent {n} ({FILES[n]}): orchestrator подставляет {missing}, но в "
         f"промпте нет плейсхолдеров {[f'<{k}>' for k in missing]}. "
-        f"fill_prompt оставит их без замены → данные не дойдут до LLM "
-        f"(баг Agent 1, июнь 2026)."
+        f"fill_prompt оставит их без замены → данные не дойдут до LLM."
     )
 
 

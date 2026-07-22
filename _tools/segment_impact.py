@@ -1,9 +1,9 @@
 """
-L3 — Client Behavior / Segment Impact (v0.8 channel-decomposition).
+L3 — Client Behavior / Segment Impact (channel-decomposition).
 
-Новая архитектура: шок раскладывается на 5 каналов передачи, каждый сегмент
-имеет карту чувствительностей. Решает проблему бифуркации (один шок может
-ухудшить положение одних сегментов и одновременно улучшить других).
+Шок раскладывается на 5 каналов передачи, каждый сегмент имеет карту
+чувствительностей. Такая декомпозиция нужна для бифуркации: один шок может
+ухудшить положение одних сегментов и одновременно улучшить других.
 
 Каналы:
   consumer      — потребительский (КС, инфляция, реальные доходы)
@@ -34,8 +34,7 @@ L3 — Client Behavior / Segment Impact (v0.8 channel-decomposition).
 
 3 режима КС: normal (≤10%), moderate_stress (10-18%), acute_stress (>18%)
 
-Что НЕ делает (TODO Фаза 1+):
-  - Channel sensitivity по регионам (Сургут vs Москва — разная экспозиция к oil_revenue)
+Что НЕ делает (осознанные ограничения):
   - Sub-segments внутри ml_public (нефтегазовые регионы vs прочие)
   - Дополнительные каналы (labor_market, real_estate, agro)
   - Causal layer через DoWhy
@@ -78,10 +77,11 @@ def load_table(path: Path = DATA_PATH) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-# S3.5: региональные профили экспозиции — множители на каналы для уточнения L3
+# Региональные профили экспозиции — множители на каналы для уточнения L3
 # по типу региона (нефтегазовый Сургут/ЯНАО vs диверсифицированная Москва).
 # Применяются к sensitivity сегмента поверх базовой карты; default (region=None)
-# не меняет поведение. Это решает находку F16 (плоская sensitivity на сегмент).
+# оставляет базовую карту как есть. Без них sensitivity сегмента плоская по
+# стране, хотя экспозиция к oil_revenue/fiscal сильно зависит от региона.
 REGION_PROFILES = {
     "oil_region": {"oil_revenue": 1.6, "fiscal": 1.4},  # ХМАО/ЯНАО/Сургут
     "metal_monotown": {"supply_chain": 1.5, "fiscal": 1.3},  # Магнитогорск/Череповец
@@ -147,7 +147,7 @@ def predict_segment_impact(
     baseline = table["channel_baseline"]
     channels_def = sub_def["channels"]
     all_channels = table["channels"]
-    # S3.5: confidence — поле данных (по умолчанию 'low'); регион уточняет sensitivity
+    # confidence — поле данных (по умолчанию 'low'); регион уточняет sensitivity
     conf = sub_def.get("confidence", table.get("confidence_default", "low"))
     region_mult = REGION_PROFILES.get(region, {}) if region else {}
     if region and region not in REGION_PROFILES:
@@ -165,7 +165,7 @@ def predict_segment_impact(
         breakdown = {}
 
         for ch in all_channels:
-            sens_ch = sens.get(ch, 0.0) * region_mult.get(ch, 1.0)  # S3.5 region
+            sens_ch = sens.get(ch, 0.0) * region_mult.get(ch, 1.0)  # региональный множитель
             ch_def = channels_def.get(ch, {})
             intensity = ch_def.get("intensity", 0.0)
             ch_dir = ch_def.get("direction", 1) * eff_direction  # eff=1 при явной подкатегории
@@ -194,7 +194,7 @@ def predict_segment_impact(
             delta_pd=round(delta_pd * amp, 3),
             delta_demand=round(delta_demand * amp, 2),
             delta_churn=round(abs(delta_churn_signed_sum) * amp, 3),
-            confidence=conf,  # S3.5: из данных (по умолчанию 'low' — не калибровано)
+            confidence=conf,  # из данных (по умолчанию 'low' — не калибровано)
             amplifier_applied=amp,
             channel_breakdown=breakdown if include_breakdown else None,
         )
@@ -255,7 +255,7 @@ def coverage_check(table_path: Path = DATA_PATH) -> dict:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="L3 Segment Impact v0.8 (channel-decomposition)")
+    parser = argparse.ArgumentParser(description="L3 Segment Impact (channel-decomposition)")
     parser.add_argument(
         "--shock", help="Категория шока: 1|2|3|4|5 (top-level) или 1.1..5.4 (подкатегория)"
     )
@@ -284,7 +284,7 @@ def main():
             print(json.dumps(result, ensure_ascii=False, indent=2))
         else:
             print("=" * 70)
-            print(f'  Coverage v0.8: {"✅ OK" if result["ok"] else "❌ ISSUES"}')
+            print(f'  Coverage: {"✅ OK" if result["ok"] else "❌ ISSUES"}')
             print("=" * 70)
             print(
                 f'  Channels: {result["channels"]} | Segments: {result["segments"]} '
@@ -326,7 +326,7 @@ def main():
     sub_def = table["shock_subcategories"][sub]
     regime_info = table["kc_regimes"][args.kc_regime]
     print("=" * 70)
-    print(f'  Segment Impact v0.8 · shock={sub} ({sub_def["label"]})')
+    print(f'  Segment Impact · shock={sub} ({sub_def["label"]})')
     print(
         f'  КС режим: {args.kc_regime} ({regime_info["range_pct"]}%) '
         f'× amp={regime_info["amplifier"]}'

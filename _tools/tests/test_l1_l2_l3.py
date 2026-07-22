@@ -84,7 +84,7 @@ def test_spillover_oilgas_to_oiv_significant():
 
 
 # ============================================================
-# L3 — Segment Impact (v0.8 channel-decomposition)
+# L3 — Segment Impact (channel-decomposition)
 # ============================================================
 
 
@@ -172,7 +172,7 @@ def test_segment_impact_acute_amplifies():
 
 
 def test_bifurcation_deescalation_oilgas_vs_consumer():
-    """v0.8 ключевой тест: при деэскалации (1.2) ФЛ выигрывают (ΔPD<0),
+    """Ключевой тест: при деэскалации (1.2) ФЛ выигрывают (ΔPD<0),
     нефтегазовые корпы (ml_large_corp) и нефтегазовые регионы (ml_public)
     проигрывают (ΔPD>0). Это и есть бифуркация шока."""
     from segment_impact import predict_segment_impact
@@ -251,8 +251,8 @@ def test_channel_breakdown_returned_when_requested():
 def test_churn_always_positive():
     """Δchurn ≥ 0 (отток на любое изменение среды) И содержателен: на выраженном шоке хотя бы
     один сегмент даёт строго положительный отток, масштабируемый усилителем режима КС
-    (acute > normal). Прежняя версия проверяла лишь abs(...)≥0 — тавтология, проходившая и на
-    полностью нулевом churn."""
+    (acute > normal). Проверки вида abs(...)≥0 недостаточно: она тавтологична и проходит даже
+    на полностью нулевом churn."""
     from segment_impact import predict_segment_impact
 
     acute = predict_segment_impact("4.2", kc_regime="acute_stress")

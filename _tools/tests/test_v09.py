@@ -1,4 +1,4 @@
-"""Тесты улучшений v0.9 (Спринты 1–3): маршрутизация 27 подкатегорий,
+"""Тесты сквозных механизмов пайплайна: маршрутизация 27 подкатегорий,
 деградация EPU, spillover из severity / credit channel, региональный множитель L3,
 recovery JSON в orchestrator."""
 
@@ -22,7 +22,7 @@ ALL_SUBCATS = (
 )
 
 
-# ---------- S2.1: маршрутизация ----------
+# ---------- Маршрутизация шоков в отрасли ----------
 
 
 @pytest.mark.parametrize("subcat", ALL_SUBCATS)
@@ -42,13 +42,13 @@ def test_routing_all_27_subcategories(subcat):
 
 
 def test_routing_confirmed_findings():
-    """Подтверждённые на перегоне исправления маршрутизации (primary = первый)."""
+    """Первичная отрасль для неочевидных подкатегорий (primary = первый в списке)."""
     import run_pipeline as rp
 
-    assert rp.get_industries_for_shock("2.5", "x")[0] == "oiv"  # был retail
-    assert rp.get_industries_for_shock("2.6", "x")[0] == "metallurgy"  # был retail
-    assert rp.get_industries_for_shock("1.4", "x")[0] == "metallurgy"  # был oilgas
-    assert rp.get_industries_for_shock("4.7", "x")[0] == "oilgas"  # был retail
+    assert rp.get_industries_for_shock("2.5", "x")[0] == "oiv"
+    assert rp.get_industries_for_shock("2.6", "x")[0] == "metallurgy"
+    assert rp.get_industries_for_shock("1.4", "x")[0] == "metallurgy"
+    assert rp.get_industries_for_shock("4.7", "x")[0] == "oilgas"
 
 
 def test_routing_unknown_subcat_uses_fallback_with_flag():
@@ -61,7 +61,7 @@ def test_routing_unknown_subcat_uses_fallback_with_flag():
     assert state.get("routing_fallback", {}).get("subcategory") == "9.9"
 
 
-# ---------- S2.2: деградация EPU ----------
+# ---------- Деградация EPU ----------
 
 
 def test_epu_degraded_on_empty_window():
@@ -97,7 +97,7 @@ def test_orchestrator_dry_run_no_api():
     assert "main_category" in d and "severity_score" in d
 
 
-# ---------- S3.4: spillover из severity / credit channel ----------
+# ---------- Spillover из severity / credit channel ----------
 
 
 def test_severity_to_magnitude_range():
@@ -120,7 +120,7 @@ def test_credit_channel_multi_source():
     assert r.ranked[0][0] == "retail"
 
 
-# ---------- S3.5: региональный множитель L3 ----------
+# ---------- Региональный множитель L3 ----------
 
 
 def test_region_multiplier_amplifies_oil_channel():
@@ -144,7 +144,7 @@ def test_region_unknown_raises():
 
 
 def test_confidence_is_data_field():
-    """confidence приходит из таблицы (S3.5), а не литерал в коде."""
+    """confidence приходит из таблицы, а не литерал в коде."""
     from segment_impact import predict_segment_impact, load_table
 
     table = load_table()
@@ -153,7 +153,7 @@ def test_confidence_is_data_field():
     assert imp["fl_massovy"].confidence == "low"
 
 
-# ---------- S1.5: extract_json recovery ----------
+# ---------- extract_json: восстановление неполного ответа ----------
 
 
 def test_extract_json_recovers_truncated():
@@ -165,7 +165,7 @@ def test_extract_json_recovers_truncated():
     assert extract_json('шум {"k":"v"} хвост') == {"k": "v"}
 
 
-# ---------- S4.1: fetch_macro_state — чистая запись ----------
+# ---------- fetch_macro_state — чистая запись ----------
 
 
 def test_update_macro_state_touches_only_current_state(tmp_path):
@@ -255,7 +255,7 @@ def test_update_macro_state_dry_run_no_write(tmp_path):
     assert data["current_state"]["key_rate"] == 14.5  # не записано
 
 
-# ---------- v0.9 loop: infer_direction (исправление знака) ----------
+# ---------- infer_direction: знак направления шока ----------
 
 
 def test_infer_direction_stimulus_and_worsening():
@@ -271,7 +271,7 @@ def test_infer_direction_stimulus_and_worsening():
     assert infer_direction("Удары дронов по НПЗ") == 1
 
 
-# ---------- v0.9 loop: контракт --json чист (stdout не загрязнён import-print) ----------
+# ---------- Контракт --json: stdout не загрязнён import-print ----------
 
 
 def test_run_pipeline_json_stdout_is_clean():

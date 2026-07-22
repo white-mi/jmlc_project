@@ -1,6 +1,6 @@
 """
 Три модели прогноза годовой выручки эмитентов металлургии — единый интерфейс
-fit(rows)/predict(rows) для честной walk-forward валидации (Stage D).
+fit(rows)/predict(rows) для честной walk-forward валидации (osl_walkforward.py).
 
 Модели (обоснование выбора — DS_REPORT / EDA):
   1. StructuralOSL  — структурная формула Q×P×FX (reuse predict_global_commodity/
@@ -83,7 +83,7 @@ VOL_TO_METAL = {
     "vol_gold_oz": "gold",
 }
 
-# Структурная модель ХИМИИ (Фаза C). Цена_период = base × (биржевой_драйвер / реф_2025),
+# Структурная модель ХИМИИ. Цена_период = base × (биржевой_драйвер / реф_2025),
 # где base — 2025-калиброванная avg-цена-за-тонну из osl_chemistry (reuse доменного модуля),
 # а драйвер (dap/urea/crude_brent) даёт per-period вариацию — как steel-proxy в металлургии.
 # Формула выручки — из osl_chemistry: Rev = vol(kt→т) × $/т × FX × (1+other). Скаляр k
@@ -103,11 +103,12 @@ CHEM_DRIVERS = {
     ),  # объём только 2024-25 → k на n=2, хрупко
 }
 
-# Структурная модель ЭНЕРГЕТИКИ (Фаза C). ЧИСТАЯ двухкомпонентная: генерация×РСВ + мощность×КОМ.
+# Структурная модель ЭНЕРГЕТИКИ. ЧИСТАЯ двухкомпонентная: генерация×РСВ + мощность×КОМ.
 # Reuse osl_energy.predict_generation (НЕ osl_energy.PROFILES — там legacy demo-набор).
 # СОЗНАТЕЛЬНО other_revenue=0: теплосегмент/сбыт (РусГидро ДВ ~34%, Мосэнерго моск.тепло, ТГК-1 СПб)
-# НЕ моделируем хардкод-интерсептами (это была бы подгонка per-company на 32-38% выручки → MAPE
-# искусственно падал с 11.9% до 8.1%). Heat поглощается мультипликативным k — НЕИДЕАЛЬНО для
+# хардкод-интерсептами не моделируется — их подбор даёт per-company подгонку на 32-38% выручки
+# и MAPE 8.1% вместо 11.9% за счёт фиттинга, а не физики. Heat поглощается
+# мультипликативным k — НЕИДЕАЛЬНО для
 # теплоёмких эмитентов (документированное ограничение, как байпродукты Норникеля). Честный
 # структурный фит — на чистой физике Q×P энергорынка. КОМ ₽/МВт·мес → ×12×1000 = ₽/ГВт·год.
 ENERGY_ISSUERS = frozenset({"РусГидро", "Мосэнерго", "ТГК-1", "ОГК-2", "Эл5-Энерго", "Юнипро"})
@@ -155,7 +156,7 @@ class StructuralOSL:
             в прогноз не входят (систематический недоучёт, поглощается скаляром k).
         Возвращает None (не падает), если нет ключевого объёма (напр. сталь 2025 — gap).
         Для химии/энергетики диспетчеризуется в _raw_chemistry/_raw_energy; нефтегаз (не в M.PROFILES)
-        → None (Фаза C ждёт НДПИ)."""
+        → None: структурная форма нефтегаза требует НДПИ-данных, их в панели нет."""
         if row.industry == "chemistry":
             return self._raw_chemistry(row)
         if row.industry == "energy":
@@ -377,7 +378,7 @@ class GBMPanel:
         l2_regularization=1.0,
         random_state=0,
     ):
-        # Дефолты = прод-конфиг (зажат под малый N). GBMPanel() байт-идентичен прежнему.
+        # Дефолты = прод-конфиг (зажат под малый N): GBMPanel() без аргументов = прод.
         # Параметры открыты для ablation-свипа (osl_ablation.py), прод их не меняет.
         self.max_depth = max_depth
         self.max_iter = max_iter
@@ -478,20 +479,20 @@ def main():
     y = _targets(rows)
 
     print("=" * 64)
-    print("  IN-SAMPLE (sanity; НЕ метрика качества — настоящая оценка в Stage D)")
+    print("  IN-SAMPLE (sanity; НЕ метрика качества — настоящая оценка в walk-forward)")
     print("=" * 64)
     for name, ctor in MODELS.items():
         m = ctor().fit(rows)
         print(f"  {name:16s} MAPE_in={mape(y, m.predict(rows)):6.2f}%")
 
-    # leave-last-period-out превью (train ≤2024, test 2025) — намёк на Stage D.
+    # leave-last-period-out превью (train ≤2024, test 2025) — ориентир перед walk-forward.
     # ВАЖНЫЙ CAVEAT: встроенные параметры StructuralOSL (PROFILES, PRICES_12M_2025)
     # изначально откалиброваны под FY2025 → тест НА 2025 даёт структурной модели
-    # преимущество (цена стали теперь per-period через iron-ore прокси, но цена Pd
+    # преимущество (цена стали задана per-period через iron-ore прокси, но цена Pd
     # заморожена — gap, и module-профили тюнились под 2025). Полный walk-forward
-    # (Stage D) тестирует и на 2022-2024, где преимущества нет — только там сравнение
-    # справедливо. NB: на gap-строках (сталь 2025) StructuralOSL даёт NaN → его
-    # эффективная тест-выборка УЖЕ, чем у learned-моделей; Stage D учитывает это явно.
+    # (osl_walkforward.py) тестирует и на 2022-2024, где преимущества нет — только там
+    # сравнение справедливо. NB: на gap-строках (сталь 2025) StructuralOSL даёт NaN → его
+    # эффективная тест-выборка УЖЕ, чем у learned-моделей; walk-forward учитывает это явно.
     train = [r for r in rows if r.period_end and r.period_end.year <= 2024]
     test = [r for r in rows if r.period_end and r.period_end.year == 2025]
     if train and test:

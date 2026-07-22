@@ -3,8 +3,8 @@ EDA панели OSL (DS-слой Russian Propagation) — headless-генера
 
 `python eda_osl.py [--industry <отрасль>]` строит ~8 графиков в docs/figures/eda[_<отрасль>]/*.png
 и пишет implications.md — по одной «импликации для модели» на каждый график (именно нарратив, а не
-картинка, для качественной EDA). Металлургия пишет в docs/figures/eda/ (исторические
-ссылки в DS_REPORT.md), остальные отрасли — в docs/figures/eda_<отрасль>/.
+картинка, для качественной EDA). Металлургия пишет в docs/figures/eda/ (на этот путь
+ссылается DS_REPORT.md), остальные отрасли — в docs/figures/eda_<отрасль>/.
 
 Параметризация зеркалит остальной харнесс: отрасль фильтрует панель (osl_panel.load_panel), а наборы
 цен/объёмов берутся из osl_models.INDUSTRY_PRICE_FEATURES / INDUSTRY_VOL_FEATURES. Issuer-специфичные
@@ -497,7 +497,7 @@ def fig_structural_residuals(df, ctx) -> str:
     return (
         f"08 Бейзлайн StructuralOSL (IN-SAMPLE, per-period цены/объёмы + скаляр k): средн |ошибка| "
         f"≈{mae:.1f}% по {len(labels)} эмитентам ({n_rows} строк). Это планка структурной физики "
-        "Q×P, которую честная out-of-sample learned-модель должна побить (Stage D). NB: k фитится "
+        "Q×P, которую честная out-of-sample learned-модель должна побить. NB: k фитится "
         f"in-sample → оценка оптимистична; реальный OOS-разрыв виден в walk-forward.{thin_note}"
     )
 

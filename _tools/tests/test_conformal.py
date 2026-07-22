@@ -65,15 +65,13 @@ def test_pharma_inside(company, conformal):
 
 
 def test_in_sample_coverage(conformal):
-    """S2.3: IN-SAMPLE покрытие ≥85%.
+    """IN-SAMPLE покрытие ≥85%.
 
     ВАЖНО: это НЕ out-of-sample валидация. Интервал калибруется и проверяется
     на ОДНИХ И ТЕХ ЖЕ захардкоженных ACTUAL_REVENUE_*_2025, поэтому метрика
     измеряет внутреннюю согласованность/остроту интервалов, а не обобщающую
-    способность модели. Настоящий temporal hold-out (калибровка на 9M →
-    проверка на 12M) требует НЕЗАВИСИМЫХ 9M-actuals из IR — см. skip-тест ниже
-    и пункт S4.2 плана. Раньше тест назывался test_overall_coverage_above_85_pct
-    и выдавал «96% покрытие» за out-of-sample (находка F5 аудита)."""
+    способность модели; выдавать эти проценты за out-of-sample нельзя.
+    Настоящий temporal hold-out — в test_holdout_coverage_metallurgy ниже."""
     import osl_metallurgy as m_met
     import osl_oilgas as m_og
     import osl_chemistry as m_chem
@@ -148,13 +146,13 @@ def test_in_sample_coverage(conformal):
 
 
 def test_holdout_coverage_metallurgy():
-    """S2.3: НАСТОЯЩИЙ temporal hold-out — РАЗБЛОКИРОВАН (DS-доработка).
+    """НАСТОЯЩИЙ temporal hold-out на независимой панели FY2021-2025 (data/panel/).
 
-    Раньше блокировался, т.к. 9M-actuals = period_share × 12M (не независимы).
-    Теперь есть независимая панель FY2021-2025 (data/panel/) → split-conformal:
-      proper-train ≤2022 → calib 2023 (относит. остатки) → ОТЛОЖЕННЫЙ test 2024-2025.
-    Годы не пересекаются, test строго в будущем → покрытие ЧЕСТНО out-of-sample
-    (а не in-sample, как perturbation-интервалы в этом же модуле).
+    Split-conformal: proper-train ≤2022 → calib 2023 (относит. остатки) →
+    ОТЛОЖЕННЫЙ test 2024-2025. Годы не пересекаются, test строго в будущем →
+    покрытие ЧЕСТНО out-of-sample (а не in-sample, как perturbation-интервалы
+    в этом же модуле). 9M-actuals для hold-out не годятся: они считаются как
+    period_share × 12M, то есть не независимы от проверяемой величины.
     """
     import osl_panel
     import conformal_split as CS

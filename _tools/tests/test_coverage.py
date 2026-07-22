@@ -8,7 +8,7 @@ output/osl_metrics/*.json (они в .gitignore) → тест детермини
 
 import json
 
-import coverage_tiers as coverage  # модуль переименован из coverage.py (шадовил lib `coverage`/pytest-cov)
+import coverage_tiers as coverage  # имя coverage_tiers, чтобы не шадовить lib `coverage`/pytest-cov
 import osl_models
 
 REPO = coverage.REPO
@@ -24,7 +24,7 @@ def _man():
 def _stable(md_text: str) -> list:
     """Строки доку БЕЗ таблицы живых чисел: она зависит от версии sklearn/окружения (MAPE из
     walk-forward), поэтому из сравнения исключается. Остальное — детерминированно из манифеста,
-    и именно там был frontmatter-дрейф, который ловит фриш-тест."""
+    и именно там ручная правка даёт дрейф frontmatter, который ловит этот тест."""
     out, skip = [], False
     for ln in md_text.splitlines():
         if ln.startswith("## Валидированные отрасли"):
@@ -128,7 +128,8 @@ def test_rejected_candidates_documented_and_absent():
 def test_committed_doc_matches_generator():
     """Закоммиченный COVERAGE_TIERS.md == вывод генератора ВНЕ таблицы живых чисел (числа зависят
     от версии sklearn → сравниваем детерминированную манифест-driven часть). Ловит ручные правки
-    сгенерированного файла (как был frontmatter-дрейф). Не требует output/ JSON → clean-clone-safe.
+    сгенерированного файла (типичный случай — дрейф frontmatter). Не требует output/ JSON →
+    clean-clone-safe.
     """
     gen = _stable(coverage.render_markdown())
     committed = _stable(coverage.DOC.read_text(encoding="utf-8"))

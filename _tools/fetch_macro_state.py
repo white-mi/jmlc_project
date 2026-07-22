@@ -1,13 +1,13 @@
 """
-S4.1 (ROADMAP A1) — авто-обновление current_state в data/macro_state.json.
+Авто-обновление current_state в data/macro_state.json.
 
-Раньше current_state правился вручную (на свежей новости обнаруживалось устаревшее
-значение КС). Скрипт тянет КС / USD-RUB / Brent / инфляцию из открытых источников
-и перезаписывает ТОЛЬКО блок current_state (baseline и historical_snapshots не
-трогаются — изоляция данных сохраняется).
+Скрипт тянет КС / USD-RUB / Brent / инфляцию из открытых источников и
+перезаписывает ТОЛЬКО блок current_state (baseline и historical_snapshots не
+трогаются — изоляция данных сохраняется). Ручная правка current_state означала бы,
+что устаревшее значение КС обнаруживается уже на разборе свежей новости.
 
-Сетевые вызовы graceful: при недоступности источника соответствующее значение
-остаётся прежним (берётся из текущего current_state), скрипт не падает.
+Сетевые вызовы graceful: при недоступности источника значение не меняется
+(берётся из текущего current_state), скрипт не падает.
 
 Использование:
   python fetch_macro_state.py                 # обновить из сети
@@ -177,7 +177,7 @@ def fetch_inflation_yoy(timeout: int = 10) -> Optional[float]:
 
 
 def fetch_all(timeout: int = 10) -> dict:
-    """Собирает доступные значения; недоступные опускает (остаются прежними)."""
+    """Собирает доступные значения; недоступные опускает (не меняются)."""
     raw = {
         "usd_rub": fetch_usd_rub(timeout),
         "key_rate": fetch_key_rate(timeout),
@@ -235,7 +235,7 @@ def _parse_set(pairs: list) -> dict:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="S4.1 — обновление current_state")
+    parser = argparse.ArgumentParser(description="Обновление current_state")
     parser.add_argument(
         "--dry-run", action="store_true", help="Показать, что было бы записано, без записи"
     )

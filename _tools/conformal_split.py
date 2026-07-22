@@ -1,6 +1,6 @@
 """
 Split-conformal интервалы на остатках калибровочного фолда → ЧЕСТНОЕ out-of-sample
-покрытие (Stage E). В отличие от perturbation-интервалов в conformal_prediction.py
+покрытие. В отличие от perturbation-интервалов в conformal_prediction.py
 (они IN-SAMPLE — острота, а не обобщение), здесь остатки берутся из периода,
 НЕ пересекающегося ни с train, ни с test, а test строго в будущем.
 

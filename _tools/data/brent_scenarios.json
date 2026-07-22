@@ -1,5 +1,5 @@
 {
-  "_comment": "S2.5: forward-сценарии Brent (pre→post) для L1.5-forward нефтегаза по подкатегориям шока. Раньше были захардкожены в run_pipeline.py. null = взять текущий Brent из macro_state (Δ=0). baseline_2025_calibration — якорь, на котором откалиброван OSL (средняя Brent 2025), НЕ трогать.",
+  "_comment": "Forward-сценарии Brent (pre→post) для L1.5-forward нефтегаза по подкатегориям шока: сценарии — данные, а не литералы в run_pipeline.py. null = взять текущий Brent из macro_state (Δ=0). baseline_2025_calibration — якорь, на котором откалиброван OSL (средняя Brent 2025), НЕ трогать.",
   "version": "0.9",
   "baseline_2025_calibration": 78.0,
   "scenarios": {

@@ -1,7 +1,7 @@
 """
 Кросс-отраслевой DS-синтез (Russian Propagation) — агрегатор уже посчитанных walk-forward результатов.
 
-`python ds_synthesis.py` читает 4 файла output/osl_metrics/<отрасль>_metrics.json (их пишет
+`python ds_synthesis.py` читает файлы output/osl_metrics/<отрасль>_metrics.json (их пишет
 osl_walkforward.py) и строит:
   • docs/figures/synthesis/mape_by_industry.png — MAPE_common по отраслям × модели (structural /
     лучшая learned / persistence). Воспроизводимо из JSON, числа не вводятся руками.

@@ -1,20 +1,20 @@
 """
-Operational Signal Layer (OSL) — Химия v0.3.
+Operational Signal Layer (OSL) — Химия.
 
-ИЗМЕНЕНИЯ v0.2 → v0.3:
-- ✅ Реальные actuals 12М 2025:
+Состав модели:
+- Бэк-тест против фактических МСФО 12М 2025:
    ФосАгро: 9М=441.7 млрд (+19.1%), 12М ≈ 590 млрд ₽; производство 9М=9.15 млн т
    Акрон: 12М=237.6 млрд ₽ (+19.92%); производство 8.983 млн т (+7%); EBITDA 91.6 (+51%)
    СИБУР: оценка ~1100-1200 млрд ₽ (закрытая отчётность)
-- ✅ Уточнённые цены FOB 2025 на основе реальной "выручка/объём":
+- Цены FOB 2025 выводятся из отношения «выручка/объём»:
    ФосАгро avg = 441.7/9.15 = ~48 274 ₽/т = $543/т (фосфаты + NPK)
    Акрон avg = 237.6/8.98 = ~26 470 ₽/т = $297/т (азотные дешевле)
-- ✅ Domestic premium для удобрений (РФ-внутр. рынок)
-- ✅ Структуры выручки уточнены
+- Domestic premium для удобрений (РФ-внутр. рынок)
 
-Концептуальное наблюдение v0.3:
-  Средневзвешенная цена/тонна оказывается лучшим прокси чем дробные цены
-  по 5 продуктам — слишком много неточностей в массовых долях.
+Спецификация цены:
+  Модель работает на средневзвешенной цене за тонну, а не на дробных ценах
+  по 5 продуктам: массовые доли продуктов известны слишком неточно, и ошибка
+  в них переносится в прогноз выручки.
 """
 
 import argparse
@@ -22,7 +22,7 @@ import sys
 from dataclasses import dataclass
 from typing import Dict, List
 
-from osl_common import RevenuePredict  # S3.1: общая структура
+from osl_common import RevenuePredict  # общая структура прогноза выручки
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
@@ -55,7 +55,7 @@ class CompanyProfile:
     notes: str = ""
 
 
-# RevenuePredict — из osl_common (S3.1)
+# RevenuePredict — из osl_common
 
 
 # ============================================================
@@ -65,7 +65,7 @@ class CompanyProfile:
 FX_AVG_2025 = 89.0  # USD/RUB
 
 PRICES = {
-    # v0.3 — откалибровано через реальные данные ФосАгро (avg $543/т) и Акрон (avg $297/т)
+    # откалибровано через данные ФосАгро (avg $543/т) и Акрон (avg $297/т)
     "urea": FertilizerPrice("urea", 380, source="Argus FOB Балтика avg 2025"),
     "mai": FertilizerPrice("mai", 600, source="Argus MAP/DAP avg 2025"),
     "potash": FertilizerPrice("potash", 280, source="IFA avg 2025"),
@@ -90,7 +90,7 @@ PRICES = {
 # ПРОИЗВОДСТВЕННЫЕ СИГНАЛЫ 12М 2025
 # ============================================================
 
-# v0.3 — calibrated через avg-price-per-ton модель
+# calibrated через avg-price-per-ton модель
 # ФосАгро: 9М 2025 — 9.15 млн т → 12М ≈ 12.2 млн т (продление тренда)
 PHOSAGRO_PRODUCTION = [
     FertilizerProduction(
@@ -155,11 +155,11 @@ PROFILES = {
         other_income_pct=0.20,  # услуги + торговля + переработка ШФЛУ
         domestic_share=0.55,
         domestic_premium_pct=0.10,
-        notes="Полимеры + услуги + ШФЛУ-торговля; CAPEX АГХК; v0.3 calibrated",
+        notes="Полимеры + услуги + ШФЛУ-торговля; CAPEX АГХК; calibrated",
     ),
 }
 
-# v0.3 — реальные actuals из открытых источников
+# фактические значения выручки из открытых источников
 ACTUAL_REVENUE_2025 = {
     "ФосАгро": {
         "rub_bn": 590,
@@ -281,7 +281,7 @@ def backtest_one(predict: RevenuePredict) -> RevenuePredict:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="OSL — Химия v0.9")
+    parser = argparse.ArgumentParser(description="OSL — Химия")
     parser.add_argument("--company", choices=list(PROFILES.keys()) + ["all"], default="all")
     args = parser.parse_args()
 

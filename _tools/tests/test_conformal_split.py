@@ -75,8 +75,8 @@ def test_intervals_valid_on_panel():
 
 def test_temporal_holdout_disjoint_years():
     """Реальный сплит temporal_holdout: proper/calib/test строго хронологичны и не пересекаются
-    (out-of-sample). Проверяется на разбиении, которое ВОЗВРАЩАЕТ функция, — ловит регрессию
-    границ окна; прежняя версия переписывала сплит в тесте и проверяла определительную истину."""
+    (out-of-sample). Проверяется разбиение, которое ВОЗВРАЩАЕТ функция, — так тест ловит
+    регрессию границ окна, а переписанный инлайн сплит проверял бы определительную истину."""
     rows = _rows()
     _need(rows)
     res = CS.temporal_holdout(rows, Mo.MODELS["structural_osl"])
