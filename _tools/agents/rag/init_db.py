@@ -1,5 +1,5 @@
 """
-RAG v1.1 — инициализация БД для хранения news embeddings и метаданных.
+RAG — инициализация БД для хранения news embeddings и метаданных.
 
 Создаёт SQLite-БД с расширением sqlite-vec для cosine similarity поиска.
 Если sqlite-vec не подгружается — fallback на чистый SQLite + Python cosine.
@@ -56,9 +56,18 @@ def init_db(db_path: Path = DB_PATH, embedding_dim: int = 384) -> sqlite3.Connec
             industries TEXT,
             shock_summary TEXT,
             actual_outcome_summary TEXT,
+            doc_type TEXT DEFAULT 'news',
+            has_what INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+
+    # Миграция БД, созданных до появления doc_type/has_what (CREATE IF NOT EXISTS их не добавит).
+    existing = {row[1] for row in conn.execute("PRAGMA table_info(news_analyses)")}
+    if "doc_type" not in existing:
+        conn.execute("ALTER TABLE news_analyses ADD COLUMN doc_type TEXT DEFAULT 'news'")
+    if "has_what" not in existing:
+        conn.execute("ALTER TABLE news_analyses ADD COLUMN has_what INTEGER DEFAULT 0")
 
     # Векторная таблица (если sqlite-vec доступен)
     if vec_loaded:
@@ -91,6 +100,7 @@ def init_db(db_path: Path = DB_PATH, embedding_dim: int = 384) -> sqlite3.Connec
     conn.execute("CREATE INDEX IF NOT EXISTS idx_macro_region ON news_analyses(macro_region)")
     conn.execute("CREATE INDEX IF NOT EXISTS idx_date ON news_analyses(date)")
     conn.execute("CREATE INDEX IF NOT EXISTS idx_severity ON news_analyses(severity_score)")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_doc_type ON news_analyses(doc_type)")
 
     # Сохраняем флаг наличия sqlite-vec
     conn.execute("CREATE TABLE IF NOT EXISTS db_meta (key TEXT PRIMARY KEY, value TEXT)")
@@ -106,7 +116,7 @@ def init_db(db_path: Path = DB_PATH, embedding_dim: int = 384) -> sqlite3.Connec
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("  RAG v1.1 — DB initialization")
+    print("  RAG — DB initialization")
     print("=" * 60)
     conn = init_db()
 

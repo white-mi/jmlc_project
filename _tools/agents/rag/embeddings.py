@@ -1,5 +1,5 @@
 """
-RAG v1.1 — embedding provider с двумя режимами.
+RAG — embedding provider с двумя режимами.
 
 Режимы:
 1. TF-IDF (default, всегда работает): sklearn TfidfVectorizer + усечение/паддинг до 384
@@ -17,17 +17,37 @@ if hasattr(sys.stdout, "reconfigure"):
 
 EMBEDDING_DIM = 384
 
-# S3.3: единый источник истины для выбора эмбеддера. Управляет И индексацией,
+# Имена пространств эмбеддингов. Пишутся в `db_meta` при индексации и сверяются при запросе:
+# косинусы из разных пространств несопоставимы, поэтому смешение — ошибка, а не «чуть хуже».
+EMBEDDER_TFIDF = "tfidf"
+EMBEDDER_E5 = "e5-small"
+
+# Пороги similarity зависят от эмбеддера и НЕ переносятся между ними.
+# Числа не «на глаз», а по замеру на реальном gold-set (38 запросов, `--gold real`):
+#   TF-IDF: top1-косинус min 0.00 / медиана 0.73 / max 0.99, разрыв top1↔top2 медиана 0.33
+#           → порог реально отсекает мусор, 0.15 консервативен.
+#   e5    : top1-косинус min 0.83 / медиана 0.86 / max 0.89, разрыв top1↔top2 медиана 0.017
+#           → абсолютный косинус почти не разделяет документы. Порог 0.80 работает только
+#             как грубый отсекатель полного мусора; настоящая фильтрация у e5 — это top_k
+#             и метадата-фильтры, а не значение косинуса. Порог 0.86 (медиана!) отрезал бы
+#             половину правильных ответов — поэтому «перенести порог TF-IDF на e5» и
+#             «взять красивое число» одинаково неверно.
+DEFAULT_THRESHOLDS = {EMBEDDER_TFIDF: 0.15, EMBEDDER_E5: 0.80}
+
+# Единый источник истины для выбора эмбеддера. Управляет И индексацией,
 # И поиском — чтобы вектора в БД и вектор запроса были в ОДНОМ пространстве.
-# Default off (TF-IDF, всегда доступен). Включить нейроэмбеддинги e5-small:
-#   1) pip install sentence-transformers
-#   2) set RADAR_RAG_USE_ST=1
-#   3) переиндексировать БД: python index_news.py  (полный реиндекс)
-RAG_USE_ST = os.environ.get("RADAR_RAG_USE_ST", "0") == "1"
+# Default ON (e5-small): на gold-set он даёт precision@1 100 % против 92 % у TF-IDF
+# (docs/EVAL.md). TF-IDF остаётся детерминированным фолбэком без сети и torch —
+# его включают через `RADAR_RAG_USE_ST=0` (так работает CI и так же выставляет conftest,
+# чтобы тесты не тянули тяжёлую модель).
+# Смена флага = смена пространства ⇒ обязателен полный реиндекс: python index_news.py
+RAG_USE_ST = os.environ.get("RADAR_RAG_USE_ST", "1") == "1"
 
 
 class TfidfEmbedder:
     """TF-IDF embedder с PCA-усечением до EMBEDDING_DIM. Работает без тяжёлых моделей."""
+
+    name = EMBEDDER_TFIDF
 
     def __init__(self, max_features: int = 5000):
         from sklearn.feature_extraction.text import TfidfVectorizer
@@ -76,18 +96,27 @@ class TfidfEmbedder:
         return embedding.astype(np.float32)
 
 
+# Кэш загруженных ST-моделей: find_analogs создаёт эмбеддер на КАЖДЫЙ запрос, и без кэша
+# eval на 38 запросах перезагружает модель 38 раз (минуты вместо секунд).
+_ST_MODEL_CACHE: dict[str, object] = {}
+
+
 class SentenceTransformerEmbedder:
     """Wrapper над sentence-transformers (если установлен)."""
+
+    name = EMBEDDER_E5
 
     def __init__(self, model_name: str = "intfloat/multilingual-e5-small"):
         # multilingual-e5-small = 384 dim (соответствует EMBEDDING_DIM)
         # multilingual-e5-large = 1024 dim (требует другую vec0 dim)
         try:
-            from sentence_transformers import SentenceTransformer
+            if model_name not in _ST_MODEL_CACHE:
+                from sentence_transformers import SentenceTransformer
 
-            self.model = SentenceTransformer(model_name)
+                _ST_MODEL_CACHE[model_name] = SentenceTransformer(model_name)
+                print(f"  ✅ SentenceTransformer loaded: {model_name}", file=sys.stderr)
+            self.model = _ST_MODEL_CACHE[model_name]
             self.available = True
-            print(f"  ✅ SentenceTransformer loaded: {model_name}")
         except ImportError:
             print("  ⚠️ sentence-transformers не установлен.")
             print("     Для production: pip install sentence-transformers")
@@ -126,6 +155,20 @@ def get_embedder(prefer_st: bool = RAG_USE_ST):
     return TfidfEmbedder()
 
 
+def embedder_name(embedder) -> str:
+    """Имя пространства эмбеддингов (`tfidf` / `e5-small`) — то, что пишется в `db_meta`.
+
+    Отдельная функция, а не только атрибут: эмбеддер может прийти из joblib-артефакта,
+    сохранённого до появления `name`.
+    """
+    return getattr(embedder, "name", EMBEDDER_TFIDF)
+
+
+def default_threshold(name: str) -> float:
+    """Порог similarity для конкретного пространства (см. DEFAULT_THRESHOLDS)."""
+    return DEFAULT_THRESHOLDS.get(name, DEFAULT_THRESHOLDS[EMBEDDER_TFIDF])
+
+
 # --- Персист фитнутого TF-IDF-эмбеддера (единый базис index↔query) -----------------
 # Косинусы сопоставимы только в одном SVD-базисе, поэтому фитнутый TF-IDF персистится при
 # индексации и загружается при запросе — index и query кодируются одним эмбеддером. ST-путь
@@ -133,12 +176,19 @@ def get_embedder(prefer_st: bool = RAG_USE_ST):
 
 
 def save_embedder(embedder, path) -> bool:
-    """Сохранить фитнутый TF-IDF-эмбеддер (joblib). Возвращает True если сохранён."""
+    """Сохранить фитнутый TF-IDF-эмбеддер (joblib). Возвращает True если сохранён.
+
+    Если эмбеддер не персистится (ST-модель предобучена), СТАРЫЙ артефакт удаляется:
+    иначе после реиндекса на e5 запрос грузил бы протухший TF-IDF-базис и искал в чужом
+    пространстве.
+    """
     if isinstance(embedder, TfidfEmbedder) and embedder.fitted:
         import joblib
 
         joblib.dump(embedder, str(path))
         return True
+    if os.path.exists(str(path)):
+        os.remove(str(path))
     return False
 
 
@@ -157,7 +207,7 @@ def load_embedder(path):
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("  RAG v1.1 — Embedding provider test")
+    print("  RAG — Embedding provider test")
     print("=" * 60)
 
     embedder = get_embedder(prefer_st=False)  # force TF-IDF for test

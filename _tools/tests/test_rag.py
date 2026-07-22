@@ -1,4 +1,4 @@
-"""Тест RAG-индексации (S1.2): index_single делает UPSERT и НЕ стирает корпус."""
+"""Тест RAG-индексации: index_single делает UPSERT и НЕ стирает корпус."""
 
 import sqlite3
 import sys

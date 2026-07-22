@@ -101,7 +101,7 @@ Multi-agent решает все 4 проблемы.
 | **`orchestrator.py`** | ✅ Реальный Python-orchestrator — прогон 5 агентов на одной новости |
 | `rag_template.md` | Шаблон RAG-системы (спецификация) |
 | **`rag/init_db.py`** | ✅ Инициализация SQLite + sqlite-vec БД эмбеддингов |
-| **`rag/embeddings.py`** | ✅ Эмбеддер: по умолчанию TF-IDF, опц. e5-small через env `RADAR_RAG_USE_ST` |
+| **`rag/embeddings.py`** | ✅ Эмбеддер: по умолчанию e5-small, TF-IDF через env `RADAR_RAG_USE_ST=0` |
 | **`rag/index_news.py`** | ✅ Индексация анализов: `index_single` (UPSERT) + `index_all` |
 | **`rag/find_analogs.py`** | ✅ Поиск исторических аналогов по cosine similarity |
 
@@ -109,7 +109,7 @@ Multi-agent решает все 4 проблемы.
 
 ## Как запустить
 
-**Автоматически (реальный orchestrator, v0.9):**
+**Автоматически (`orchestrator.py`):**
 
 ```bash
 python orchestrator.py --news-file news.txt --source "ТАСС" --date 2026-06-15 --llm-mode cli
@@ -124,15 +124,15 @@ python orchestrator.py --news-file news.txt --source "ТАСС" --date 2026-06-1
 
 ## Состояние
 
-**v1.0 промпты (2026-04-25):** ✅ промпты агентов написаны как markdown-инструкции, готовы к использованию.
+**Промпты агентов:** ✅ написаны как markdown-инструкции, готовы к использованию.
 
-**RAG — ✅ реализован (v0.9, июнь 2026):** реальный код в `rag/*.py` (`init_db`, `embeddings`, `find_analogs`, `index_news`). Локальная БД эмбеддингов всех проанализированных новостей (SQLite + sqlite-vec). Эмбеддер по умолчанию — TF-IDF (всегда доступен, без тяжёлых моделей); опционально нейросетевой e5-small (`intfloat/multilingual-e5-small`, 384d) через env `RADAR_RAG_USE_ST=1` + reindex, с graceful fallback на TF-IDF (не FinBERT по умолчанию). Индексация: `index_single` (UPSERT, не стирает БД) + `index_all`.
+**RAG — ✅ реализован:** код в `rag/*.py` (`init_db`, `embeddings`, `find_analogs`, `index_news`). Локальная БД эмбеддингов всех проанализированных новостей (SQLite + sqlite-vec). Эмбеддер по умолчанию — нейросетевой e5-small (`intfloat/multilingual-e5-small`, 384d); TF-IDF включается через env `RADAR_RAG_USE_ST=0` (так работает CI: без сети и тяжёлых моделей) и служит graceful fallback, если модель недоступна. Смена эмбеддера требует реиндекса — пространства несовместимы, и `find_analogs` явно падает при расхождении с `db_meta`. Индексация: `index_single` (UPSERT, не стирает БД) + `index_all`.
 
-**Retrieval-качество (sanity):** `eval_rag.py` на синтетическом gold-set (`data/rag_gold_set.json`, 10 доков × 12 запросов) — **precision@1 92% (11/12), MRR 0.92** на TF-IDF (малый-N=12, не бенчмарк; e5 поднял бы за счёт синонимии). Единый index/query-базис (персист фитнутого эмбеддера) валидирован.
+**Retrieval-качество:** меряется на двух наборах — реальном (38 ретро-разборов из `_Анализы/_история/` × 38 запросов-парафразов) и быстром синтетическом (10×12). e5-small: **precision@1 0.66 / recall@5 0.84** на реальном и 1.00 на синтетическом; TF-IDF: 0.58 / 0.76 и 0.92. Пороги гейтятся тестами `tests/test_rag_eval.py`, разбор промахов и A/B эмбеддеров — [docs/EVAL.md](../../docs/EVAL.md). Воспроизведение: `python eval_rag.py --gold real`.
 
-**Orchestrator — ✅ реализован (v0.9, июнь 2026):** `orchestrator.py` — автозапуск pipeline на новости (`--llm-mode cli|sdk|dry-run`).
+**Orchestrator — ✅ реализован:** `orchestrator.py` — автозапуск pipeline на новости (`--llm-mode cli|sdk|dry-run`).
 
-**Впереди:** out-of-sample калибровка RAG, cross-encoder rerank, расширение на новости из открытых источников (не только наши анализы).
+**Впереди:** out-of-sample калибровка RAG, cross-encoder rerank, расширение на новости из открытых источников (не только собственные анализы).
 
 ---
 

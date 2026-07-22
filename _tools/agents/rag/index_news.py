@@ -1,5 +1,5 @@
 """
-RAG v1.1 — индексация анализов из _Анализы/ в БД.
+RAG — индексация анализов из _Анализы/ в БД.
 
 Парсит markdown-файлы с frontmatter, генерирует embeddings, сохраняет в БД.
 """
@@ -18,6 +18,17 @@ if hasattr(sys.stdout, "reconfigure"):
 ANALYSES_DIR = Path(__file__).parent.parent.parent.parent / "_Анализы"
 DB_PATH = Path(__file__).parent / "radar_rag.db"
 
+# Подпапки корпуса: индексируем разборы событий (корень + _история), но НЕ журналы
+# разработки и не батч-выгрузки — они не являются «историческими аналогами шока».
+INDEXED_SUBDIRS = ("_история",)
+EXCLUDED_SUBDIRS = ("_журнал", "_batch")
+
+# Размеры текстовых фрагментов (см. docs/EVAL.md — «стратегия чанкинга»). Ретрив-единица
+# здесь — весь разбор события, поэтому это не sliding-window чанкинг, а извлечение полей;
+# обрезка делается по границе предложения, а не по символу.
+WHAT_MAX_CHARS = 700
+SUMMARY_MAX_CHARS = 300
+
 # BLOB-таблица эмбеддингов для режима без sqlite-vec (numpy-cosine fallback).
 FALLBACK_EMB_DDL = """
     CREATE TABLE IF NOT EXISTS news_embeddings_fallback (
@@ -32,6 +43,113 @@ FALLBACK_EMB_DDL = """
 def _embedder_path(db_path):
     """Путь к персистнутому TF-IDF-эмбеддеру рядом с БД (общий базис index↔query)."""
     return Path(str(db_path) + ".embedder.joblib")
+
+
+def _clean_markdown(s: str) -> str:
+    """Снять разметку, которая мешает эмбеддингу: пайпы таблиц, разделители, жирный,
+    вики-ссылки, сноски. Boilerplate шапок таблиц («Параметр | Значение») одинаков во всех
+    разборах и искусственно сближает их векторы — поэтому чистим до кодирования."""
+    s = re.sub(r"^\s*\|?\s*-{2,}[\s|:-]*\|?\s*$", " ", s, flags=re.MULTILINE)  # |---|---|
+    s = re.sub(r"\[\[([^\]|]+)\|?[^\]]*\]\]", r"\1", s)  # [[ссылка|текст]] → ссылка
+    s = re.sub(r"\[([^\]]+)\]\([^)]*\)", r"\1", s)  # [текст](url) → текст
+    s = re.sub(r"\[\^[^\]]+\]", " ", s)  # сноски
+    s = s.replace("|", " ").replace("*", "").replace("`", "").replace(">", " ")
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def _truncate_sentence(s: str, limit: int) -> str:
+    """Обрезка по границе предложения, а не по символу (иначе режем середину таблицы/слова)."""
+    if len(s) <= limit:
+        return s
+    head = s[:limit]
+    cut = max(head.rfind(". "), head.rfind("! "), head.rfind("? "), head.rfind("; "))
+    # откатываемся к границе, только если она не отрезает больше 40% фрагмента
+    return head[: cut + 1].strip() if cut >= int(limit * 0.6) else head.rstrip()
+
+
+def _section(text: str, header_re: str) -> str:
+    """Тело секции по регэкспу её заголовка (до следующего ## или конца файла)."""
+    m = re.search(rf"^##\s*{header_re}[^\n]*\n(.+?)(?=^##\s|\Z)", text, re.DOTALL | re.MULTILINE)
+    return m.group(1).strip() if m else ""
+
+
+def extract_what(text: str) -> str:
+    """Каскад извлечения WHAT («что произошло») из разбора.
+
+    Источники пробуются от самого точного к самому общему. Опора на единственный источник
+    (секцию `## L0`) означала бы, что у документа без неё `what_text` равен заголовку,
+    и оба «независимых» вектора документа совпадают буквально.
+    """
+    l0 = _section(text, r"L0")
+    if l0:
+        # 1) строка таблицы «Что произошло / Что случилось / Что» — самый точный источник
+        row = re.search(
+            r"^\s*\|\s*\**\s*(?:Что произошло|Что случилось|Что)\s*\**\s*\|(.+?)\|?\s*$",
+            l0,
+            re.MULTILINE | re.IGNORECASE,
+        )
+        if row:
+            cleaned = _clean_markdown(row.group(1))
+            if cleaned:
+                return cleaned
+    # 2) буллет «**WHAT:** …» / «**Что:** …»
+    bullet = re.search(r"^[-*]?\s*\**\s*(?:WHAT|Что)\s*:\**\s*(.+)$", text, re.MULTILINE)
+    if bullet:
+        cleaned = _clean_markdown(bullet.group(1))
+        if cleaned:
+            return cleaned
+    # 3) цитата новости в «## Источник» — это сам текст события, лучший материал для ретрива
+    src = _section(text, r"Источник")
+    if src:
+        quote = "\n".join(ln for ln in src.splitlines() if ln.lstrip().startswith(">"))
+        cleaned = _clean_markdown(quote)
+        if len(cleaned) > 40:
+            return cleaned
+    # 4) TL;DR / Итог
+    for header in (r"TL;?DR", r"Итог", r"Что было дальше"):
+        sec = _section(text, header)
+        if sec:
+            cleaned = _clean_markdown(sec)
+            if cleaned:
+                return cleaned
+    # 5) вся секция L0 без разметки (у части разборов это таблица классификации — слабый,
+    #    но всё же непустой сигнал, лучше чем дубль заголовка)
+    if l0:
+        cleaned = _clean_markdown(l0)
+        if cleaned:
+            return cleaned
+    # 6) первый содержательный абзац после H1
+    body = re.sub(r"^#\s+[^\n]*\n", "", text, count=1, flags=re.MULTILINE)
+    for para in re.split(r"\n\s*\n", body):
+        p = para.strip()
+        if not p or p.startswith(("#", ">", "|", "---", "![")):
+            continue
+        cleaned = _clean_markdown(p)
+        if len(cleaned) > 40:
+            return cleaned
+    return ""
+
+
+def detect_doc_type(fm: dict, title: str, file_path: Path, text: str = "") -> str:
+    """news | retro | digest | devlog. Явный `doc_type` во frontmatter имеет приоритет.
+
+    Журналы разработки («OSL v0.3 final», «Conformal v0.5») — не разборы событий и не должны
+    возвращаться как «исторические аналоги шока»; ретрив по умолчанию их отсекает.
+    """
+    explicit = str(fm.get("doc_type") or "").strip().lower()
+    if explicit in {"news", "retro", "digest", "devlog"}:
+        return explicit
+    if "_история" in file_path.parts:
+        return "retro"
+    if "дайджест" in title.lower() or "дайджест" in file_path.stem.lower():
+        return "digest"
+    if str(fm.get("шок_категория") or "").strip():
+        return "news"
+    # Секция «## L0 — Классификация» = документ прошёл классификацию шока → это разбор события,
+    # даже если frontmatter неполный (часть ранних разборов писалась без `шок_категория`).
+    if re.search(r"^##\s*L0\b", text, re.MULTILINE):
+        return "news"
+    return "devlog"
 
 
 def parse_markdown_analysis(file_path: Path) -> dict:
@@ -51,16 +169,13 @@ def parse_markdown_analysis(file_path: Path) -> dict:
                 fm = {}
             text = text[fm_end + 5 :]
 
-    # Заголовок (первый # )
+    # Заголовок (первый # ); служебный префикс «Анализ новости — » не несёт сигнала
     title_match = re.search(r"^# (.+?)$", text, re.MULTILINE)
     title = title_match.group(1).strip() if title_match else file_path.stem
+    title = re.sub(r"^Анализ новости\s*[—–-]\s*", "", title).strip()
 
-    # WHAT — обычно в L0 секции или в Источнике
-    what_match = re.search(r"## L0[^\n]*\n(.+?)(?=##|\Z)", text, re.DOTALL)
-    what = what_match.group(1).strip()[:500] if what_match else ""
-
-    # Полный текст для full embedding
-    full_text = text[:3000]  # ограничение для эмбеддинга
+    # WHAT — каскад источников (см. extract_what)
+    what = _truncate_sentence(extract_what(text), WHAT_MAX_CHARS)
 
     # Извлекаем регион из заголовка / тегов
     macro_region = ""
@@ -119,11 +234,27 @@ def parse_markdown_analysis(file_path: Path) -> dict:
         "macro_region": macro_region,
         "micro_region": micro_region,
         "industries": "",  # пока не извлекаем
-        "shock_summary": what[:300],
+        "shock_summary": _truncate_sentence(what, SUMMARY_MAX_CHARS),
         "actual_outcome_summary": "",
-        "full_text": full_text,
+        "doc_type": detect_doc_type(fm, title, file_path, text),
+        # has_what=0 → второго независимого вектора у документа нет: what_text падает
+        # обратно на title, и векторы совпали бы буквально. Флаг фиксирует это явно,
+        # и find_analogs не учитывает what-вектор для таких документов.
+        "has_what": 1 if what and what.strip() != title.strip() else 0,
         "what_text": what or title,
     }
+
+
+def iter_corpus_files(analyses_dir: Path) -> list[Path]:
+    """Файлы корпуса для индексации: корень `_Анализы/` + `_история/` (ретро-разборы).
+
+    `_журнал/` (журналы разработки) и `_batch/` (пакетные выгрузки) исключены: они не
+    являются разборами событий, а как «исторические аналоги» только шумят.
+    """
+    files = [p for p in analyses_dir.glob("*.md")]
+    for sub in INDEXED_SUBDIRS:
+        files.extend((analyses_dir / sub).glob("*.md"))
+    return sorted(f for f in files if not set(f.parts) & set(EXCLUDED_SUBDIRS))
 
 
 def _connect(db_path: Path):
@@ -164,8 +295,8 @@ def _write_row(conn, embedder, data: dict, vec_loaded: bool) -> None:
         INSERT INTO news_analyses
         (file_path, date, title, main_category, subcategory, severity_score,
          severity_level, impact_horizon, macro_region, micro_region,
-         industries, shock_summary, actual_outcome_summary)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         industries, shock_summary, actual_outcome_summary, doc_type, has_what)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """,
         (
             data["file_path"],
@@ -181,6 +312,8 @@ def _write_row(conn, embedder, data: dict, vec_loaded: bool) -> None:
             data["industries"],
             data["shock_summary"],
             data["actual_outcome_summary"],
+            data.get("doc_type", "news"),
+            data.get("has_what", 0),
         ),
     )
     news_id = cursor.lastrowid
@@ -201,6 +334,20 @@ def _write_row(conn, embedder, data: dict, vec_loaded: bool) -> None:
         )
 
 
+def _record_embedder(conn, embedder) -> None:
+    """Записать пространство эмбеддингов в `db_meta`.
+
+    Без этой отметки БД, проиндексированная TF-IDF, молча искалась бы e5-запросом (и наоборот):
+    косинусы из разных пространств несопоставимы, выдача превращалась бы в шум без единой ошибки.
+    """
+    from embeddings import embedder_name
+
+    conn.execute("CREATE TABLE IF NOT EXISTS db_meta (key TEXT PRIMARY KEY, value TEXT)")
+    conn.execute(
+        "INSERT OR REPLACE INTO db_meta VALUES ('embedder', ?)", (embedder_name(embedder),)
+    )
+
+
 def _load_corpus_texts(conn) -> list[str]:
     """Тексты существующего корпуса (title + shock_summary) для fit embedder."""
     texts = []
@@ -213,7 +360,7 @@ def _load_corpus_texts(conn) -> list[str]:
 
 
 def index_single(file_path, db_path: Path = DB_PATH, use_st: bool | None = None) -> bool:
-    """Инкрементально индексирует ОДИН файл анализа (S1.2): UPSERT без стирания БД.
+    """Инкрементально индексирует ОДИН файл анализа: UPSERT без стирания БД.
 
     Использует ПЕРСИСТНУТЫЙ эмбеддер (из index_all): новый док лишь трансформируется в
     существующем базисе → его вектор консистентен и с БД, и с запросом (find_analogs грузит
@@ -243,6 +390,7 @@ def index_single(file_path, db_path: Path = DB_PATH, use_st: bool | None = None)
             embedder.fit(corpus)
             save_embedder(embedder, _embedder_path(db_path))
         _write_row(conn, embedder, data, vec_loaded)
+        _record_embedder(conn, embedder)
         conn.commit()
     finally:
         conn.close()
@@ -263,7 +411,7 @@ def index_all(
         print(f"  ❌ Папка анализов не найдена: {analyses_dir}")
         return 0
 
-    md_files = sorted(analyses_dir.glob("*.md"))
+    md_files = iter_corpus_files(analyses_dir)
     print(f"  Найдено {len(md_files)} файлов анализов")
 
     parsed = []
@@ -302,6 +450,7 @@ def index_all(
             _write_row(conn, embedder, data, vec_loaded)
             indexed += 1
             print(f"  [{indexed}/{len(parsed)}] {data['date']} | {data['title'][:60]}...")
+        _record_embedder(conn, embedder)
         conn.commit()
     finally:
         conn.close()

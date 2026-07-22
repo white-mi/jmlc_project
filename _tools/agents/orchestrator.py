@@ -1,5 +1,5 @@
 """
-Multi-Agent Pipeline Orchestrator (v0.9).
+Multi-Agent Pipeline Orchestrator.
 
 Прогон 5 агентов на одной новости через Anthropic SDK:
   Agent 1 (Classifier) → Agent 2 (Context-RAG) → Agent 3 (Backtest-Analog)
@@ -37,17 +37,19 @@ RAG_DIR = AGENTS_DIR / "rag"
 RADAR_ROOT = AGENTS_DIR.parent.parent  # _tools/agents/orchestrator.py → Макро-радар/
 ANALYSES_DIR = RADAR_ROOT / "_Анализы"
 
-# S2.4: путь к _tools для импорта run_pipeline (реальные OSL-числа для Agent 4)
+# путь к _tools для импорта run_pipeline (реальные OSL-числа для Agent 4)
 sys.path.insert(0, str(TOOLS_DIR))
 
 DEFAULT_MODEL = "opus"  # alias подходит и для CLI (--model opus), и для SDK
 TIMEOUT_SECONDS = 300
 DEFAULT_LLM_MODE = "cli"  # 'cli' | 'sdk' | 'dry-run'
 
-# S1.4: минимальное косинусное сходство для RAG-аналогов. Было 0.0 (фильтр
-# отключён → вся БД уходила в Agent 3). TF-IDF даёт низкие cos, поэтому порог
-# умеренный; при переходе на нейроэмбеддинги (S3.3) можно поднять до ~0.5.
-RAG_MIN_SIMILARITY = 0.15
+# Минимальное косинусное сходство для RAG-аналогов: без порога в Agent 3 уходит вся БД.
+# Порог зависит от пространства эмбеддингов (TF-IDF 0.15 / e5 0.80) и по умолчанию
+# разрешается внутри find_analogs — фиксированное число здесь означало бы «для e5
+# фильтра нет». Переопределить можно env RAG_MIN_SIMILARITY.
+_RAG_MIN_SIMILARITY_ENV = os.environ.get("RAG_MIN_SIMILARITY")
+RAG_MIN_SIMILARITY = float(_RAG_MIN_SIMILARITY_ENV) if _RAG_MIN_SIMILARITY_ENV else None
 RAG_MAX_ANALOGS = 5  # cap на число инжектируемых аналогов (защита контекста)
 
 # Подключаем RAG-модуль для прямого Python-импорта
@@ -81,7 +83,7 @@ def fill_prompt(template: str, substitutions: dict) -> str:
 
 
 def _balance_braces(candidate: str) -> str:
-    """Достраивает закрывающие скобки/кавычки для обрезанного JSON (S1.5).
+    """Достраивает закрывающие скобки/кавычки для обрезанного JSON.
 
     Идёт по строке, учитывая строковые литералы и экранирование, и добавляет
     недостающие ", ] и } в конец — чтобы каскадно не падать на truncated-ответе LLM.
@@ -122,7 +124,7 @@ def extract_json(text: str) -> dict:
     """Извлекает JSON из ответа LLM (может быть обёрнут в ```json ... ```).
 
     При обрезанном/неполном JSON пытается достроить закрывающие скобки
-    через _balance_braces, чтобы не давать каскадный отказ (S1.5)."""
+    через _balance_braces, чтобы не давать каскадный отказ."""
     # 1) ```json ... ``` — допускаем и незакрытый code-fence
     match = re.search(r"```(?:json)?\s*\n(.*)```", text, re.DOTALL)
     if match:
@@ -232,7 +234,7 @@ def fetch_analogs(
             query_text=query_text[:500],
             subcategory=subcategory_filter,
             top_k=min(top_k, RAG_MAX_ANALOGS),
-            threshold=RAG_MIN_SIMILARITY,  # S1.4: фильтрация включена
+            threshold=RAG_MIN_SIMILARITY,  # отсечение нерелевантных аналогов
         )
         # Чистим непригодные для JSON-сериализации поля
         clean = []
@@ -274,7 +276,7 @@ def reindex_rag(analysis_path: Path) -> bool:
 
 
 def compute_osl_results(subcat: Optional[str]) -> dict:
-    """S2.4: реальные OSL/conformal-числа для затронутых отраслей (для Agent 4).
+    """Реальные OSL/conformal-числа для затронутых отраслей (для Agent 4).
 
     subcat — подкатегория шока (например '1.2'). Переиспользует маршрутизацию и
     osl_for_industry из run_pipeline. При сбоях возвращает {'error': ...},
@@ -323,7 +325,7 @@ def run_agent(
     }
     agent_path = AGENTS_DIR / agent_files[agent_num]
     template = extract_prompt(agent_path)
-    # S1.1: подставляем корни хранилища вместо захардкоженных путей в промптах.
+    # подставляем корни хранилища вместо захардкоженных путей в промптах.
     # <VAULT_ROOT> = D:\...\claudeT, <RADAR_ROOT> = .../Макро-радар.
     substitutions = {
         "VAULT_ROOT": str(RADAR_ROOT.parent),
@@ -339,7 +341,7 @@ def run_agent(
             return extract_json(response)
         except (json.JSONDecodeError, ValueError) as e:
             print(f"    [WARN] JSON parse error: {e}", file=sys.stderr)
-            # S1.5: явный флаг сбоя вместо тихой передачи битого state дальше.
+            # явный флаг сбоя вместо тихой передачи битого state дальше.
             return {"_raw": response, "_error": str(e), "_l0_failed": True}
     return response
 
@@ -398,7 +400,7 @@ def run_pipeline(
         3, {"STATE_JSON": state, "RAG_ANALOGS": analogs}, model=model, llm_mode=llm_mode
     )
 
-    # Agent 4: S2.4 — считаем реальные OSL/conformal-числа и инжектируем в промпт,
+    # Agent 4: считаем реальные OSL/conformal-числа и инжектируем в промпт,
     # чтобы LLM использовал расчёты, а не фабриковал прогнозы выручки.
     state["_bifurcation_mode"] = bifurcation
     osl_results = compute_osl_results(subcat)
@@ -448,9 +450,7 @@ def save_analysis(markdown: str, state: dict, date: str) -> Path:
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Multi-Agent Pipeline для Russian Propagation (v0.9)"
-    )
+    parser = argparse.ArgumentParser(description="Multi-Agent Pipeline для Russian Propagation")
     parser.add_argument("--news-file", help="Файл с текстом новости")
     parser.add_argument("--source", required=True, help="Источник новости (URL или издание)")
     parser.add_argument(
