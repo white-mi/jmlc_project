@@ -93,7 +93,7 @@ cd _tools && python eval_all.py     # metric · gate · how to reproduce, in one
 
 | What is measured | Gold set | Result | Gate |
 |---|---|---|---|
-| Shock classification (L0, 27 subcategories) | 50 labelled news items, all 27 subcategories | **94 %** accuracy (Haiku 4.5), 95 % CI [0.84, 0.98] | ≥ 0.90 |
+| Shock classification (L0, 27 subcategories) | 50 labelled news items, all 27 subcategories | **96 %** accuracy (Haiku 4.5, 48/50), 95 % CI [0.87, 0.99] | ≥ 0.90 |
 | Historical-analog retrieval (RAG) | **38 real retrospective shock write-ups × 38 paraphrase queries** | precision@1 **0.66**, recall@5 **0.84** (e5-small) | baseline − 1 miss |
 
 The retrieval gold set is deliberately hard: it contains eight separate key-rate decisions and
