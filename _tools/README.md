@@ -12,7 +12,7 @@ Python-пакет для расчёта индикаторов и моделей
 
 **Состояние v0.9.2 (июнь 2026):**
 - `pyproject` version = **0.9.0**, `pipeline_version='0.9'`.
-- **335 pytest зелёных, 0 skipped** (включая DS-тесты: ОИВ region×year панель, нефтегаз, химия, EDA/DS-синтез).
+- **349 pytest зелёных, 0 skipped** (включая DS-тесты: ОИВ region×year панель, нефтегаз, химия, EDA/DS-синтез).
 - OSL покрывает **7 отраслей тирами по доступности данных**: **5 валидированы** (walk-forward +
   conformal + DS-отчёт), **2 иллюстративны** (нет публичного Q×P) — см. [`COVERAGE_TIERS`](../docs/COVERAGE_TIERS.md).
 - `fetch_macro_state.py` тянет **4 живых макрофида**.
@@ -105,7 +105,7 @@ N=24; фискальная панель region×year). DS-харнесс **indus
 |---|---|
 | `.github/workflows/test.yml` | CI: pytest + ruff + black (TF-IDF режим без сети) |
 | `pyproject.toml` | Зависимости + конфигурация ruff/black/pytest |
-| `tests/` | 335 тестов (0 skipped): юнит + property-based (hypothesis) + golden-снапшот пайплайна + голден-фикстуры LLM-ответов + регрессионные гейты качества ретрива |
+| `tests/` | 349 тестов (0 skipped): юнит + property-based (hypothesis) + golden-снапшот пайплайна + голден-фикстуры LLM-ответов + регрессионные гейты качества ретрива |
 | `eval_all.py` | сводная витрина метрик: значение · порог · чем воспроизвести → [docs/EVAL.md](../docs/EVAL.md) |
 | `eval_rag.py` / `eval_l0_classifier.py` | retrieval-eval (два gold-set × два эмбеддера) / eval классификатора L0 |
 
@@ -157,7 +157,7 @@ python batch_run.py                     # пакетный прогон неск
 
 ```bash
 cd _tools
-python -m pytest tests/ -v              # 335 зелёных, 0 skipped
+python -m pytest tests/ -v              # 349 зелёных, 0 skipped
 ```
 
 ---
@@ -217,7 +217,7 @@ python -m pytest tests/ -v              # 335 зелёных, 0 skipped
 | Out-of-sample conformal | `conformal_split.py` + панель FY2021–2025 |
 | CI на GitHub Actions | `.github/workflows/test.yml`: pytest + ruff + black |
 | Конфигурация линтеров | ruff/black в `pyproject.toml` |
-| Тестовое покрытие | 335 зелёных (0 skipped) |
+| Тестовое покрытие | 349 зелёных (0 skipped) |
 | Единая схема OSL | `osl_common.py` — `RevenuePredict`/`FXRate`/`mae_pct` для 7 модулей; `batch_run.py` — пакетный прогон |
 
 ### ⏳ Осознанно не закрыто (нет данных)
@@ -248,7 +248,7 @@ _tools/
 ├── agents/                    ← orchestrator.py + rag/
 ├── data/                      ← macro_state, shock_to_industries, brent_scenarios, ...
 ├── calibration/               ← <module>_calibrated.json (7 шт.)
-└── tests/                     ← 335 тестов (0 skipped)
+└── tests/                     ← 349 тестов (0 skipped)
 ```
 
 ---

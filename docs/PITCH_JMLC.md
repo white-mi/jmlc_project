@@ -64,7 +64,7 @@ style: |
 <div class="stats">
 <div class="stat"><b>5 слоёв</b><span>L0 → L3, один прогон</span></div>
 <div class="stat"><b>30 модулей · ≈11k строк</b><span>Python</span></div>
-<div class="stat"><b>335 тестов · CI</b><span>0 skipped</span></div>
+<div class="stat"><b>349 тестов · CI</b><span>0 skipped</span></div>
 <div class="stat"><b>5 отраслей</b><span>walk-forward + conformal</span></div>
 </div>
 
@@ -299,7 +299,7 @@ $$\mathrm{DM}=\frac{\bar d}{\sqrt{2\pi\,\hat f_d(0)/T}},\quad d_t=L(e^{1}_t)-L(e
 <div>
 
 **Инженерия**
-- **30 модулей** (+6 в agents/rag) · **≈11k строк** · **335 тестов**, 0 skipped
+- **30 модулей** (+6 в agents/rag) · **≈11k строк** · **349 тестов**, 0 skipped
 - CI 6 джобов: matrix 3.11/3.12 · e2e smoke L0→L3 · Docker clean-clone · security · typecheck (mypy)
 - `ruff` (E/F/W) + `black` + coverage — блокирующие гейты
 - `requirements.lock` → CI и Docker детерминированы
@@ -310,6 +310,7 @@ $$\mathrm{DM}=\frac{\bar d}{\sqrt{2\pi\,\hat f_d(0)/T}},\quad d_t=L(e^{1}_t)-L(e
 **Применение ИИ**
 - L0: измерен **классификатор** (Agent 1), gold-set N=50
 - Haiku 4.5 → **94% / 96%** (main 47/50 · sub 48/50); Sonnet 5 → **14/15** (подмножество N=15)
+- **Реальный набор N=93** настоящих РУ-новостей с провенансом (silver-метки, аннотатор Opus ≠ Haiku): main **97%**, sub **86%**, non-boundary **90%** — честнее синтетики (реальный текст труднее), по main даже сильнее; разбор + confusion-матрица в `docs/L0_EVAL.md`
 - контракт промптов L0 закреплён **regression-тестом**
 - разработка агентная: сбор публичных данных, верификация, тесты
 
@@ -319,7 +320,7 @@ $$\mathrm{DM}=\frac{\bar d}{\sqrt{2\pi\,\hat f_d(0)/T}},\quad d_t=L(e^{1}_t)-L(e
 **Дальше:** **ОИВ large-N** (регионы × годы → 150–425 строк) — пробить статзначимость · калибровка на шоках РФ 2014 / 2020 / 2022 · L2 — графовые методы LPCMCI + DebtRank
 
 <!--
-(35 сек): Инженерно — 30 модулей, 11 тысяч строк, 335 тестов, CI из шести джобов с Docker
+(35 сек): Инженерно — 30 модулей, 11 тысяч строк, 349 тестов, CI из шести джобов с Docker
 clean-clone, всё запинено и детерминировано. Применение ИИ — L0 не просто промпт, а с измеренным классификатором
 (Agent 1, N=50): Haiku 94%, Sonnet 5 закрывает тонкие boundary-кейсы, контракт промптов закреплён regression-тестом.
 Дальше — региональные бюджеты дают большой N и статзначимость.
@@ -465,7 +466,7 @@ $$\text{structural } 26.8\% \;>\; \text{persistence } 19.1\%$$
 **Модули** (≈11k строк): `run_pipeline` 651 · `orchestrator` 525 · `osl_models` 486 ·
 `segment_impact` 359 · `osl_walkforward` 270 · `spillover` 213.
 
-**Тесты** 335 (0 skipped): anti-leakage guards, bifurcation, conformal-split, JSON-контракт
+**Тесты** 349 (0 skipped): anti-leakage guards, bifurcation, conformal-split, JSON-контракт
 stdout, prompt-контракт L0.
 
 </div>

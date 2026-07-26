@@ -225,7 +225,7 @@ PyYAML парсит → передаётся в RAG индексатор и Conf
 
 ## 6. Тестирование (текущее состояние)
 
-**Юнит/интеграционные тесты:** 335 pytest зелёных (0 skipped), запуск `cd _tools && python -m pytest tests/ -v`; CI через GitHub Actions.
+**Юнит/интеграционные тесты:** 349 pytest зелёных (0 skipped), запуск `cd _tools && python -m pytest tests/ -v`; CI через GitHub Actions.
 
 > Честный out-of-sample — split-conformal в `conformal_split.py`. Независимая проверка на 9M-фактах эмитента — плановое уточнение.
 
@@ -279,7 +279,7 @@ Pandas / Django / FastAPI / SQLAlchemy — **не используются**. Т
 - ❌ Authentication — single-user
 
 ### Реализовано
-- ✅ pytest suite (335 зелёных, 0 skipped) + CI (GitHub Actions: pytest/ruff/black)
+- ✅ pytest suite (349 зелёных, 0 skipped) + CI (GitHub Actions: pytest/ruff/black)
 - ✅ `pyproject.toml` (с ruff/black)
 - ✅ Multi-period validation (energy refactor + multi-period калибровки)
 - ✅ `fetch_macro_state.py` — живые макрофиды (USD/RUB, Brent, КС ЦБ, инфляция)

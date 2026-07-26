@@ -158,7 +158,7 @@ FY2021–2025: 9M-actuals не выводятся из 12M, поэтому hold-
 
 ## 7. Инженерия и воспроизводимость
 
-- **335 pytest зелёных, 0 skipped** — детерминированы на чистом клоне (bundled-фикстуры).
+- **349 pytest зелёных, 0 skipped** — детерминированы на чистом клоне (bundled-фикстуры).
   CI: матрица **py3.11/3.12** + e2e smoke + **docker build (clean-clone gate)** + secret/dep-scan;
   **ruff — реальный гейт**; зависимости из закреплённого `requirements.lock`.
 - Модули в core (numpy/scikit-learn): `osl_panel`, `osl_models`, `osl_walkforward`,
@@ -168,7 +168,7 @@ FY2021–2025: 9M-actuals не выводятся из 12M, поэтому hold-
 
 ```bash
 cd _tools
-python -m pytest tests/ -q                       # 335 passed, 0 skipped
+python -m pytest tests/ -q                       # 349 passed, 0 skipped
 python osl_panel.py --industry metallurgy        # сводка панели
 pip install -e ".[eda]" && python eda_osl.py     # 8 фигур → docs/figures/eda/
 python osl_models.py                             # in-sample + leave-last-out

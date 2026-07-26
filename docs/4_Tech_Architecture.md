@@ -97,7 +97,7 @@ tags: [russian-propagation, docs, architecture, для-IT]
     │   ├── brent_scenarios.json
     │   ├── spillover_matrix.json
     │   └── segment_impact_table.json
-    ├── tests/                   (335 pytest зелёных, 0 skipped)
+    ├── tests/                   (349 pytest зелёных, 0 skipped)
     ├── calibration/
     │   ├── osl_metallurgy_calibrated.json
     │   └── ... (7 JSON + multi-param/multi-period)
@@ -349,7 +349,7 @@ multi_agent: bool
 ## 7. Тестирование (текущее + roadmap)
 
 ### Сейчас
-- ✅ **335 pytest зелёных (0 skipped)** — `cd _tools && python -m pytest tests/ -v`
+- ✅ **349 pytest зелёных (0 skipped)** — `cd _tools && python -m pytest tests/ -v`
 - ✅ **CI: GitHub Actions** (`.github/workflows/test.yml`) — pytest + ruff + black на каждый push
 - ✅ pytest suite для всех 7 OSL модулей + conformal + RAG + L1/L2/L3
 - ✅ Бэк-тест встроен в каждый OSL — `predict_revenue()` сравнивается с `ACTUAL_REVENUE_*`
@@ -453,7 +453,7 @@ python osl_oilgas.py --company ЛУКОЙЛ
 | Содержание | Статус |
 |---|---|
 | energy refactor + multi-period validation | ✅ done |
-| pytest suite (335 зелёных) + CI/линтеры (ruff/black) | ✅ done |
+| pytest suite (349 зелёных) + CI/линтеры (ruff/black) | ✅ done |
 | `pyproject.toml` (зависимости) | ✅ done |
 | `fetch_macro_state.py` — живые макрофиды | ✅ done |
 | маршрутизация подкатегорий (`shock_to_industries.json`) | ✅ done |
