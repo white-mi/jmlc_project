@@ -1,0 +1,41 @@
+{
+  "_comment": "Витрина held-out эксперимента по улучшению промпта L0-классификатора. Гипотеза: добавить в прод-промпт ОБЩИЕ правила разграничения размытых границ таксономии (holds 4.3/4.4 vs инфошум 5.2; полномасштабная война vs точечный удар; системный кризис vs техсбой/дефолт эмитента), обоснованные диагнозом confusion-матрицы на dev. Контроль оверфита: правила ЗАМОРОЖЕНЫ до прогона held-out; аннотатор Opus (вслепую) != тестируемый классификатор Haiku; held-out disjoint с dev по URL; парный McNemar. ЧЕСТНЫЙ NULL-РЕЗУЛЬТАТ — улучшение НЕ подтвердилось. Воспроизведение: cd _tools && ANTHROPIC_API_KEY=... python experiments/prompt_ab.py --sets dev heldout --variants baseline all ac. Разбор — docs/L0_EVAL.md.",
+  "harness": "_tools/experiments/prompt_ab.py",
+  "model": "claude-haiku-4-5-20251001",
+  "variants": {
+    "baseline": "прод-промпт agent_1_classifier.md как есть",
+    "all": "прод + 4 правила (A holds, B strikes, C systemic, D threat)",
+    "ac": "прод + только A+C (dev-диагноз: B вредит, D без эффекта)"
+  },
+  "dev": {
+    "gold_set": "l0_gold_set_real.json",
+    "n": 93,
+    "baseline_sub_correct": "81/93",
+    "all_sub_correct": "82/93",
+    "note": "rule A починил все hold-промахи 4.3/4.4->5.2 (стык x4 -> x0); rule B backfired (война 1.1->точечный удар 1.3, x1 -> x3); net ~ +1, в пределах шума. Dev — для диагностики гипотез, не для валидации."
+  },
+  "heldout": {
+    "gold_set": "l0_gold_set_heldout.json",
+    "n": 70,
+    "n_new_disjoint_from_dev": 41,
+    "baseline_sub_correct": "58/70",
+    "all_sub_correct": "58/70",
+    "ac_sub_correct": "58/70",
+    "baseline_sub_ci95": [0.724, 0.899],
+    "new_only_sub_all_variants": "33/41",
+    "mcnemar_baseline_vs_ac": {
+      "b_right_to_wrong": 2,
+      "c_wrong_to_right": 2,
+      "n_discordant": 4,
+      "p_two_sided": 1.0
+    }
+  },
+  "verdict": "NULL: улучшение промпта статистически НЕ подтвердилось на held-out (McNemar p_two_sided=1.0; baseline=all=ac=58/70). Правило A (holds->инфошум) воспроизводимо чинит свой стык (dev x4, held-out x2), но эффект ~2 айтема — в пределах run-to-run недетерминизма Haiku. Прирост +7pp на первом маленьком held-out (N=29, holds-heavy) НЕ реплицировался на сбалансированном N=70. Правила A+C НЕ применены к проду.",
+  "discipline": [
+    "правила зафиксированы ДО прогона held-out; на held-out каждый вариант измерен один раз (без тюнинга правил на тесте)",
+    "аннотатор Opus по рубрике, вслепую к предсказаниям тестируемого Haiku (разрыв циркулярности)",
+    "held-out disjoint с dev по URL (тест test_heldout_disjoint_from_dev_by_url)",
+    "парный McNemar без scipy; расширение 29->70 разоблачило небольшой оверфит/шум малого N",
+    "отрицательный результат зафиксирован и не спрятан — валидация улучшения важнее самого улучшения"
+  ]
+}

@@ -2,9 +2,10 @@
 L0 Agent-1 (Classifier) eval harness — честный sanity-check классификации шоков.
 
 ЧТО ДЕЛАЕТ: прогоняет реальный промпт Agent 1 (тот же, что в продакшене,
-orchestrator.extract_prompt) на gold-set (_tools/data/l0_gold_set.json) через
-Anthropic API, сравнивает предсказанные main_category / subcategory с эталоном,
-считает accuracy и стоимость по токенам (response.usage).
+orchestrator.extract_prompt) на gold-set (по умолчанию _tools/data/l0_gold_set_50.json,
+N=50; переключается флагом --gold) через Anthropic API, сравнивает предсказанные
+main_category / subcategory с эталоном, считает accuracy, per-class CI, confusion-матрицу
+и стоимость по токенам (response.usage).
 
 ЧЕСТНЫЕ ОГОВОРКИ (важно для интерпретации):
   * Это SANITY-CHECK на N=50 синтетических публичных новостях, НЕ статистически
@@ -32,6 +33,8 @@ import json
 import math
 import re
 import sys
+import time
+from collections import Counter, defaultdict
 from pathlib import Path
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -157,11 +160,20 @@ def run(model_alias, limit=None, gold_path=GOLD_PATH):
     rows, tin, tout = [], 0, 0
     for it in items:
         prompt = build_prompt(it)
-        resp = client.messages.create(
-            model=model,
-            max_tokens=1200,
-            messages=[{"role": "user", "content": prompt}],
-        )
+        resp = None
+        for attempt in range(4):
+            try:
+                resp = client.messages.create(
+                    model=model,
+                    max_tokens=1200,
+                    messages=[{"role": "user", "content": prompt}],
+                )
+                break
+            except Exception as exc:  # транзиентные обрывы стрима/сети — ретрай с backoff
+                if attempt == 3:
+                    raise
+                print(f"  [retry {it['id']} {attempt + 1}/3] {exc}", file=sys.stderr)
+                time.sleep(2 * (attempt + 1))
         raw = response_text(resp)
         tin += resp.usage.input_tokens
         tout += resp.usage.output_tokens
@@ -194,6 +206,25 @@ def run(model_alias, limit=None, gold_path=GOLD_PATH):
     nb = [r for r in rows if not r["boundary"]]
     sub_nb_k = sum(r["sub_ok"] for r in nb)
     sub_acc_nb = sub_nb_k / len(nb) if nb else 0.0
+
+    # Per-class breakdown (по эталонной подкатегории) + Wilson-CI на класс.
+    by_gold = defaultdict(list)
+    for r in rows:
+        by_gold[r["gold_sub"]].append(r)
+    per_class = {
+        g: {
+            "n": len(rs),
+            "correct": sum(x["sub_ok"] for x in rs),
+            "accuracy": round(sum(x["sub_ok"] for x in rs) / len(rs), 4),
+            "ci95": wilson_ci(sum(x["sub_ok"] for x in rs), len(rs)),
+        }
+        for g, rs in sorted(by_gold.items())
+    }
+    # Confusion (только ошибки, off-diagonal): gold_sub → pred_sub, по убыванию частоты.
+    conf_counter = Counter((r["gold_sub"], r["pred_sub"]) for r in rows if not r["sub_ok"])
+    confusion = [
+        {"gold_sub": g, "pred_sub": p, "count": c} for (g, p), c in conf_counter.most_common()
+    ]
     summary = {
         "model": model,
         "n": n,
@@ -203,6 +234,8 @@ def run(model_alias, limit=None, gold_path=GOLD_PATH):
         "subcategory_accuracy_ci95": wilson_ci(sub_k, n),
         "subcategory_accuracy_excl_boundary": round(sub_acc_nb, 4),
         "subcategory_accuracy_excl_boundary_ci95": wilson_ci(sub_nb_k, len(nb)),
+        "per_class": per_class,
+        "confusion": confusion,
         "tokens_in": tin,
         "tokens_out": tout,
         "cost_usd": round(cost, 6),
@@ -232,6 +265,19 @@ def run(model_alias, limit=None, gold_path=GOLD_PATH):
         file=sys.stderr,
     )
     print(f"  tokens: {tin} in / {tout} out   cost: ${cost:.4f}", file=sys.stderr)
+    worst = sorted(summary["per_class"].items(), key=lambda kv: (kv[1]["accuracy"], -kv[1]["n"]))
+    weak = [(g, pc) for g, pc in worst if pc["accuracy"] < 1.0]
+    if weak:
+        print("  слабейшие подкатегории (по эталону):", file=sys.stderr)
+        for g, pc in weak[:6]:
+            print(
+                f"    {g}: {pc['correct']}/{pc['n']} ({pc['accuracy']:.0%})  CI {pc['ci95']}",
+                file=sys.stderr,
+            )
+    if confusion:
+        print("  confusion (эталон → предсказано):", file=sys.stderr)
+        for c in confusion[:8]:
+            print(f"    {c['gold_sub']} → {c['pred_sub']}  ×{c['count']}", file=sys.stderr)
     return summary
 
 

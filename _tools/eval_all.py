@@ -26,6 +26,7 @@ TOOLS = Path(__file__).parent
 sys.path.insert(0, str(TOOLS))
 
 L0_SHOWCASE = TOOLS / "data" / "l0_eval_results.json"
+L0_REAL_SHOWCASE = TOOLS / "data" / "l0_eval_real_results.json"
 RAG_SHOWCASE = TOOLS / "data" / "rag_eval_results.json"
 
 
@@ -125,12 +126,40 @@ def _l0_rows():
     return rows
 
 
+def _l0_real_rows():
+    if not L0_REAL_SHOWCASE.exists():
+        return []
+    from tests.test_l0_gold_set_real import MIN_SUB_REAL
+
+    data = json.loads(L0_REAL_SHOWCASE.read_text(encoding="utf-8"))
+    rows = []
+    for m in data["models"]:
+        if "subcategory_accuracy" not in m:
+            continue
+        rows.append(
+            {
+                "eval": "L0 классификация (реальные новости)",
+                "space": m["alias"],
+                "n": m["n"],
+                "metric": "subcategory accuracy",
+                "value": m["subcategory_accuracy"],
+                "gate": MIN_SUB_REAL,
+                "source": f"витрина от {data['run_date']} (реальный silver-набор, нужен API-ключ)",
+                "repro": (
+                    f"ANTHROPIC_API_KEY=… python eval_l0_classifier.py --model {m['alias']} "
+                    f"--gold data/l0_gold_set_real.json"
+                ),
+            }
+        )
+    return rows
+
+
 def collect():
     # Индексация болтлива (init_db/index_all печатают прогресс в stdout). Уводим её в stderr,
     # чтобы stdout оставался чистой таблицей и корректным JSON под `--json`.
     with contextlib.redirect_stdout(sys.stderr):
         rag = _rag_rows()
-    return rag + _rag_e5_rows() + _l0_rows()
+    return rag + _rag_e5_rows() + _l0_real_rows() + _l0_rows()
 
 
 def main():

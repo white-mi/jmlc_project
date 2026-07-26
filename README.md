@@ -10,7 +10,7 @@ portfolio data.
 
 [![tests](https://github.com/white-mi/jmlc_project/actions/workflows/test.yml/badge.svg)](https://github.com/white-mi/jmlc_project/actions/workflows/test.yml)
 ![python](https://img.shields.io/badge/python-3.11%2B-blue)
-![tests-count](https://img.shields.io/badge/tests-335%20passed%2C%200%20skipped-brightgreen)
+![tests-count](https://img.shields.io/badge/tests-349%20passed%2C%200%20skipped-brightgreen)
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 ---
@@ -65,7 +65,7 @@ git clone https://github.com/white-mi/jmlc_project.git
 cd jmlc_project/_tools
 
 pip install -r ../requirements.lock pytest   # pinned numeric stack (TF-IDF, offline)
-python -m pytest tests/ -q                    # 335 passed, 0 skipped
+python -m pytest tests/ -q                    # 349 passed, 0 skipped
 
 # End-to-end smoke run — numbers at every layer, no LLM call:
 python run_pipeline.py --smoke-shock 4.2 --smoke-industry oilgas
@@ -93,8 +93,14 @@ cd _tools && python eval_all.py     # metric · gate · how to reproduce, in one
 
 | What is measured | Gold set | Result | Gate |
 |---|---|---|---|
-| Shock classification (L0, 27 subcategories) | 50 labelled news items, all 27 subcategories | **96 %** accuracy (Haiku 4.5, 48/50), 95 % CI [0.87, 0.99] | ≥ 0.90 |
+| Shock classification (L0, 27 subcategories) | **93 real RU news items** with provenance URLs (silver labels, annotator ≠ classifier) + 50 synthetic for coverage | **86 %** subcategory · **97 %** main-category (Haiku 4.5, real N=93), 95 % CI [0.78, 0.92]; **90 %** excl. boundary | ≥ 0.80 |
 | Historical-analog retrieval (RAG) | **38 real retrospective shock write-ups × 38 paraphrase queries** | precision@1 **0.66**, recall@5 **0.84** (e5-small) | baseline − 1 miss |
+
+The L0 gold set is harvested from **real dated RU news** (CBR/Minfin press releases,
+TASS/Interfax/RBC/Kommersant/…) with a real URL per item, labelled by a *different* model
+(Opus) than the one under test (Haiku) — so the 86 % is on genuine text, not paraphrased-from-the-taxonomy
+synthetics, and the errors cluster at known-fuzzy boundaries (rate-hold↔info-noise, war-escalation↔point-strike)
+rather than randomly. Labels are "silver" (model-annotated, sample-verified against sources), not human-gold.
 
 The retrieval gold set is deliberately hard: it contains eight separate key-rate decisions and
 five sanction packages, and queries are paraphrases that share no wording with document titles.
